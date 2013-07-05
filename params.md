@@ -5,8 +5,6 @@
 table th, table td {
 word-wrap:break-word;
 word-break:break-all;
-  border: 1px solid #ccc;
-  padding: 6px 13px;
 }
 </style>
 
