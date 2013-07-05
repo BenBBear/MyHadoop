@@ -16,10 +16,12 @@
 
 - 关闭selinux
     
-    `setenforce 0`或修改`/etc/selinux/config：SELINUX=disabled`
+        setenforce 0
+        #或者
+        /etc/selinux/config：SELINUX=disabled    
 - 关闭防火墙
     
-        /etc/init.d/iptables sto p
+        /etc/init.d/iptables stop
 - 安装需要root用户登录或作为其他具有无需密码的伪权限的用户登录，以成为根root用户
 
 ### 2. 安装过程 ###
