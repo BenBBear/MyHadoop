@@ -1,6 +1,15 @@
 <script type="text/javascript" language="javascript" src="media/js/jquery.js"></script>
 <script type="text/javascript" language="javascript" src="media/js/jquery.dataTables.min.js"></script>
 
+<style type="text/css">
+table th, table td {
+word-wrap:break-word;
+word-break:break-all;
+  border: 1px solid #ccc;
+  padding: 6px 13px;
+}
+</style>
+
 Hadoop参数汇总 
 =======================
 linux参数
@@ -12,7 +21,7 @@ linux参数
 4. 设置合理的预读取缓冲区
 5. Linux的内核的IO调度器
 
-
+table
 JVM参数
 -----------------------
 [Hadoop Performance Tuning Guide](http://developer.amd.com/wordpress/media/2012/10/Hadoop_Tuning_Guide-Version5.pdf "Hadoop Performance Tuning Guide")
