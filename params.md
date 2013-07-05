@@ -6,6 +6,9 @@ table th, table td {
 word-wrap:break-word;
 word-break:break-all;
 }
+#hadooptable {
+	width:850px;
+}
 </style>
 
 Hadoop参数汇总 
@@ -18,7 +21,6 @@ linux参数
 3. 关闭swap分区
 4. 设置合理的预读取缓冲区
 5. Linux的内核的IO调度器
-
 table
 JVM参数
 -----------------------
