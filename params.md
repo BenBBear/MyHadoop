@@ -49,15 +49,15 @@ I1基本不用管
 <table cellpadding="0" cellspacing="0" border="0" class="display" id="hadooptable" width="100%">
 <thead>
 <tr>
-<th width='40px'>版本</th>
-<th width='40px'>文件位置</th>
-<th width='40px'>分类</th>
-<th width='100px'>名称</th>
-<th width='200px'>描述</th>
-<th width='80px'>默认值</th>
-<th width='40px'>final</th>
-<th width='40px'>推荐值</th>
-<th width='40px'>重要度</th>
+<th >版本</th>
+<th >文件位置</th>
+<th >分类</th>
+<th >名称</th>
+<th >描述</th>
+<th >默认值</th>
+<th >final</th>
+<th >推荐值</th>
+<th >重要度</th>
 </thead>
 <tbody>
 <!-- replaceMark -->
