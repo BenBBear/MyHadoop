@@ -7,7 +7,7 @@
 
 [3. 数据库](#3)
 
-[4. SCM结构](#4)
+[4. CM结构](#4)
 
 [5. 升级](#5)
 
@@ -57,7 +57,7 @@
 
 Cloudera manager主要的数据库为scm,存储Cloudera manager运行所需要的信息：配置，主机，用户等。
 
-### <a name="4">4. SCM结构</a> ###
+### <a name="4">4. CM结构</a> ###
 
 CM分为Server与Agent两部分及数据库（自带更改过的嵌入Postgresql）。它主要做三件事件：
 
