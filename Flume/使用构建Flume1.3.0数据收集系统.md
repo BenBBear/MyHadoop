@@ -169,7 +169,8 @@ platform32, platform33, platform34日志机的配置为：
         uc_agent.sinks.uclogsink1.channel = ucfilechannel
         uc_agent.sinks.uclogsink2.channel = ucfilechannel
 
-        platform30， platform31中转机的配置为：
+platform30， platform31中转机的配置为：
+
         #==== flume1.3.0带failover的配置 ======= 1.3.0汇聚节点配置 ==============
         uc_c_agent.sources = ucweblog-c
         uc_c_agent.sinks = uclogsink-c
