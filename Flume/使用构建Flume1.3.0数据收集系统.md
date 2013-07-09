@@ -18,7 +18,7 @@
 [Flume组件](#15)        
 [Flume安装](#16)        
 [通过Cloudera Manager安装](#17)     
-[Flume配置使用](#178)     
+[Flume配置使用](#18)     
 
 
 ## <a name="1">Flume介绍</a>
