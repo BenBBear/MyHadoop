@@ -370,7 +370,7 @@ Sink Processor充当Sink的一个代理。
 
 ### 通过Cloudera Manager安装
 
-    直接添加Flume服务即可，Flume-ng架构比较简单，只有统一的Agent，只需要在需要安装Flume的机器上选择安装Agent即可。
+直接添加Flume服务即可，Flume-ng架构比较简单，只有统一的Agent，只需要在需要安装Flume的机器上选择安装Agent即可。
 
 ## Flume配置使用
 
