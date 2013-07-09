@@ -21,9 +21,9 @@
 [Flume配置使用](#178)     
 
 
-## <a name="#1">Flume介绍</a>
+## <a name="1">Flume介绍</a>
 
-### <a name="#2">Flume是什么</a>     
+### <a name="2">Flume是什么</a>     
 
 - 收集、聚合事件流数据的分布式框架。        
 - 通常用于log数据。     
@@ -35,17 +35,17 @@
     - 功能丰富。        
     - 完全的可扩展。        
 
-### <a name="#3">Flume可靠性</a>     
+### <a name="3">Flume可靠性</a>     
 
 - Agent间事务的交换。
 - Flow中，Channel的持久特性。
 
-### <a name="#4">Flume可用性</a> 
+### <a name="4">Flume可用性</a> 
 
 - 内建的Load balancing支持。
 - 内建的Failover支持。
 
-### <a name="#5">核心概念</a>
+### <a name="5">核心概念</a>
 
 - Event。
 - Client。
@@ -53,7 +53,7 @@
 - Sources、Channels、Sinks。
 - 其他组件：Interceptors、Channel Selectors、Sink Processor。
 
-### <a name="#6">核心概念：Event</a>         
+### <a name="6">核心概念：Event</a>         
 
 Event是Flume数据传输的基本单元。Flume以事件的形式将数据从源头传送到最终目的地。Event由可选的`Hearders`和载有数据的一个`byte array`所构成。Headers是容纳了key-value字符串对的无序集合，key在集合内是唯一的。Headers可以在上下文路由中使用。
 
@@ -65,15 +65,15 @@ Event是Flume数据传输的基本单元。Flume以事件的形式将数据从�
 
         }
 
-### <a name="#7">核心概念：Client</a>       
+### <a name="7">核心概念：Client</a>       
 
 Clinet是一个将原始Log包装成Events并且发送它们到一个或多个Agent的实体。例如`Flume log4j Appender`。可以使用Client SDK (org.apache.flume.api)定制特定的Client。Client的目的是从数据源系统中解耦Flume，在Flume的拓扑结构中不是必须的。
 
-### <a name="#8">核心概念：Agent</a>     
+### <a name="8">核心概念：Agent</a>     
 
 一个Agent包含Sources, Channels, Sinks和其他组件，它利用这些组件将Events从一个节点传输到另一个节点或最终目的地。Agent是flume流的基础部分。Flume为这些组件提供了配置、生命周期管理及监控支持（监控现在还比较弱只提供了一个返回json监控数据的metrics URL）。
 
-### <a name="#9">核心概念：Source</a>        
+### <a name="9">核心概念：Source</a>        
 
 Source负责接收Events或通过特殊机制产生Events，并将Events批量的放到一个或多个Channels。有Event驱动和轮询2种类型的Source。一个Agent可以配置多个Source，Source必须至少和一个channel关联。
 
@@ -83,7 +83,7 @@ Source负责接收Events或通过特殊机制产生Events，并将Events批量�
 - 自动生成事件的Sources: `SpoolDir, Exec, seq`。
 - 用于Agent和Agent之间通信的IPC Sources: `Avro, thrift, jms, http`。
 
-### <a name="#10">核心概念：Channel</a>       
+### <a name="10">核心概念：Channel</a>       
 
 Channel位于Source和Sink之间，用于缓存进来的Events，当Sink成功的将Events发送到下一跳的Channel或最终目的，Events从Channel移除。Channels支持事务，提供较弱的顺序保证，可以和任何数量的Source和Sink工作。
 
@@ -93,7 +93,7 @@ Channel位于Source和Sink之间，用于缓存进来的Events，当Sink成功�
 - File Channel: 基于WAL（预写式日志Write-Ahead Logging）实现。
 - JDBC Channel: 基于嵌入Database实现。
 
-### <a name="#11">核心概念：Sink</a>
+### <a name="11">核心概念：Sink</a>
 
 Sink负责将Events传输到下一跳或最终目的地，成功完成后将Events从Channel中移除，Sink必须作用于一个确切的channel。
 
@@ -103,11 +103,11 @@ Sink负责将Events传输到下一跳或最终目的地，成功完成后将Even
 - 自动消耗的Sinks. 比如: `Null Sink`。
 - 用于Agent间通信的IPC sink: `Avro,thrift`。
 
-### <a name="#12">核心概念：Interceptor</a>
+### <a name="12">核心概念：Interceptor</a>
 
 用于Source的一组Interceptor，按照预设的顺序在必要地方装饰和过滤Events。内建的Interceptors允许增加Event的Headers比如：时间戳、主机名、静态标记等等，定制的interceptors可以通过内省event payload（读取原始日志），在必要的地方创建一个特定的Headers。
 
-### <a name="#13">核心概念：Channel Selector</a>
+### <a name="13">核心概念：Channel Selector</a>
 
 Channel Selector允许Source基于预设的标准，从所有Channel中，选择一个或多个Channel。      
 内建的Channel Selectors: 
@@ -115,7 +115,7 @@ Channel Selector允许Source基于预设的标准，从所有Channel中，选择
 - 复制Replicating: Event被复制到相关的Channel。
 - 复用Multiplexing: 基于Hearder，Event被路由到特定的Channel。
 
-### <a name="#14">核心概念：Sink Processor</a>
+### <a name="14">核心概念：Sink Processor</a>
 
 多个Sink可以构成一个Sink Group。一个Sink Processor负责从一个指定的Sink Group中激活一个Sink。Sink Processor可以通过组中所有Sink实现负载均衡；也可以在一个Sink失败时转移到另一个。
 Flume通过Sink Processor实现负载均衡（Load Balancing）和故障转移（failover）。所有的Sink都是采取轮询（polling）的方式从Channel上获取Events。这个动作是通过Sink Runner激活的
@@ -127,7 +127,7 @@ Sink Processor充当Sink的一个代理。
 - Failover Sink Processor 。
 - Default Sink Processor（单Sink）。
 
-### <a name="#15">Flume组件</a>
+### <a name="15">Flume组件</a>
 
 <table class="table table-bordered table-striped table-condensed">
    <tr>
@@ -387,13 +387,13 @@ Sink Processor充当Sink的一个代理。
    </tr>
 </table>
 
-## <a name="#16">Flume安装</a>
+## <a name="16">Flume安装</a>
 
-### <a name="#17">通过Cloudera Manager安装</a>
+### <a name="17">通过Cloudera Manager安装</a>
 
 直接添加Flume服务即可，Flume-ng架构比较简单，只有统一的Agent，只需要在需要安装Flume的机器上选择安装Agent即可。
 
-## <a name="#18">Flume配置使用</a>
+## <a name="18">Flume配置使用</a>
 
 配置方案：日志机安装flume agent从指定目录获取日志通过avro 压缩的方案传输到中转机，在每个日志机传输到转机时配置failover的方式保证日志传输的安全性。
 
