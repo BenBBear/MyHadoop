@@ -106,6 +106,266 @@ Sink Processor充当Sink的一个代理。
 - Failover Sink Processor 。
 - Default Sink Processor（单Sink）。
 
+### Flume组件
+
+<table class="table table-bordered table-striped table-condensed">
+   <tr>
+      <td>Component Interface </td>
+      <td>Type Alias </td>
+      <td>Implementation Class</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Channel </td>
+      <td>memory </td>
+      <td>org.apache.flume.channel.MemoryChannel</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Channel </td>
+      <td>jdbc </td>
+      <td>org.apache.flume.channel.jdbc.JdbcChannel</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Channel </td>
+      <td>recoverablememory </td>
+      <td>org.apache.flume.channel.recoverable.memory.RecoverableMemoryChannel</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Channel </td>
+      <td>file </td>
+      <td>org.apache.flume.channel.file.FileChannel</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Channel </td>
+      <td>– </td>
+      <td>org.apache.flume.channel.PseudoTxnMemoryChannel</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Channel </td>
+      <td>– </td>
+      <td>org.example.MyChannel</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Source </td>
+      <td>avro </td>
+      <td>org.apache.flume.source.AvroSource</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Source </td>
+      <td>netcat </td>
+      <td>org.apache.flume.source.NetcatSource</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Source </td>
+      <td>seq </td>
+      <td>org.apache.flume.source.SequenceGeneratorSource</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Source </td>
+      <td>exec </td>
+      <td>org.apache.flume.source.ExecSource</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Source </td>
+      <td>syslogtcp </td>
+      <td>org.apache.flume.source.SyslogTcpSource</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Source </td>
+      <td>multiport_syslogtcp </td>
+      <td>org.apache.flume.source.MultiportSyslogTCPSource</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Source </td>
+      <td>syslogudp </td>
+      <td>org.apache.flume.source.SyslogUDPSource</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Source </td>
+      <td>spooldir </td>
+      <td>org.apache.flume.source.SpoolDirectorySource</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Source </td>
+      <td>http </td>
+      <td>org.apache.flume.source.http.HTTPSource</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Source </td>
+      <td>thrift </td>
+      <td>org.apache.flume.source.ThriftSource</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Source </td>
+      <td>jms </td>
+      <td>org.apache.flume.source.jms.JMSSource</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Source </td>
+      <td>– </td>
+      <td>org.apache.flume.source.avroLegacy.AvroLegacySource</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Source </td>
+      <td>– </td>
+      <td>org.apache.flume.source.thriftLegacy.ThriftLegacySource</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Source </td>
+      <td>– </td>
+      <td>org.example.MySource</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Sink </td>
+      <td>null </td>
+      <td>org.apache.flume.sink.NullSink</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Sink </td>
+      <td>logger </td>
+      <td>org.apache.flume.sink.LoggerSink</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Sink </td>
+      <td>avro </td>
+      <td>org.apache.flume.sink.AvroSink</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Sink </td>
+      <td>hdfs </td>
+      <td>org.apache.flume.sink.hdfs.HDFSEventSink</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Sink </td>
+      <td>hbase </td>
+      <td>org.apache.flume.sink.hbase.HBaseSink</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Sink </td>
+      <td>asynchbase </td>
+      <td>org.apache.flume.sink.hbase.AsyncHBaseSink</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Sink </td>
+      <td>elasticsearch </td>
+      <td>org.apache.flume.sink.elasticsearch.ElasticSearchSink</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Sink </td>
+      <td>file_roll </td>
+      <td>org.apache.flume.sink.RollingFileSink</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Sink </td>
+      <td>irc </td>
+      <td>org.apache.flume.sink.irc.IRCSink</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Sink </td>
+      <td>thrift </td>
+      <td>org.apache.flume.sink.ThriftSink</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.Sink </td>
+      <td>– </td>
+      <td>org.example.MySink</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.ChannelSelector </td>
+      <td>replicating </td>
+      <td>org.apache.flume.channel.ReplicatingChannelSelector</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.ChannelSelector </td>
+      <td>multiplexing </td>
+      <td>org.apache.flume.channel.MultiplexingChannelSelector</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.ChannelSelector </td>
+      <td>– </td>
+      <td>org.example.MyChannelSelector</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.SinkProcessor </td>
+      <td>default </td>
+      <td>org.apache.flume.sink.DefaultSinkProcessor</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.SinkProcessor </td>
+      <td>failover </td>
+      <td>org.apache.flume.sink.FailoverSinkProcessor</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.SinkProcessor </td>
+      <td>load_balance </td>
+      <td>org.apache.flume.sink.LoadBalancingSinkProcessor</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.SinkProcessor </td>
+      <td>– </td>
+      <td> </td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.interceptor.Interceptor </td>
+      <td>timestamp </td>
+      <td>org.apache.flume.interceptor.TimestampInterceptor$Builder</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.interceptor.Interceptor </td>
+      <td>host </td>
+      <td>org.apache.flume.interceptor.HostInterceptor$Builder</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.interceptor.Interceptor </td>
+      <td>static </td>
+      <td>org.apache.flume.interceptor.StaticInterceptor$Builder</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.interceptor.Interceptor </td>
+      <td>regex_filter </td>
+      <td>org.apache.flume.interceptor.RegexFilteringInterceptor$Builder</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.interceptor.Interceptor </td>
+      <td>regex_extractor </td>
+      <td>org.apache.flume.interceptor.RegexFilteringInterceptor$Builder</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.channel.file.encryption.KeyProvider$Builder </td>
+      <td>jceksfile </td>
+      <td>org.apache.flume.channel.file.encryption.JCEFileKeyProvider</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.channel.file.encryption.KeyProvider$Builder </td>
+      <td>– </td>
+      <td>org.example.MyKeyProvider</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.channel.file.encryption.CipherProvider </td>
+      <td>aesctrnopadding </td>
+      <td>org.apache.flume.channel.file.encryption.AESCTRNoPaddingProvider</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.channel.file.encryption.CipherProvider </td>
+      <td>– </td>
+      <td>org.example.MyCipherProvider</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.serialization.EventSerializer$Builder </td>
+      <td>text </td>
+      <td>org.apache.flume.serialization.BodyTextEventSerializer$Builder</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.serialization.EventSerializer$Builder </td>
+      <td>avro_event </td>
+      <td>org.apache.flume.serialization.FlumeEventAvroEventSerializer$Builder</td>
+   </tr>
+   <tr>
+      <td>org.apache.flume.serialization.EventSerializer$Builder </td>
+      <td>– </td>
+      <td>org.example.MyEventSerializer$Builder</td>
+   </tr>
+</table>
+
 ## Flume安装
 
 ### 通过Cloudera Manager安装
