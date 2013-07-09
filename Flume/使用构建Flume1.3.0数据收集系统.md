@@ -118,6 +118,10 @@ Sink Processor充当Sink的一个代理。
 
 如下面的配置设置platform32, platform33, platform34为日志机，platform30， platform31为中转机。
 
+部署如图所示：
+
+![Flume配置](flume_conf.png)
+
 platform32, platform33, platform34日志机的配置为：
 
         #==== flume1.3.0的配置 ======== 1.3.0日志节点配置========================
