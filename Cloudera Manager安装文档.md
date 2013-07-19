@@ -35,6 +35,8 @@
 
 ### 2. 安装过程 ###
 
+#### 2.1 安装Cloudera Manager Server
+
 1. 准备安装文件cloudera-manager-installer.bin
 
     这是个二进制文件，运行于64位系统。下载地址：`http://archive.cloudera.com/cm4/installer/latest/cloudera-manager-installer.bin`。
@@ -55,50 +57,52 @@
     
     > 使用IE9以上、Firefox、Chrome或Opera打开Cloudera Manager。 地址：`http://92.168.30.101:7180`，登录用户名与密码都为`admin`。
 
-- 选择标准版本，继续下一步。
+    - 选择标准版本，继续下一步。
 
-- 为CDH集群安装指定主机
+    - 为CDH集群安装指定主机
     
-    以逗号分割输入所有加入集群的主机`IP`及`SSH`端口。搜索主机确认后继续下一步。
+        以逗号分割输入所有加入集群的主机`IP`及`SSH`端口。搜索主机确认后继续下一步。
 
-- 集群安装
-    - 选择存储库
+#### 2.2 集群安装
+
+- 选择存储库
         
-        默认将使用最新版本的CDH存储库地址为：`http://archive.cloudera.com/cdh4/parcels/latest/ `，可以使用其它版本的CDH。如使用CDH4.2.1，则填入存储库地址为：`http://archive.cloudera.com/cdh4/parcels/4.2.1/ `
-    - 提供SSH登录凭据
+    默认将使用最新版本的CDH存储库地址为：`http://archive.cloudera.com/cdh4/parcels/latest/ `，可以使用其它版本的CDH。如使用CDH4.2.1，则填入存储库地址为：`http://archive.cloudera.com/cdh4/parcels/4.2.1/ `
+- 提供SSH登录凭据
+
+    输入root密码及ssh端口，继续下一步。
+- 自动下载安装
+
+    下载安装完后，继续下一步。
+    > 因为是从外国网站下载安装会比较慢，有时会因为网络安装失败，只需点击重试失败的主机重新安装即可。
+
+- 选择要在集群中安装的服务
+
+    选择需要安装的CDH4服务（安装完成后，也可以断续增加安装的CDH4服务，也可以对服务进行修改），继续下一步。
+
+- 数据库设置
     
-        输入root密码及ssh端口，继续下一步。
-    - 自动下载安装
+    可以选择使用嵌入式数据库（Postgresql）这种方式最简单，也可以选择使用Mysql或Oracle, 选择外部数据库时，需要把对应的数据库JDBC驱动程序放入Cloudera Manager的lib包下，地址为：`/usr/share/cmf/lib/`，JDBC驱动程序放好后，填入数据库对应的IP及端口（对于Hive数据库需要先把数据库创建好，其它几个监控数据库使用的数据库会自行创建）测试连接成功后，继续下一步。或
+    选择使用嵌入式数据库，测试连接成功后，继续下一步。
 
-        下载安装完后，继续下一步。
-        > 因为是从外国网站下载安装会比较慢，有时会因为网络安装失败，只需点击重试失败的主机重新安装即可。
-    - 选择要在集群中安装的服务
+    > 在里配置的数据库是Hive及Cloudera Manager监控使用的数据库，对于Cloudera Manager自身使用的数据库SCM会使用嵌入式数据库(Postgresql)主要用于存放配置信息。
+    > 如果Hive使用外部数据库如Mysql需要把Mysql JDBC驱动程序放入Hive的lib下，地址为：`/opt/cloudera/parcels/CDH/lib/hive/lib/`
 
-        选择需要安装的CDH4服务（安装完成后，也可以断续增加安装的CDH4服务，也可以对服务进行修改），继续下一步。
+- 审核配置更改
 
-    - 数据库设置
-        
-        可以选择使用嵌入式数据库（Postgresql）这种方式最简单，也可以选择使用Mysql或Oracle, 选择外部数据库时，需要把对应的数据库JDBC驱动程序放入Cloudera Manager的lib包下，地址为：`/usr/share/cmf/lib/`，JDBC驱动程序放好后，填入数据库对应的IP及端口（对于Hive数据库需要先把数据库创建好，其它几个监控数据库使用的数据库会自行创建）测试连接成功后，继续下一步。或
-        选择使用嵌入式数据库，测试连接成功后，继续下一步。
+    更改你需要改变的配置内容，主要是数据存储目录及各服务角色对应的机器，确认各服务角色的分配是否符合目标要求，继续下一步。
 
-        > 在里配置的数据库是Hive及Cloudera Manager监控使用的数据库，对于Cloudera Manager自身使用的数据库SCM会使用嵌入式数据库(Postgresql)主要用于存放配置信息。
-        > 如果Hive使用外部数据库如Mysql需要把Mysql JDBC驱动程序放入Hive的lib下，地址为：`/opt/cloudera/parcels/CDH/lib/hive/lib/`
+    > 在CDH4.2.1中Zoonkeeper默认设置为不自动创建Zoonkeeper目录，在启动集群服务时需要手动创建（/var/lib/zookeeper）并更改它的所属为`zookeeper:zookeeper`或到管理界面把“启用数据目录的自动创建”设置为ture。
 
-    - 审核配置更改
+- 启动集群服务
 
-        更改你需要改变的配置内容，主要是数据存储目录及各服务角色对应的机器，确认各服务角色的分配是否符合目标要求，继续下一步。
+    Cloudera Manager会自动启动配置的服务(服务启动前的预处理会自动完成,并把客户端配置部署好)。继续下一步完成安装。
 
-        > 在CDH4.2.1中Zoonkeeper默认设置为不自动创建Zoonkeeper目录，在启动集群服务时需要手动创建（/var/lib/zookeeper）并更改它的所属为`zookeeper:zookeeper`或到管理界面把“启用数据目录的自动创建”设置为ture。
+- Cloudera Manager安装成功
 
-    - 启动集群服务
+#### 2.3 修改安装目录
 
-        Cloudera Manager会自动启动配置的服务(服务启动前的预处理会自动完成,并把客户端配置部署好)。继续下一步完成安装。
-
-    - Cloudera Manager安装成功
-
-6. 修改安装目录
-
-    > Cloudera Manager在安装时使用了默认安装路径（安装在系统目录中），安装过程中不能修改，对于系统盘一般较小，需要在安装完成后把安装程序及数据目录移动到其它硬盘目录，再做软链接指向原来的目录。
+> Cloudera Manager在安装时使用了默认安装路径（安装在系统目录中），安装过程中不能修改，对于系统盘一般较小，需要在安装完成后把安装程序及数据目录移动到其它硬盘目录，再做软链接指向原来的目录。
 
 - 在管理界面停止CDH集群服务
 
@@ -148,9 +152,9 @@
 
 - 在管理界面启动CDH集群服务
 
-7. 修改CDH服务配置
+#### 2.4 修改CDH服务配置
 
-    CDH的配置Cloudera Manager会设置默认值，大部分都可使用默认的，一般只需要修改各服务的端口地址、MapReduce调度器配置、JVM参数及数据目录、日志存放目录（更改目录后需要确保CDH服务对目录有权限写）。
+CDH的配置Cloudera Manager会设置默认值，大部分都可使用默认的，一般只需要修改各服务的端口地址、MapReduce调度器配置、JVM参数及数据目录、日志存放目录（更改目录后需要确保CDH服务对目录有权限写）。
 
 ### 3. 杂项 ###
 
