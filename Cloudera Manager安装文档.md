@@ -110,35 +110,35 @@
 
 - 停止Cloudera Management服务           
     
-      /etc/init.d/etc/init.d/cloudera-scm-server stop
+        /etc/init.d/etc/init.d/cloudera-scm-server stop
 
 - 停止Cloudera Management的内嵌数据库       
 
-       /etc/init.d/cloudera-scm-server-db stop
+        /etc/init.d/cloudera-scm-server-db stop
 
 - 在每台机器上停止Cloudera Manager agent        
 
-       /etc/init.d/cloudera-scm-agent stop
+        /etc/init.d/cloudera-scm-agent stop
 
 - 移动Cloudera Management的内嵌数据库目录（这里移到/home/hadoop目录下）
 
-      mv /var/lib/cloudera-scm-server-db/ /home/hadoop/
+        mv /var/lib/cloudera-scm-server-db/ /home/hadoop/
 
 - 对Cloudera Management的内嵌数据库目录做软链接
 
-      ln -s /home/hadoop/cloudera-scm-server-db/ /var/lib/
+        ln -s /home/hadoop/cloudera-scm-server-db/ /var/lib/
 
 - 在所有机器上移动CDH安装程序（这里移到/home/hadoop目录下）
 
-      mv /opt/cloudera/ /home/hadoop/
+        mv /opt/cloudera/ /home/hadoop/
 
 - 在所有机器上对CDH安装目录做软链接
 
-      ln -s /home/hadoop/cloudera/ /opt/
+        ln -s /home/hadoop/cloudera/ /opt/
 
 - 启动Cloudera Management 内嵌数据库
 
-      /etc/init.d/cloudera-scm-server-db start
+        /etc/init.d/cloudera-scm-server-db start
 
 - 启动Cloudera Management服务
 
