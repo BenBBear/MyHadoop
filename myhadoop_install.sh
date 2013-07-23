@@ -101,12 +101,12 @@ if [ $checkpassed -ne 0 ]; then
     echo "begin to install cloudera-manager......"
     # download the cloudera-manager-installer.bin
     echo "download the cloudera-manager-installer.bin for install"
-    #wget http://archive.cloudera.com/cm4/installer/latest/cloudera-manager-installer.bin
+    wget http://archive.cloudera.com/cm4/installer/latest/cloudera-manager-installer.bin
 
     # install cloudera-manager
     echo "begin to install the cloudera-manager"
-    #chmod a+x cloudera-manager-installer.bin
-    #./cloudera-manager-installer.bin
+    chmod a+x cloudera-manager-installer.bin
+    ./cloudera-manager-installer.bin
 else
     echo "The env requirement check failed, nothing installed. Please fixed it and re-run the install sh!"
 fi
