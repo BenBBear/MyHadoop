@@ -2,6 +2,8 @@
 # ssh port should be changed for your use
 sshport=9922
 
+hostname_file=hosts_name.txt
+
 # check root user or has root permission
 checkpassed=1
 echo "begin to check the root permission....."
@@ -14,7 +16,7 @@ fi
 
 #check the root ssh and system time synchronization
 echo "begin to check the root ssh and system time synchronization.........."
-for IP in `cat ./hosts_name.txt`
+for IP in `cat ./$hostname_file`
 do
     ssh -p $sshport root@$IP "ntpdate cn.pool.ntp.org"
     if [ $? -eq 0 ]; then
@@ -29,7 +31,7 @@ done
 
 #check the selinux
 echo "begin to check the selinux is been shutdown....."
-for IP in `cat ./hosts_name.txt`
+for IP in `cat ./$hostname_file`
 do 
     seout=`ssh -p $sshport root@$IP "getenforce"`
     if [ $seout != "Disabled" ]; then
@@ -44,7 +46,7 @@ done
 
 #check the iptables
 echo "begin to check the iptables status......"
-for IP in `cat ./hosts_name.txt`
+for IP in `cat ./$hostname_file`
 do 
     ssh -p $sshport root@$IP "/sbin/service iptables status 1>/dev/null 2>&1"
     if [ $? -ne 0 ]; then
@@ -57,7 +59,7 @@ done
 
 # check the hostname 
 echo "begin to check the hostname setting.........."
-for IP in `cat ./hosts_name.txt`
+for IP in `cat ./$hostname_file`
 do 
     h1=`ssh -p $sshport root@$IP "cat /etc/sysconfig/network | grep HOSTNAME " | awk -F '=' '{print $2}'`
     if [ `ssh -p $sshport root@$IP "hostname"` != $h1 ]; then
@@ -71,7 +73,7 @@ done
 
 # check the yum
 echo "begin to check the yum....."
-for IP in `cat ./hosts_name.txt`
+for IP in `cat ./$hostname_file`
 do 
     ssh -p $sshport root@$IP "yum install -y vim 1>/dev/null"
     if [ $? -eq 0 ]; then
@@ -85,7 +87,7 @@ done
 
 # check the system disk space if less than 8G
 echo "begin to check the system disk space......"
-for IP in `cat ./hosts_name.txt`
+for IP in `cat ./$hostname_file`
 do 
     space=`ssh -p $sshport root@$IP "df -h /" | awk '{print $4}'| grep G | awk '{printf("%d", $1)}'`
     if [ $space -gt 8 ]; then
