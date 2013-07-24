@@ -33,23 +33,23 @@
 
 - 确保yum可以使用，可以通过yum安装软件
 
+- 系统盘剩余空间不要少于8G
+
+- 各机器能联外网
+
 ### 2. 安装过程 ###
 
 #### 2.1 安装Cloudera Manager Server
 
-1. 准备安装文件cloudera-manager-installer.bin
+1. 修改myhadoop_install.sh安装脚本
 
-    这是个二进制文件，运行于64位系统。下载地址：`http://archive.cloudera.com/cm4/installer/latest/cloudera-manager-installer.bin`。
+    修改sshport和root_password。
 
-2. 上传cloudera-manager-installer.bin到安装Cloudera Manager服务端的主机上
+2. 修改hosts_name.txt
     
-    如：这里使用Hadoop1为服务端并确保服务端机器能够联网，安装过程需要在线安装程序软件包。
+    在hosts_name.txt文件中写上所有需要安装的hostname，一个机名一行，不要留有空行。
 
-3. 修改权限
-
-        chmod u+x ./cloudera-manager-installer.bin
-
-4. 运行cloudera-manager-installer.bin进行安装
+3. 运行myhadoop_install.sh
 
     选择接受Lincese安装即可，安装完成后Cloudera Manager已启动。
 
