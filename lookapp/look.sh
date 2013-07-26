@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+nmport=59842
 host="mob616:50088"
 host="platform30:8088"
 version="v1"
@@ -23,4 +24,16 @@ curl -H "$accept" -X GET "$url" -o $file 2>/dev/null
 #http://mob616:50088/ws/v1/cluster/apps/{appid}
 #http://mob616:50088/ws/v1/cluster/apps?state=RUNNING
 
-
+#采集node manager的container的列表
+dt=`date +"%Y%m%d%H%M"`
+nodes=`cat ${HADOOP_CONF_DIR}/slaves`
+for node in $nodes
+do
+    echo $node
+    dir=./nodedata/$day/$node
+    mkdir -p $dir
+    file=$dir/${dt}.log
+    url="http://${node}:${nmport}/ws/${version}/node/containers"
+    echo $url
+    curl -H "$accept" -X GET "$url" -o $file 2>/dev/null
+done
