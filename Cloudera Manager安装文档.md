@@ -142,7 +142,7 @@
 
 - 启动Cloudera Management服务
 
-        /etc/init.d/etc/init.d/cloudera-scm-server start
+        /etc/init.d/cloudera-scm-server start
 
 - 在所有机器上启动Cloudera Manager agent
 
