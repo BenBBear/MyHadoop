@@ -7,7 +7,7 @@ from cm_install.check_env import *
 from cm_install.install_prepare import *
 from cm_install.install import *
 
-def check_env():
+def check_myhadoop_env():
     check_env()
 
 def install():
@@ -25,4 +25,5 @@ def install():
     start_cm_agent()
 
 if __name__ == '__main__':
+    check_myhadoop_env()
     install()

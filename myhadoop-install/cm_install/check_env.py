@@ -26,7 +26,7 @@ def root_ssh_check():
     @return:
     """
     hosts  = read_host_file()
-    err_host = []
+    err_hosts = []
     for h in hosts:
         try:
             ssh = ssh_connect(h, ssh_port, username, root_pass)
@@ -34,11 +34,14 @@ def root_ssh_check():
         except Exception, ex:
             logInfo("root ssh to %s have exception: %s, Please check if root can ssh to %s or check the network. "
                 % (h, ex, h))
-            err_host.append(h)
+            if h not in err_hosts:
+                err_hosts.append(h)
 
-    if len(err_host) != 0:
-        logInfo("Check root ssh to %s servers failed, root user can't ssh to %s servers, Please Check that, %s"
-            % (err_host, err_host, EXIT_MSG))
+    if len(err_hosts) != 0:
+        logInfo("Check root ssh to %s servers failed, root user can't ssh to %s servers, or your "
+                " /etc/hosts file not set correctly Please Check that, "
+                "%s"
+            % (err_hosts, err_hosts, EXIT_MSG))
         sys.exit(-1)
 
     logInfo("Check root ssh to %s servers passed........ " % hosts)
@@ -63,7 +66,8 @@ def check_yum():
                     logInfo(s)
 
         except Exception, ex:
-            pass
+            if h not in err_hosts:
+                err_hosts.append(h)
     if len(err_hosts) != 0:
         logInfo("Check yum failed, in %s servers yum can't work %s " % (err_hosts, EXIT_MSG,))
         sys.exit(-1)
@@ -88,7 +92,8 @@ def syn_sys_time():
                 for s in err:
                     logInfo(s)
         except Exception, ex:
-            pass
+            if h not in err_hosts:
+                err_hosts.append(h)
     if len(err_hosts) != 0:
         logInfo("Synchronize %s servers failed. %s " % (err_hosts, EXIT_MSG,))
         sys.exit(-1)
@@ -107,7 +112,8 @@ def selinux_check():
                 err_hosts.append(h)
                 logInfo("The server %s selinux is not closed, Please closed it first and reinstall. ")
         except Exception, ex:
-            pass
+            if h not in err_hosts:
+                err_hosts.append(h)
     if len(err_hosts) != 0:
         logInfo("Check selinux status and %s servers have not close the selinux. Install the Myhadoop please "
                 "close the selinux first. %s " % (err_hosts, EXIT_MSG,))
@@ -127,7 +133,8 @@ def iptables_check():
                 err_hosts.append(h)
                 logInfo("The server %s iptables is running, Please closed it first and reinstall. ")
         except Exception, ex:
-            pass
+            if h not in err_hosts:
+                err_hosts.append(h)
     if len(err_hosts) != 0:
         logInfo("Check iptables status and %s servers have not stop the iptables. Install the Myhadoop please "
                 "stop the iptables first. %s " % (err_hosts, EXIT_MSG,))
@@ -173,21 +180,31 @@ def hosts_check():
                             err_hosts.append(h)
                         logInfo("The server %s /etc/hosts not set correct %s have multiple hostname. if host have "
                                 "multiple hostname and %s should be in first." % (ip, h, h))
+
+
+            # check hostname is set in hosts
+            for hh in hosts:
+                if "".join(hosts_content).find(hh) < 0:
+                    if h not in err_hosts:
+                        err_hosts.append(h)
+                    logInfo("The server %s /etc/hosts not set correct %s not set in /etc/hosts file." % (h, hh))
+
         except Exception, ex:
-            pass
+            if h not in err_hosts:
+                err_hosts.append(h)
+
     if len(err_hosts) != 0:
-        logInfo("Check hostname and /etc/hosts conf and %s servers not set correctly . Install the "
-                "Myhadoop please reset the hostname. %s " % (err_hosts, EXIT_MSG,))
+        logInfo("Check hostname and /etc/hosts conf and %s servers not set correctly ."
+                "please reset the hostname. %s " % (err_hosts, EXIT_MSG,))
         sys.exit(-1)
     else:
         logInfo("hostname and hosts set correctly. Check passed.........")
 
 def check_env():
-    root_check()
     root_ssh_check()
-    check_yum()
-    syn_sys_time()
     selinux_check()
+    root_check()
     iptables_check()
     hosts_check()
-    check_env()
+    check_yum()
+    syn_sys_time()

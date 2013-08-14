@@ -30,7 +30,8 @@ def prepare_dirs():
                 out.remove('log')
 
             if len(out) != 0: # the directory not empty
-                err_host.append(h)
+                if h not in err_host:
+                    err_host.append(h)
                 logInfo("The %s server the directory %s is not empty please check that and make sure the %s "
                         "directory is empty." % (h, d, d))
 
@@ -131,21 +132,32 @@ pid-file=/var/run/mysqld/mysqld.pid
     # start mysql server
     os.system('/etc/init.d/mysqld start')
 
-    # add password for the mysql root user todo
+    # add password for the mysql root user
     ssh = ssh_connect('localhost', ssh_port, username, root_pass)
     stdin, stdout, stderr = ssh_exc_cmd(ssh, '/usr/bin/mysql_secure_installation')
-    stdin.write("")
-    stdin.write("y")
-    stdin.write(mysql_pass)
-    stdin.write(mysql_pass)
-    stdin.write("y")
-    stdin.write("n")
-    stdin.write("n")
-    stdin.write("y")
+    stdin.write("\n")
+    stdin.flush()
+    stdin.write("y\n")
+    stdin.flush()
+    stdin.write(mysql_pass + '\n')
+    stdin.flush()
+    stdin.write(mysql_pass + '\n')
+    stdin.flush()
+    stdin.write("y\n")
+    stdin.flush()
+    stdin.write("n\n")
+    stdin.flush()
+    stdin.write("n\n")
+    stdin.flush()
+    stdin.write("y\n")
+    stdin.flush()
+    stdin.write('\n\n\n\n')
+    stdin.flush()
+
     for s in stdout.readlines():
         print s
 
-
+    ssh.close()
     #os.system('/usr/bin/mysql_secure_installation')
 
     # add start up by system

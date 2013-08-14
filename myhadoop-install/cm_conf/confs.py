@@ -3,7 +3,7 @@
 # root password and ssh port. this is just for test. root password and ssh port should be
 # input as the myhadoop.py args
 root_pass = '123456'
-ssh_port = '22'
+ssh_port = 22
 
 mysql_pass = '123456' # this password will set for mysql root user and for cloudera manager databases user.
 
@@ -11,7 +11,7 @@ mysql_pass = '123456' # this password will set for mysql root user and for cloud
 cm_tar = 'cloudera-manager-el6-cm4.6.2_x86_64.tar.gz'
 
 """ CM connetct info  """
-CM_HOST = 'platform30'
+CM_HOST = '' # if this not config then will use the hostname of the script to run
 CM_PORT = '7180'
 CM_USERNAME = 'admin'
 CM_USER_PASSWORD = 'admin'

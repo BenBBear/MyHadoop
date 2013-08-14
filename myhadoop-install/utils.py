@@ -18,7 +18,7 @@ def read_host_file(filename='hosts_name.txt'):
     Read the host file. Return a list of hostname.
     """
     if len(hosts_list) == 0:
-        path = os.path.abspath(__file__) + os.path.sep + filename
+        path = os.path.abspath(os.path.dirname(__file__)) + os.path.sep + filename
 
         if (not (os.path.exists(path) or os.path.isfile(path))):
             raise Exception("The hosts_name file: %s you specific is not exist or this is a directory." %

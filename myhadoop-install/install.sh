@@ -6,7 +6,7 @@ bin=`which $0`
 bin=`dirname ${bin}`
 bin=`cd "$bin"; pwd`
 
-cd bin/tools
+cd $bin/tools
 tar zxf setuptools-0.9.8.tar.gz
 cd setuptools-0.9.8
 python setup.py install
