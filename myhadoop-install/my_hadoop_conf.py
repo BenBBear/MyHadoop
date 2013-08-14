@@ -13,6 +13,7 @@ import inspect
 import logging
 import sys
 import textwrap
+import os
 
 from cm_api.api_client import ApiResource
 
@@ -21,12 +22,6 @@ from utils import *
 
 LOG = logging.getLogger(__name__)
 LOG_LEVLE = logging.INFO
-
-def get_cm_host():
-    if not CM_HOST.strip():
-        return socket.gethostname()
-    else:
-        return CM_HOST.strip()
 
 
 def setup_logging(level):
@@ -49,7 +44,7 @@ def do_bulk_config_update(hostnames):
     Given a list of hostnames, update the configs of all the
     datanodes, tasktrackers and regionservers on those hosts.
     """
-    api = ApiResource(get_cm_host(), username=CM_USERNAME, password=CM_USER_PASSWORD)
+    api = ApiResource(CM_HOST, username=CM_USERNAME, password=CM_USER_PASSWORD)
     hosts = collect_hosts(api, hostnames)
 
     # Set config
@@ -181,7 +176,7 @@ def main(argv):
 def test_connect():
     """ this just test connect to cloudera manager """
     import urllib2
-    hosts = "http://%s:%s" %(get_cm_host(), CM_PORT,)
+    hosts = "http://%s:%s" %(CM_HOST, CM_PORT,)
     try:
         urllib2.urlopen(hosts)
     except Exception, ex:
