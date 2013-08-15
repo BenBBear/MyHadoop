@@ -6,19 +6,20 @@ import socket
 EXIT_MSG = "so myhadoop install will exit. Please fix it and install again."
 username = 'root'
 
-CMF_HOME = "/home/cloudera-manager/cm-4.6.2"
 LOCL_HOST= socket.gethostname()
 
 hs = "%"
 
 hosts_list = []
 
+install_root_dir = os.path.abspath(os.path.dirname(__file__))
+
 def read_host_file(filename='hosts_name.txt'):
     """
     Read the host file. Return a list of hostname.
     """
     if len(hosts_list) == 0:
-        path = os.path.abspath(os.path.dirname(__file__)) + os.path.sep + filename
+        path = install_root_dir + os.path.sep + filename
 
         if (not (os.path.exists(path) or os.path.isfile(path))):
             raise Exception("The hosts_name file: %s you specific is not exist or this is a directory." %

@@ -2,16 +2,20 @@
 
 # root password and ssh port. this is just for test. root password and ssh port should be
 # input as the myhadoop.py args
-root_pass = '123456'
 ssh_port = 22
 
 mysql_pass = '123456' # this password will set for mysql root user and for cloudera manager databases user.
 
 # cm_tar is you put in tars of the CM tar package
+cm_install_dir = '/home/cloudera-manager'
 cm_tar = 'cloudera-manager-el6-cm4.6.2_x86_64.tar.gz'
+CMF_ROOT = '%s/cm-4.6.2' % cm_install_dir # cm-4.6.2 depends on the version of cm
+
+jdk_bin_name = 'jdk-6u45-linux-x64.bin'
+jdk_unpack_name = 'jdk1.6.0_45'
 
 """ CM connetct info  """
-CM_HOST = '' # if this not config then will use the hostname of the script to run
+CM_HOST = '192.168.56.102' # if this not config then will use the hostname of the script to run
 CM_PORT = '7180'
 CM_USERNAME = 'admin'
 CM_USER_PASSWORD = 'admin'
@@ -20,28 +24,31 @@ CM_USER_PASSWORD = 'admin'
 MB = 1024 * 1024
 GB = 1024 * 1024 * 1024
 
+CDH_install_dir = '/home/cloudera'
+CDH_data_dir = '/home/CDH-data'
+
 """ The services conf, you can change the these conf for your own """
 # zookeeper
 SERVER_CONF = { # zookeeper conf
-    'dataLogDir': '/home/CDH-data/zookeeper',
-    'zk_server_log_dir': '/home/CDH-data/log/zookeeper',
+    'dataLogDir': '%s/zookeeper' % CDH_data_dir,
+    'zk_server_log_dir': '%s/log/zookeeper' % CDH_data_dir,
     'zookeeper_server_java_heapsize': 128 * MB, #bytes
-    'dataDir': '/home/CDH-data/zookeeper',
+    'dataDir': '%s/zookeeper' % CDH_data_dir,
     'zookeeper_config_safety_valve': """"""
 }
 
 # hdfs
 NAMENODE_CONF = { # Namenode conf
-    'dfs_name_dir_list': '/home/CDH-data/hdfs-nn',
+    'dfs_name_dir_list': '%s/nn' % CDH_data_dir,
     'fs_trash_interval': 60,  # Minutes
     'namenode_java_heapsize': 2 * GB, #bytes
-    'namenode_log_dir': '/home/CDH-data/log/hadoop-hdfs',
+    'namenode_log_dir': '%s/log/hadoop-hdfs' % CDH_data_dir,
     'dfs_http_port': 50070,
     'namenode_java_opts': '',
     'namenode_config_safety_valve': """"""
 }
 DATANODE_CONF = { # datanode conf
-    'dfs_data_dir_list': '/home/CDH-data/hdfs-dn',
+    'dfs_data_dir_list': '%s/dn' % CDH_data_dir,
     'dfs_datanode_handler_count': 4,
     'dfs_datanode_du_reserved': 10 * GB, #bytes
     'dfs_datanode_max_xcievers': 4096,
@@ -50,17 +57,17 @@ DATANODE_CONF = { # datanode conf
     'datanode_config_safety_valve': """"""
 }
 SECONDARY_NAMENODE_CONF = { # Secondary Namenode conf
-    'fs_checkpoint_dir_list': '/home/CDH-data/hdfs-snn',
+    'fs_checkpoint_dir_list': '%s/snn' % CDH_data_dir,
     'secondary_namenode_java_heapsize': 2 * GB, #bytes
-    'secondarynamenode_log_dir': '/home/CDH-data/log/hadoop-hdfs',
+    'secondarynamenode_log_dir': '%s/log/hadoop-hdfs' % CDH_data_dir,
     'dfs_secondary_http_port': 50090,
     'secondarynamenode_java_opts': '',
     'secondarynamenode_config_safety_valve': """"""
 }
 JOURNALNODE_CONF = { # JournalNode conf
-    'dfs_journalnode_edits_dir': '/home/CDH-data/journal_edit_logs/',
+    'dfs_journalnode_edits_dir': '%s/journal_edit_logs/' % CDH_data_dir,
     'journalNode_java_heapsize': 256 * MB, #bytes
-    'journalnode_log_dir': '/home/CDH-data/log/hadoop-hdfs',
+    'journalnode_log_dir': '%s/log/hadoop-hdfs' % CDH_data_dir,
     'dfs_journalnode_http_port': 50480,
     'jn_config_safety_valve': """"""
 }
@@ -98,14 +105,14 @@ RESOURCEMANAGER_CONF = { # resource manager conf
             """,
     'yarn_resourcemanager_webapp_address': '50088',
     'resource_manager_java_heapsize': 2 * GB, #bytes
-    'resource_manager_log_dir': '/home/CDH-data/log/hadoop-yarn',
+    'resource_manager_log_dir': '%s/log/hadoop-yarn' % CDH_data_dir,
     'resource_manager_java_opts': '',
     'resourcemanager_config_safety_valve': """""",
     'resourcemanager_mapred_safety_valve': """"""
 }
 JOBHISTORY_CONF = { #jobhistory conf
     'yarn_app_mapreduce_am_staging_dir': '/user',
-    'mr2_jobhistory_log_dir': '/home/CDH-data/log/hadoop-mapreduce',
+    'mr2_jobhistory_log_dir': '%s/log/hadoop-mapreduce' % CDH_data_dir,
     'mapreduce_jobhistory_webapp_address': 50888,
     'mr2_jobhistory_java_heapsize': 1 * GB, #bytes
     'mr2_jobhistory_java_opts': '',
@@ -115,12 +122,12 @@ JOBHISTORY_CONF = { #jobhistory conf
 }
 NODEMANAGER_CONF = { # nodemanager conf
     'node_manager_java_heapsize': 2 * GB, #bytes
-    'node_manager_log_dir': '/home/CDH-data/log/hadoop-yarn',
+    'node_manager_log_dir': '%s/log/hadoop-yarn' % CDH_data_dir,
     'yarn_nodemanager_vmem_pmem_ratio': 2.1,
     'yarn_nodemanager_resource_memory_mb': 5 * GB, # MB
-    'yarn_nodemanager_local_dirs': '/home/CDH-data/yarn-nm',
+    'yarn_nodemanager_local_dirs': '%s/nm' % CDH_data_dir,
     'yarn_nodemanager_webapp_address': 50842,
-    'yarn_nodemanager_log_dirs': '/home/CDH-data/log/hadoop-yarn-container',
+    'yarn_nodemanager_log_dirs': '%s/log/hadoop-yarn-container' % CDH_data_dir,
     'nodemanager_mapred_safety_valve': """""",
     'nodemanager_config_safety_valve': """"""
 }
@@ -130,7 +137,7 @@ MASTER_CONF = { # hbase
     'hbase_master_handler_count': 25,
     'hbase_master_info_port': 50610,
     'hbase_master_logcleaner_ttl': 60000, # millisecond
-    'hbase_master_log_dir': '/home/CDH-data/log/hbase',
+    'hbase_master_log_dir': '%s/log/hbase' % CDH_data_dir,
     'hbase_master_java_heapsize': 2 * GB,
     'hbase_master_java_opts': '',
     'hbase_master_config_safety_valve': """"""
@@ -140,7 +147,7 @@ REGIONSERVER_CONF = { # region server conf
     'hbase_regionserver_handler_count': 10,
     'hbase_regionserver_java_heapsize': 512 * MB, #bytes
     'hbase_regionserver_info_port': 50630,
-    'hbase_regionserver_log_dir': '/home/CDH-data/log/hbase',
+    'hbase_regionserver_log_dir': '%s/log/hbase' % CDH_data_dir,
     'hbase_regionserver_lease_period': 60000, # millisecond
     'hbase_regionserver_java_opts': '',
     'hbase_regionserver_config_safety_valve': """"""
@@ -148,7 +155,7 @@ REGIONSERVER_CONF = { # region server conf
 
 # hive
 HIVEMETASTORE_CONF = { # hive metastore conf
-    'hive_log_dir': '/var/log/hive',
+    'hive_log_dir': '%s/log/hive' % CDH_data_dir,
     'hive_metastore_max_threads': 100000,
     'hive_metastore_min_threads': 200,
     'hive_metastore_java_heapsize': 128 * MB, #bytes
@@ -160,14 +167,14 @@ HIVEMETASTORE_CONF = { # hive metastore conf
 # hue
 HUE_SERVER_CONF = { # hue server conf
     'hue_http_port': 8888,
-    'hue_server_log_dir': '/home/CDH-data/log/hue',
+    'hue_server_log_dir': '%s/log/hue' % CDH_data_dir,
     'hue_server_hue_safety_valve': """"""
 
 }
 BEESWAX_SERVER_CONF = { # beeswax server conf
     'beeswax_server_conn_timeout': 120, # seconds
     'metastore_conn_timeout': 10, # seconds
-    'beeswax_log_dir': '/home/CDH-data/log/hue',
+    'beeswax_log_dir': '%s/log/hue' % CDH_data_dir,
     'beeswax_server_heapsize': 128 * MB, #bytes
     'beeswax_hive_conf_safety_valve': """"""
 
@@ -176,27 +183,27 @@ BEESWAX_SERVER_CONF = { # beeswax server conf
 # impala
 IMPALAD_CONF = { # impala conf
     'impalad_memory_limit': 4 * GB, #bytes
-    'log_dir': '/home/CDH-data/log/impalad',
+    'log_dir': '%s/log/impalad' % CDH_data_dir,
     'impala_hive_conf_safety_valve': """""",
     'impala_hdfs_site_conf_safety_valve': """"""
 }
 STATESTORE_CONF = { # impala state store
-    'log_dir': '/home/CDH-data/log/statestore',
+    'log_dir': '%s/log/statestore' % CDH_data_dir,
     'state_store_num_server_worker_threads': 4
 }
 
 # Oozie
 OOZIE_SERVER_CONF = { # Oozie server conf
-    'oozie_log_dir': '/home/CDH-data/log/oozie',
+    'oozie_log_dir': '%s/log/oozie' % CDH_data_dir,
     'oozie_java_heapsize': 512 * MB, #bytes
-    'oozie_data_dir': '/home/CDH-data/oozie-data',
+    'oozie_data_dir': '%s/oozie-data' % CDH_data_dir,
     'oozie_config_safety_valve': """"""
 }
 
 # flume
 AGENT_CONF = { # flume conf
     'agent_java_heapsize': 256 * MB, #bytes
-    'agent_home_dir': '/home/CDH-data/flume-ng',
+    'agent_home_dir': '%s/flume-ng' % CDH_data_dir,
     'agent_name': 'tier1',
     'agent_config_file': """
 # Please paste flume.conf here. Example:

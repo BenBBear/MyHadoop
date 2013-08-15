@@ -5,7 +5,7 @@ from cm_conf.confs import *
 import os, sys
 import utils
 
-cm_install_dir = '/home/cloudera-manager'
+
 
 def unpack_cm():
     """
@@ -25,7 +25,7 @@ def init_database():
     os.system('mysql -uroot -p%s -e "grant all on scm.* TO \'scm\'@\'%s\' IDENTIFIED BY \'scm\' with grant option;"'
               % (mysql_pass, hs))
     os.system('%s/share/cmf/schema/scm_prepare_database.sh mysql -h %s -P3306 -u temp -p123456 --scm-host '
-              '%s scm scm scm' % (CMF_HOME, LOCL_HOST, LOCL_HOST))
+              '%s scm scm scm' % (CMF_ROOT, LOCL_HOST, LOCL_HOST))
     os.system('mysql -uroot -p%s -e "drop user \'temp\'@\'%s\';"' % (mysql_pass, hs))
 
 def change_cnf():
@@ -33,11 +33,33 @@ def change_cnf():
     change some conf of cm, special for cm agent
     @return:
     """
-    # sed -i "s/server_host=localhost/server_host=`hostname`/g" $CM_HOME/etc/cloudera-scm-agent/config.ini
-    conf_file = CMF_HOME + os.path.sep + 'etc/cloudera-scm-agent/config.ini'
+    # sed -i "s/server_host=localhost/server_host=`hostname`/g" $CMF_ROOT/etc/cloudera-scm-agent/config.ini
+    conf_file = CMF_ROOT + os.path.sep + 'etc/cloudera-scm-agent/config.ini'
     os.system('sed -i "s/server_host=localhost/server_host=%s/g" %s' %(socket.gethostname(), conf_file))
 
-def dispatch_cm():
+    # and JAVA_HOME and CMF_ROOT to $CMF_ROOT/etc/default/cloudera-scm-server %CMF_ROOT/etc/default/cloudera-scm-agent
+    # JAVA_HOME just set for cm server is ok and agent will to locate the java home in /usr/java/jdk1.6*
+    java_home_str = 'export JAVA_HOME=/usr/java/%s' % jdk_unpack_name
+    cmf_root = 'export CMF_ROOT=%s' % CMF_ROOT
+    cm_server_f = '%s/etc/default/cloudera-scm-server' % CMF_ROOT
+    cm_agent_f = '%s/etc/default/cloudera-scm-agent' % CMF_ROOT
+    if os.path.exists('/usr/java/%s' % jdk_unpack_name):
+        os.system("sed -i '1 i\%s' %s" % (java_home_str, cm_server_f))
+    else:
+        logInfo("Can't find the JDK, %s" % EXIT_MSG)
+        sys.exit(-1)
+    os.system("sed -i '1 i\%s' %s" % (cmf_root, cm_server_f))
+    os.system("sed -i '1 i\%s' %s" % (cmf_root, cm_agent_f))
+
+    # and CMF_DEFAULTS to $CMF_ROOT/etc/init.d/cloudera-scm-server %CMF_ROOT/etc/init.d/cloudera-scm-agent
+    CMF_DEFAULTS = 'export CMF_DEFAULTS=%s/etc/default' %CMF_ROOT
+    cm_server_f = '%s/etc/init.d/cloudera-scm-server' % CMF_ROOT
+    cm_agent_f = '%s/etc/init.d/cloudera-scm-agent' % CMF_ROOT
+    os.system("sed -i '37 i\%s' %s" % (CMF_DEFAULTS, cm_server_f))
+    os.system("sed -i '37 i\%s' %s" % (CMF_DEFAULTS, cm_agent_f))
+
+
+def dispatch_cm(root_pass, hosts = read_host_file()):
     """
     dispatch the cm to all the server you want to install the  cm agent
     @return:
@@ -50,7 +72,7 @@ def dispatch_cm():
     os.system('tar -czf %s ./' % source)
     os.chdir('/home')
     err_hosts = []
-    for h in read_host_file():
+    for h in hosts:
         if h == socket.gethostname():
             continue
         # there use scp to dispatch the
@@ -98,6 +120,10 @@ def start_cm_server():
     # stdin, stdout, stderr = ssh.exec_command('%s/cm-4.6.2/etc/init.d/cloudera-scm-server start' % cm_install_dir)
     # ssh.close()
     # errs = stderr.readlines()
+    #
+    # for o in stdout.readlines():
+    #     logInfo(o)
+    #
     # if len(errs) == 0:
     #     for err in errs:
     #         logInfo(err)
@@ -105,19 +131,24 @@ def start_cm_server():
     # else:
     #     logInfo("CM Server start failed. %s" % EXIT_MSG)
     #     sys.exit(-1)
-    os.system('%s/cm-4.6.2/etc/init.d/cloudera-scm-server start' % cm_install_dir)
 
-def start_cm_agent():
+    # use paramiko can't start the server. os here to use os.system
+    os.system('%s/etc/init.d/cloudera-scm-server start' % CMF_ROOT)
+    logInfo("CM Server started, Now you can login http://%s:7180 to manager your CDH cluster." % socket.gethostname())
+
+def start_cm_agent(root_pass, hosts = read_host_file()):
     """
     start all cm agent
     @return:
     """
     err_hosts = []
-    for h in read_host_file():
+    for h in hosts:
         ssh = ssh_connect(h, ssh_port, username, root_pass)
-        stdin, stdout, stderr = ssh.exec_command('%s/cm-4.6.2/etc/init.d/cloudera-scm-agent start' % cm_install_dir)
+        stdin, stdout, stderr = ssh.exec_command('%s/etc/init.d/cloudera-scm-agent start' % CMF_ROOT)
 
         if len(stderr.readlines()) == 0:
+            for o in stdout.readlines():
+                logInfo(o)
             logInfo("CM agent in %s server started." % h)
         else:
             err_hosts.append(h)
@@ -129,3 +160,31 @@ def start_cm_agent():
         logInfo("The CM agent of the servers: %s start failed, please check that.")
 
     logInfo("Install CM finished.")
+
+
+def add_startup_on_init(root_pass, hosts = read_host_file(), isaddnode=False):
+    """
+    add cm start up by system
+    @return:
+    """
+    if not isaddnode:
+        os.system('rm -rf /etc/init.d/cloudera-scm-server')
+        os.system('rm -rf /etc/rc.d/init.d/cloudera-scm-server')
+        os.system('rm -rf /usr/sbin/cloudera-scm-server')
+        os.system('ln -s %s/etc/init.d/cloudera-scm-server /etc/init.d/' % CMF_ROOT)
+        os.system('ln -s %s/etc/init.d/cloudera-scm-server /etc/rc.d/init.d/' % CMF_ROOT)
+        os.system('ln -s %s/sbin/cmf-server /usr/sbin' % CMF_ROOT)
+        os.system('/sbin/chkconfig cloudera-scm-server on')
+        os.system('/sbin/chkconfig --list cloudera-scm-server')
+    for h in hosts:
+        if h == socket.gethostname():
+            continue
+        ssh = ssh_connect(h, ssh_port, username, root_pass)
+        ssh.exec_command('rm -rf /etc/init.d/cloudera-scm-agent')
+        ssh.exec_command('rm -rf /etc/rc.d/init.d/cloudera-scm-agent')
+        ssh.exec_command('rm -rf /usr/sbin/cloudera-scm-agent')
+        ssh.exec_command('ln -s %s/etc/init.d/cloudera-scm-agent /etc/init.d/' % CMF_ROOT)
+        ssh.exec_command('ln -s %s/etc/init.d/cloudera-scm-agent /etc/rc.d/init.d/' % CMF_ROOT)
+        ssh.exec_command('ln -s %s/sbin/cmf-agent /usr/sbin' % CMF_ROOT)
+        ssh.exec_command('/sbin/chkconfig cloudera-scm-agent on')
+        ssh.exec_command('/sbin/chkconfig --list cloudera-scm-agent')

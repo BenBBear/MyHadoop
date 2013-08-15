@@ -6,24 +6,30 @@
 from cm_install.check_env import *
 from cm_install.install_prepare import *
 from cm_install.install import *
+from cm_conf import confs
 
-def check_myhadoop_env():
-    check_env()
+import sys
 
-def install():
-    prepare_dirs()
-    create_soft_links()
-    install_mysql()
-    create_user()
+def check_myhadoop_env(root_pass):
+    check_env(root_pass)
 
-    unpack_cm()
-    init_database()
-    change_cnf()
-    dispatch_cm()
-    put_local_repo()
-    start_cm_server()
-    start_cm_agent()
+def install(root_pass):
+    prepare_dirs(root_pass)
+    create_soft_links(root_pass)
+    install_mysql(root_pass)
+    install_jdk(root_pass)
+    create_user(root_pass)
+
+    unpack_cm(root_pass)
+    init_database(root_pass)
+    change_cnf(root_pass)
+    dispatch_cm(root_pass)
+    put_local_repo(root_pass)
+    start_cm_server(root_pass)
+    start_cm_agent(root_pass)
+    add_startup_on_init(root_pass)
 
 if __name__ == '__main__':
-    check_myhadoop_env()
-    install()
+    root_pass = str(sys.argv[1]) # set root password
+    check_myhadoop_env(root_pass)
+    install(root_pass)

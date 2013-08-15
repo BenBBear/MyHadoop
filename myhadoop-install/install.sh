@@ -18,4 +18,4 @@ easy_install ./
 
 cd ../../
 
-python myhadoop.py
+python myhadoop.py $*

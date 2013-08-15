@@ -4,19 +4,19 @@ import sys
 from cm_conf.confs import *
 from utils import *
 
-def prepare_dirs():
+def prepare_dirs(root_pass, hosts = read_host_file()):
     """
     begin install to create we will use the dirs and also this method will check the dir is exist.
     if the dir is exist install will exit.
     @return:
     """
-    hosts = read_host_file()
+    # hosts = read_host_file()
     err_host = []
     directorys = [
-        '/home/cloudera-manager',
-        '/home/CDH-data',
-        '/home/CDH-data/log',
-        '/home/cloudera',
+        cm_install_dir,
+        CDH_data_dir,
+        '%s/log' % CDH_data_dir,
+        CDH_install_dir,
     ]
     for h in hosts:
         ssh = ssh_connect(h, ssh_port, username, root_pass)
@@ -26,7 +26,7 @@ def prepare_dirs():
             # check the dir is empty
             stdin, stdout, stderr = ssh_exc_cmd(ssh, 'ls %s' % d)
             out = stdout.readlines()
-            if d == '/home/CDH-data' and 'log' in out > -1:
+            if d == CDH_data_dir and 'log' in out > -1:
                 out.remove('log')
 
             if len(out) != 0: # the directory not empty
@@ -41,13 +41,12 @@ def prepare_dirs():
         sys.exit(-1)
 
 
-def create_soft_links():
+def create_soft_links(root_pass, hosts = read_host_file()):
     """
     Create soft links for CDH ln -s /home/cloudera /opt/
     @return:
     """
-    hosts = read_host_file()
-    err_host = []
+    # hosts = read_host_file()
     for h in hosts:
         ssh = ssh_connect(h, ssh_port, username, root_pass)
         # /opt/cloudera directory should be not exist
@@ -57,10 +56,10 @@ def create_soft_links():
             logInfo("The /opt/cloudera have exist now, before install Myhadoop /opt/cloudera directory should "
                     "have not exist. %s" % EXIT_MSG)
             sys.exit(-1)
-        ssh_exc_cmd(ssh, 'ln -s /home/cloudera /opt/')
+        ssh_exc_cmd(ssh, 'ln -s %s /opt/' % CDH_install_dir)
 
 
-def install_mysql():
+def install_mysql(root_pass):
     """
     Install the mysql through yum and config the mysql for cloudera manager
     @return:
@@ -197,6 +196,55 @@ def create_user():
     create cm server user
     @return:
     """
-    os.system('useradd --system --home=/home/cloudera-manager/cm-4.6.2/run/cloudera-scm-server/  --no-create-home '
-              '--shell=/bin/false --comment "Cloudera SCM User" cloudera-scm')
+    os.system('useradd --system --home=%s/run/cloudera-scm-server/  --no-create-home '
+              '--shell=/bin/false --comment "Cloudera SCM User" cloudera-scm' % CMF_ROOT)
 
+def dispatch_jdk(root_pass, hosts = read_host_file()):
+    """
+    dispatch jdk to all server
+    @return:
+    """
+    source = '%s/tools/%s' % (install_root_dir, jdk_bin_name,)
+    target = cm_install_dir + '/%s' % jdk_bin_name
+    err_hosts = []
+    for h in hosts:
+        if h == socket.gethostname():
+            continue
+        # there use scp to dispatch the
+        logInfo("dispatch the JDK to other servers and install it")
+        try:
+            sftp = get_sftp(h, ssh_port, username, root_pass)
+            # if target exists then remove it first
+            sftp.remove(target)
+            # upload the file
+            sftp.put(source, target)
+            sftp.close()
+
+            # unpack the target file
+            ssh = ssh_connect(h, ssh_port, username, root_pass)
+            ssh.exec_command('%s/tools' % install_root_dir)
+            ssh.exec_command('sh %s' % (target,))
+            ssh.exec_command('mkdir /usr/java')
+            ssh.exec_command('rm -rf /usr/java/%s' % jdk_unpack_name) # if exist delete it first
+            ssh.exec_command('mv %s/%s /usr/java/%s' % (cm_install_dir, jdk_unpack_name, jdk_unpack_name))
+            ssh.close()
+        except Exception, ex:
+            err_hosts.append(h)
+            logInfo("Upload the file: %s to %s as %s failed. info is: %s " % (source, h, target, ex.message,))
+
+    if len(err_hosts) != 0:
+        logInfo("Dispatch the JDK in %s hosts failed, %s " % (err_hosts, EXIT_MSG,))
+        sys.exit(-1)
+
+def install_jdk(root_pass):
+    """
+    install jdk
+    @return:
+    """
+    os.chdir('%s/tools' % install_root_dir)
+    os.system('sh %s/tools/%s' %(install_root_dir, jdk_bin_name))
+    if not os.path.exists('/usr/java'):
+        os.mkdir('/usr/java')
+    os.system('mv %s/tools/%s /usr/java/%s' % (install_root_dir, jdk_unpack_name, jdk_unpack_name))
+
+    dispatch_jdk(root_pass)

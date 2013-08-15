@@ -20,12 +20,12 @@ def root_check():
     else:
         logInfo("Check root permission passed..........")
 
-def root_ssh_check():
+def root_ssh_check(root_pass, hosts  = read_host_file()):
     """
     check the all server if can do ssh as root user
     @return:
     """
-    hosts  = read_host_file()
+    # hosts  = read_host_file()
     err_hosts = []
     for h in hosts:
         try:
@@ -46,12 +46,12 @@ def root_ssh_check():
 
     logInfo("Check root ssh to %s servers passed........ " % hosts)
 
-def check_yum():
+def check_yum(root_pass, hosts  = read_host_file()):
     """
     Check the yum can install software or not. There in all server to install the ntpdate.
     @return:
     """
-    hosts = read_host_file()
+    # hosts = read_host_file()
     err_hosts = []
     for h in hosts:
         try:
@@ -74,12 +74,12 @@ def check_yum():
     else:
         logInfo("Yum work well, check passed.........")
 
-def syn_sys_time():
+def syn_sys_time(root_pass, hosts  = read_host_file()):
     """
     synchronization system time for all server
     @return:
     """
-    hosts  = read_host_file()
+    # hosts  = read_host_file()
     err_hosts = []
     for h in hosts:
         try:
@@ -100,8 +100,8 @@ def syn_sys_time():
     else:
         logInfo("Synchronize time passed.........")
 
-def selinux_check():
-    hosts  = read_host_file()
+def selinux_check(root_pass, hosts  = read_host_file()):
+    # hosts  = read_host_file()
     err_hosts = []
     for h in hosts:
         try:
@@ -121,8 +121,8 @@ def selinux_check():
     else:
         logInfo("Selinux have been closed. Check selinux status passed.........")
 
-def iptables_check():
-    hosts  = read_host_file()
+def iptables_check(root_pass, hosts  = read_host_file()):
+    # hosts  = read_host_file()
     err_hosts = []
     for h in hosts:
         try:
@@ -142,8 +142,8 @@ def iptables_check():
     else:
         logInfo("Iptables have been stoped. Check iptables status passed.........")
 
-def hosts_check():
-    hosts  = read_host_file()
+def hosts_check(root_pass, hosts  = read_host_file()):
+    # hosts  = read_host_file()
     err_hosts = []
     for h in hosts:
         try:
@@ -200,11 +200,11 @@ def hosts_check():
     else:
         logInfo("hostname and hosts set correctly. Check passed.........")
 
-def check_env():
-    root_ssh_check()
-    selinux_check()
+def check_env(root_pass):
+    root_ssh_check(root_pass)
+    selinux_check(root_pass)
     root_check()
-    iptables_check()
-    hosts_check()
-    check_yum()
-    syn_sys_time()
+    iptables_check(root_pass)
+    hosts_check(root_pass)
+    check_yum(root_pass)
+    syn_sys_time(root_pass)

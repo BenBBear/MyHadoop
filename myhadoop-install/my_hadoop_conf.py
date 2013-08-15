@@ -27,7 +27,7 @@ def get_cm_host():
     if not CM_HOST.strip():
         return socket.gethostname()
     else:
-        CM_HOST.strip()
+        return CM_HOST.strip()
 
 def setup_logging(level):
     logging.basicConfig()
