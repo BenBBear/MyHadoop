@@ -177,7 +177,7 @@ def add_startup_on_init(root_pass, hosts = read_host_file(), isaddnode=False):
         os.system('/sbin/chkconfig cloudera-scm-server on')
         os.system('/sbin/chkconfig --list cloudera-scm-server')
     for h in hosts:
-        if h == socket.gethostname():
+        if h == socket.gethostname() and isaddnode:
             continue
         ssh = ssh_connect(h, ssh_port, username, root_pass)
         ssh.exec_command('rm -rf /etc/init.d/cloudera-scm-agent')
