@@ -11,6 +11,8 @@ tar zxf setuptools-0.9.8.tar.gz
 cd setuptools-0.9.8
 python setup.py install
 
+easy_install termcolor
+
 cd ../
 tar zxf paramiko-1.11.0.tar.gz
 cd paramiko-1.11.0

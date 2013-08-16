@@ -11,19 +11,17 @@ cm_install_dir = '/home/cloudera-manager'
 cm_tar = 'cloudera-manager-el6-cm4.6.2_x86_64.tar.gz'
 CMF_ROOT = '%s/cm-4.6.2' % cm_install_dir # cm-4.6.2 depends on the version of cm
 
-jdk_bin_name = 'jdk-6u45-linux-x64.bin'
-jdk_unpack_name = 'jdk1.6.0_45'
-
 """ CM connetct info  """
-CM_HOST = '192.168.56.102' # if this not config then will use the hostname of the script to run
+CM_HOST = '' # if this not config then will use the hostname of the script to run
 CM_PORT = '7180'
 CM_USERNAME = 'admin'
 CM_USER_PASSWORD = 'admin'
 
-
+# can use default
+jdk_bin_name = 'jdk-6u45-linux-x64.bin'
+jdk_unpack_name = 'jdk1.6.0_45'
 MB = 1024 * 1024
 GB = 1024 * 1024 * 1024
-
 CDH_install_dir = '/home/cloudera'
 CDH_data_dir = '/home/CDH-data'
 

@@ -28,7 +28,7 @@ def init_database():
               '%s scm scm scm' % (CMF_ROOT, LOCL_HOST, LOCL_HOST))
     os.system('mysql -uroot -p%s -e "drop user \'temp\'@\'%s\';"' % (mysql_pass, hs))
 
-def change_cnf():
+def change_cnf(root_pass):
     """
     change some conf of cm, special for cm agent
     @return:
@@ -46,7 +46,9 @@ def change_cnf():
     if os.path.exists('/usr/java/%s' % jdk_unpack_name):
         os.system("sed -i '1 i\%s' %s" % (java_home_str, cm_server_f))
     else:
-        logInfo("Can't find the JDK, %s" % EXIT_MSG)
+        logInfo("Can't find the JDK, %s" % EXIT_MSG, color='red')
+
+        rollback_to_innit(root_pass)
         sys.exit(-1)
     os.system("sed -i '1 i\%s' %s" % (cmf_root, cm_server_f))
     os.system("sed -i '1 i\%s' %s" % (cmf_root, cm_agent_f))
@@ -91,10 +93,12 @@ def dispatch_cm(root_pass, hosts = read_host_file()):
             ssh.close()
         except Exception, ex:
             err_hosts.append(h)
-            logInfo("Upload the file: %s to %s as %s failed. info is: %s " % (source, h, target, ex.message,))
+            logInfo("Upload the file: %s to %s as %s failed. info is: %s " % (source, h, target, ex.message,),
+                    color='red')
 
     if len(err_hosts) != 0:
-        logInfo("Dispatch the CM agent in %s hosts failed, %s " % (err_hosts, EXIT_MSG,))
+        logInfo("Dispatch the CM agent in %s hosts failed, %s " % (err_hosts, EXIT_MSG,), color='red')
+        rollback_to_innit(root_pass)
         sys.exit(-1)
 
 def put_local_repo():
@@ -134,7 +138,9 @@ def start_cm_server():
 
     # use paramiko can't start the server. os here to use os.system
     os.system('%s/etc/init.d/cloudera-scm-server start' % CMF_ROOT)
-    logInfo("CM Server started, Now you can login http://%s:7180 to manager your CDH cluster." % socket.gethostname())
+    logInfo("CM Server started, Now you can login http://%s:7180 to manager your CDH cluster." % socket.gethostname(
+
+    ), color='green')
 
 def start_cm_agent(root_pass, hosts = read_host_file()):
     """
@@ -149,17 +155,17 @@ def start_cm_agent(root_pass, hosts = read_host_file()):
         if len(stderr.readlines()) == 0:
             for o in stdout.readlines():
                 logInfo(o)
-            logInfo("CM agent in %s server started." % h)
+            logInfo("CM agent in %s server started." % h , color='green')
         else:
             err_hosts.append(h)
-            logInfo("CM agent in %s server start failed. %s" % h)
+            logInfo("CM agent in %s server start failed. %s" % h, color='red')
 
         ssh.close()
 
     if len(err_hosts) != 0:
-        logInfo("The CM agent of the servers: %s start failed, please check that.")
+        logInfo("The CM agent of the servers: %s start failed, please check that.", color='red')
 
-    logInfo("Install CM finished.")
+    logInfo("Install CM finished.", color='green')
 
 
 def add_startup_on_init(root_pass, hosts = read_host_file(), isaddnode=False):
@@ -172,7 +178,6 @@ def add_startup_on_init(root_pass, hosts = read_host_file(), isaddnode=False):
         os.system('rm -rf /etc/rc.d/init.d/cloudera-scm-server')
         os.system('rm -rf /usr/sbin/cloudera-scm-server')
         os.system('ln -s %s/etc/init.d/cloudera-scm-server /etc/init.d/' % CMF_ROOT)
-        os.system('ln -s %s/etc/init.d/cloudera-scm-server /etc/rc.d/init.d/' % CMF_ROOT)
         os.system('ln -s %s/sbin/cmf-server /usr/sbin' % CMF_ROOT)
         os.system('/sbin/chkconfig cloudera-scm-server on')
         os.system('/sbin/chkconfig --list cloudera-scm-server')
@@ -184,7 +189,29 @@ def add_startup_on_init(root_pass, hosts = read_host_file(), isaddnode=False):
         ssh.exec_command('rm -rf /etc/rc.d/init.d/cloudera-scm-agent')
         ssh.exec_command('rm -rf /usr/sbin/cloudera-scm-agent')
         ssh.exec_command('ln -s %s/etc/init.d/cloudera-scm-agent /etc/init.d/' % CMF_ROOT)
-        ssh.exec_command('ln -s %s/etc/init.d/cloudera-scm-agent /etc/rc.d/init.d/' % CMF_ROOT)
         ssh.exec_command('ln -s %s/sbin/cmf-agent /usr/sbin' % CMF_ROOT)
         ssh.exec_command('/sbin/chkconfig cloudera-scm-agent on')
         ssh.exec_command('/sbin/chkconfig --list cloudera-scm-agent')
+
+def rollback_to_innit(root_pass, hosts = read_host_file()):
+    """
+    Stop the mysql service and delete the dirs we create
+    @param root_pass:
+    @param hosts:
+    @return:
+    """
+    logInfo("begin rollback for failed servers: %s, " % hosts, color='red')
+    os.system('/etc/init.d/mysqld stop')
+
+    directorys = [
+        cm_install_dir,
+        CDH_data_dir,
+        CDH_install_dir,
+        '/home/mysql-data',
+        '/home/mysql-binlog'
+    ]
+
+    for d in directorys:
+        os.system('rm -rf %s' % d)
+
+    os.system('rm -f /opt/cloudera')

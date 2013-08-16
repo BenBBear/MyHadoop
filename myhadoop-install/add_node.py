@@ -39,7 +39,7 @@ def install_cm_agent(root_pass, hosts):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        logInfo(usage)
+        logInfo(usage, color='red')
         sys.exit(-1)
     root_pass = sys.argv[1]
 

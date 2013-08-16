@@ -50,13 +50,17 @@ def ssh_connect(host, port, username, password, timeout_=5):
     except Exception, ex:
         raise ex
 
-def logInfo(msg):
+def logInfo(msg, color='white', highlight='on_grey'):
     """
     print the info for user
     @param msg:
     @return:
     """
-    print msg
+    try:
+        from termcolor import colored, cprint
+        cprint(msg, color, highlight, attrs=['bold'])
+    except:
+        print msg
 
 def ssh_exc_cmd(ssh, cmd):
     return ssh.exec_command(cmd)

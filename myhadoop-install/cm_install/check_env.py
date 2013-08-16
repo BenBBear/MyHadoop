@@ -15,10 +15,10 @@ def root_check():
     @return:
     """
     if os.getuid() != 0:
-        logInfo("You are not the root user, Install Myhadoop must be the root user, %s" % EXIT_MSG )
+        logInfo("You are not the root user, Install Myhadoop must be the root user, %s" % EXIT_MSG, color='red')
         sys.exit(-1)
     else:
-        logInfo("Check root permission passed..........")
+        logInfo("Check root permission passed..........", color='green')
 
 def root_ssh_check(root_pass, hosts  = read_host_file()):
     """
@@ -33,7 +33,7 @@ def root_ssh_check(root_pass, hosts  = read_host_file()):
             ssh.close()
         except Exception, ex:
             logInfo("root ssh to %s have exception: %s, Please check if root can ssh to %s or check the network. "
-                % (h, ex, h))
+                % (h, ex, h), color='red')
             if h not in err_hosts:
                 err_hosts.append(h)
 
@@ -41,10 +41,10 @@ def root_ssh_check(root_pass, hosts  = read_host_file()):
         logInfo("Check root ssh to %s servers failed, root user can't ssh to %s servers, or your "
                 " /etc/hosts file not set correctly Please Check that, "
                 "%s"
-            % (err_hosts, err_hosts, EXIT_MSG))
+            % (err_hosts, err_hosts, EXIT_MSG), color='red')
         sys.exit(-1)
 
-    logInfo("Check root ssh to %s servers passed........ " % hosts)
+    logInfo("Check root ssh to %s servers passed........ " % hosts, color='green')
 
 def check_yum(root_pass, hosts  = read_host_file()):
     """
@@ -61,18 +61,18 @@ def check_yum(root_pass, hosts  = read_host_file()):
             if len(err) != 0:
                 err_hosts.append(h)
                 logInfo("The server %s yum can't install ntpdate, maybe the yum in %s can't work, Please the yum"
-                        " in %s. The info is:   " % (h, h, h,))
+                        " in %s. The info is:   " % (h, h, h,), color='red')
                 for s in err:
-                    logInfo(s)
+                    logInfo(s, color='red')
 
         except Exception, ex:
             if h not in err_hosts:
                 err_hosts.append(h)
     if len(err_hosts) != 0:
-        logInfo("Check yum failed, in %s servers yum can't work %s " % (err_hosts, EXIT_MSG,))
+        logInfo("Check yum failed, in %s servers yum can't work %s " % (err_hosts, EXIT_MSG,), color='red')
         sys.exit(-1)
     else:
-        logInfo("Yum work well, check passed.........")
+        logInfo("Yum work well, check passed.........", color='green')
 
 def syn_sys_time(root_pass, hosts  = read_host_file()):
     """
@@ -88,17 +88,17 @@ def syn_sys_time(root_pass, hosts  = read_host_file()):
             err = stderr.readlines()
             if len(err) != 0:
                 err_hosts.append(h)
-                logInfo("Synchronize %s server failed. The info is: " % (h))
+                logInfo("Synchronize %s server failed. The info is: " % (h), color='red')
                 for s in err:
-                    logInfo(s)
+                    logInfo(s, color='red')
         except Exception, ex:
             if h not in err_hosts:
                 err_hosts.append(h)
     if len(err_hosts) != 0:
-        logInfo("Synchronize %s servers failed. %s " % (err_hosts, EXIT_MSG,))
+        logInfo("Synchronize %s servers failed. %s " % (err_hosts, EXIT_MSG,), color='red')
         sys.exit(-1)
     else:
-        logInfo("Synchronize time passed.........")
+        logInfo("Synchronize time passed.........", color='green')
 
 def selinux_check(root_pass, hosts  = read_host_file()):
     # hosts  = read_host_file()
@@ -110,16 +110,16 @@ def selinux_check(root_pass, hosts  = read_host_file()):
 
             if stdout.readline().strip() != "Disabled":
                 err_hosts.append(h)
-                logInfo("The server %s selinux is not closed, Please closed it first and reinstall. ")
+                logInfo("The server %s selinux is not closed, Please closed it first and reinstall. ", color='red')
         except Exception, ex:
             if h not in err_hosts:
                 err_hosts.append(h)
     if len(err_hosts) != 0:
         logInfo("Check selinux status and %s servers have not close the selinux. Install the Myhadoop please "
-                "close the selinux first. %s " % (err_hosts, EXIT_MSG,))
+                "close the selinux first. %s " % (err_hosts, EXIT_MSG,), color='red')
         sys.exit(-1)
     else:
-        logInfo("Selinux have been closed. Check selinux status passed.........")
+        logInfo("Selinux have been closed. Check selinux status passed.........", color='green')
 
 def iptables_check(root_pass, hosts  = read_host_file()):
     # hosts  = read_host_file()
@@ -131,16 +131,16 @@ def iptables_check(root_pass, hosts  = read_host_file()):
 
             if not stdout.readline().strip().endswith("not running."):
                 err_hosts.append(h)
-                logInfo("The server %s iptables is running, Please closed it first and reinstall. ")
+                logInfo("The server %s iptables is running, Please closed it first and reinstall. ", color='red')
         except Exception, ex:
             if h not in err_hosts:
                 err_hosts.append(h)
     if len(err_hosts) != 0:
         logInfo("Check iptables status and %s servers have not stop the iptables. Install the Myhadoop please "
-                "stop the iptables first. %s " % (err_hosts, EXIT_MSG,))
+                "stop the iptables first. %s " % (err_hosts, EXIT_MSG,), color='red')
         sys.exit(-1)
     else:
-        logInfo("Iptables have been stoped. Check iptables status passed.........")
+        logInfo("Iptables have been stoped. Check iptables status passed.........", color='green')
 
 def hosts_check(root_pass, hosts  = read_host_file()):
     # hosts  = read_host_file()
@@ -155,13 +155,13 @@ def hosts_check(root_pass, hosts  = read_host_file()):
             hostname2 = stdout.readline().strip()
             if hostname1 != hostname2:
                 err_hosts.append(h)
-                logInfo("The server %s hostname not set correct, Please set it right first. ")
+                logInfo("The server %s hostname not set correct, Please set it right first. ", color='red')
             # hostname can't have underscore
             if hostname2.find('_') > -1:
                 if h not in err_hosts:
                     err_hosts.append(h)
                 logInfo("The server %s hostname contains underscore is not allowed to install Myhadoop. Please "
-                        "correct it first.")
+                        "correct it first.", color='red')
 
             # check hosts file if correct
             stdin, stdout, stderr = ssh_exc_cmd(ssh, "cat /etc/hosts")
@@ -179,7 +179,7 @@ def hosts_check(root_pass, hosts  = read_host_file()):
                         if h not in err_hosts:
                             err_hosts.append(h)
                         logInfo("The server %s /etc/hosts not set correct %s have multiple hostname. if host have "
-                                "multiple hostname and %s should be in first." % (ip, h, h))
+                                "multiple hostname and %s should be in first." % (ip, h, h), color='red')
 
 
             # check hostname is set in hosts
@@ -187,7 +187,8 @@ def hosts_check(root_pass, hosts  = read_host_file()):
                 if "".join(hosts_content).find(hh) < 0:
                     if h not in err_hosts:
                         err_hosts.append(h)
-                    logInfo("The server %s /etc/hosts not set correct %s not set in /etc/hosts file." % (h, hh))
+                    logInfo("The server %s /etc/hosts not set correct %s not set in /etc/hosts file." % (h, hh),
+                            color='red')
 
         except Exception, ex:
             if h not in err_hosts:
@@ -195,10 +196,10 @@ def hosts_check(root_pass, hosts  = read_host_file()):
 
     if len(err_hosts) != 0:
         logInfo("Check hostname and /etc/hosts conf and %s servers not set correctly ."
-                "please reset the hostname. %s " % (err_hosts, EXIT_MSG,))
+                "please reset the hostname. %s " % (err_hosts, EXIT_MSG,), color='red')
         sys.exit(-1)
     else:
-        logInfo("hostname and hosts set correctly. Check passed.........")
+        logInfo("hostname and hosts set correctly. Check passed.........", color='green')
 
 def check_env(root_pass):
     root_ssh_check(root_pass)

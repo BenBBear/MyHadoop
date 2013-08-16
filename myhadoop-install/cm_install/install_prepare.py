@@ -3,6 +3,7 @@
 import sys
 from cm_conf.confs import *
 from utils import *
+import install
 
 def prepare_dirs(root_pass, hosts = read_host_file()):
     """
@@ -33,11 +34,14 @@ def prepare_dirs(root_pass, hosts = read_host_file()):
                 if h not in err_host:
                     err_host.append(h)
                 logInfo("The %s server the directory %s is not empty please check that and make sure the %s "
-                        "directory is empty." % (h, d, d))
+                        "directory is empty." % (h, d, d), color='red')
 
     if len(err_host) != 0:
         logInfo("Prepare install dir failed, In the %s servers some directory %s are not empty, %s"
-                % (err_host, directorys, EXIT_MSG))
+                % (err_host, directorys, EXIT_MSG), color='red')
+
+        install.rollback_to_innit(root_pass)
+
         sys.exit(-1)
 
 
@@ -54,8 +58,12 @@ def create_soft_links(root_pass, hosts = read_host_file()):
         err = stderr.readlines()
         if len(err) == 0:
             logInfo("The /opt/cloudera have exist now, before install Myhadoop /opt/cloudera directory should "
-                    "have not exist. %s" % EXIT_MSG)
+                    "have not exist. %s" % EXIT_MSG, color='red')
+
+            install.rollback_to_innit(root_pass)
+
             sys.exit(-1)
+
         ssh_exc_cmd(ssh, 'ln -s %s /opt/' % CDH_install_dir)
 
 
@@ -64,10 +72,10 @@ def install_mysql(root_pass):
     Install the mysql through yum and config the mysql for cloudera manager
     @return:
     """
-    logInfo("install the mysql through the yum")
+    logInfo("install the mysql through the yum", color='green')
     os.system('yum -y install mysql-server')
 
-    logInfo("install the mysql-connector-java ")
+    logInfo("install the mysql-connector-java ", color='green')
     os.system('yum -y install mysql-connector-java')
 
     #create dir
@@ -75,7 +83,7 @@ def install_mysql(root_pass):
     os.system("mkdir /home/mysql-binlog")
     os.system("chown mysql:mysql /home/mysql-binlog")
 
-    logInfo("config the mysql for cloudera manager")
+    logInfo("config the mysql for cloudera manager", color='green')
     mysql_conf = """
 [mysqld]
 transaction-isolation=READ-COMMITTED
@@ -125,7 +133,10 @@ pid-file=/var/run/mysqld/mysqld.pid
         f.write(mysql_conf)
         f.close()
     except Exception, ex:
-        logInfo("When config the mysql config file failed. and install will exit.")
+        logInfo("When config the mysql config file failed. and install will exit.", color='red')
+
+        install.rollback_to_innit(root_pass)
+
         sys.exit(-1)
 
     # start mysql server
@@ -230,10 +241,11 @@ def dispatch_jdk(root_pass, hosts = read_host_file()):
             ssh.close()
         except Exception, ex:
             err_hosts.append(h)
-            logInfo("Upload the file: %s to %s as %s failed. info is: %s " % (source, h, target, ex.message,))
+            logInfo("Upload the file: %s to %s as %s failed. info is: %s " % (source, h, target, ex.message,), color='red')
 
     if len(err_hosts) != 0:
-        logInfo("Dispatch the JDK in %s hosts failed, %s " % (err_hosts, EXIT_MSG,))
+        logInfo("Dispatch the JDK in %s hosts failed, %s " % (err_hosts, EXIT_MSG,), color='red')
+        install.rollback_to_innit(root_pass)
         sys.exit(-1)
 
 def install_jdk(root_pass):
