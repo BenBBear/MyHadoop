@@ -110,7 +110,7 @@
 
 - 停止Cloudera Management服务           
     
-        /etc/init.d/etc/init.d/cloudera-scm-server stop
+        /etc/init.d/cloudera-scm-server stop
 
 - 停止Cloudera Management的内嵌数据库       
 
