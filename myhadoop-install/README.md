@@ -152,3 +152,16 @@ MyHadoop使用Mysql数据，会自行安装与配置，数据库密码通过配�
 - 重起整个集群，使用配置生效
 
 - 部署集群客户端配置
+
+
+#### 增加机器
+
+- 执行python add_node.py $root_pass hostname1 hostname2
+
+    安装成功后，会在新增加的机器上安装好Cloudera Manager Agent并已启动。
+
+- 登录CM管理台，在主机菜单选择增加主机。
+
+- 选择当前管理的主机，把所有主机勾选上。
+
+- 为新增加的机器分配服务角色。

@@ -31,6 +31,7 @@ def install_pre(root_pass, hosts):
     prepare_dirs(root_pass, hosts=hosts)
     create_soft_links(root_pass, hosts=hosts)
     dispatch_jdk(root_pass, hosts=hosts)
+    create_user(root_pass)
 
 def install_cm_agent(root_pass, hosts):
     dispatch_cm(root_pass, hosts=hosts)

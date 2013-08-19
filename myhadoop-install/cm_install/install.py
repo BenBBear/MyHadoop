@@ -71,7 +71,10 @@ def dispatch_cm(root_pass, hosts = read_host_file()):
     source = '/home/cloudera-manager-myhadoop.tar.gz'
     target = cm_install_dir + '/cloudera-manager-myhadoop.tar.gz'
     os.chdir(cm_install_dir)
-    os.system('tar -czf %s ./' % source)
+
+    if not os.path.exists(source):
+        os.system('tar -czf %s ./' % source)
+
     os.chdir('/home')
     err_hosts = []
     for h in hosts:
@@ -82,14 +85,21 @@ def dispatch_cm(root_pass, hosts = read_host_file()):
         try:
             sftp = get_sftp(h, ssh_port, username, root_pass)
             # if target exists then remove it first
-            sftp.remove(target)
+            try:
+                sftp.remove(target)
+            except:
+                pass
             # upload the file
             sftp.put(source, target)
             sftp.close()
 
             # unpack the target file
             ssh = ssh_connect(h, ssh_port, username, root_pass)
-            ssh.exec_command('tar zxf %s -C %s' % (target, cm_install_dir,))
+            stdin, stdout, stderr = ssh.exec_command('tar -zxvf %s -C %s' % (target, cm_install_dir,))
+
+            for o in stdout.readlines():
+                logInfo(o)
+
             ssh.close()
         except Exception, ex:
             err_hosts.append(h)
@@ -150,20 +160,24 @@ def start_cm_agent(root_pass, hosts = read_host_file()):
     err_hosts = []
     for h in hosts:
         ssh = ssh_connect(h, ssh_port, username, root_pass)
+        ssh.exec_command('chmod a+x %s/etc/init.d/cloudera-scm-agent' % CMF_ROOT)
         stdin, stdout, stderr = ssh.exec_command('%s/etc/init.d/cloudera-scm-agent start' % CMF_ROOT)
 
-        if len(stderr.readlines()) == 0:
+        errors = stderr.readlines()
+        if len(errors) == 0:
             for o in stdout.readlines():
                 logInfo(o)
             logInfo("CM agent in %s server started." % h , color='green')
         else:
+            for e in errors:
+                logInfo(e, color='red')
             err_hosts.append(h)
-            logInfo("CM agent in %s server start failed. %s" % h, color='red')
+            logInfo("CM agent in %s server start failed. %s" % (h,EXIT_MSG), color='red')
 
         ssh.close()
 
     if len(err_hosts) != 0:
-        logInfo("The CM agent of the servers: %s start failed, please check that.", color='red')
+        logInfo("The CM agent of the servers: %s start failed, please check that." % (err_hosts), color='red')
 
     logInfo("Install CM finished.", color='green')
 
@@ -211,7 +225,12 @@ def rollback_to_innit(root_pass, hosts = read_host_file()):
         '/home/mysql-binlog'
     ]
 
-    for d in directorys:
-        os.system('rm -rf %s' % d)
+    for h in hosts:
+        ssh = ssh_connect(h, ssh_port, username, root_pass)
 
-    os.system('rm -f /opt/cloudera')
+        for d in directorys:
+            ssh.exec_command('rm -rf %s' % d)
+
+        ssh.exec_command('rm -f /opt/cloudera')
+
+        ssh.close()
