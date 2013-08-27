@@ -17,7 +17,7 @@ def install_cm(root_pass):
     create_soft_links(root_pass)
     install_mysql(root_pass)
     install_jdk(root_pass)
-    create_user()
+    create_user(root_pass)
 
     unpack_cm()
     init_database()

@@ -110,7 +110,7 @@ def selinux_check(root_pass, hosts  = read_host_file()):
 
             if stdout.readline().strip() != "Disabled":
                 err_hosts.append(h)
-                logInfo("The server %s selinux is not closed, Please closed it first and reinstall. ", color='red')
+                logInfo("The server %s selinux is not closed, Please closed it first and reinstall. " % h, color='red')
         except Exception, ex:
             if h not in err_hosts:
                 err_hosts.append(h)
@@ -131,7 +131,7 @@ def iptables_check(root_pass, hosts  = read_host_file()):
 
             if not stdout.readline().strip().endswith("not running."):
                 err_hosts.append(h)
-                logInfo("The server %s iptables is running, Please closed it first and reinstall. ", color='red')
+                logInfo("The server %s iptables is running, Please closed it first and reinstall. " % h, color='red')
         except Exception, ex:
             if h not in err_hosts:
                 err_hosts.append(h)
@@ -155,13 +155,13 @@ def hosts_check(root_pass, hosts  = read_host_file()):
             hostname2 = stdout.readline().strip()
             if hostname1 != hostname2:
                 err_hosts.append(h)
-                logInfo("The server %s hostname not set correct, Please set it right first. ", color='red')
+                logInfo("The server %s hostname not set correct, Please set it right first. " % h, color='red')
             # hostname can't have underscore
             if hostname2.find('_') > -1:
                 if h not in err_hosts:
                     err_hosts.append(h)
                 logInfo("The server %s hostname contains underscore is not allowed to install Myhadoop. Please "
-                        "correct it first.", color='red')
+                        "correct it first." % h, color='red')
 
             # check hosts file if correct
             stdin, stdout, stderr = ssh_exc_cmd(ssh, "cat /etc/hosts")

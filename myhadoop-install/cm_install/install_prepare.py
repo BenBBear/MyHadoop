@@ -202,7 +202,7 @@ pid-file=/var/run/mysqld/mysqld.pid
                                                                                                        mysql_pass))
 
 
-def create_user():
+def create_user(root_pass, hosts = read_host_file()):
     """
     create cm server user
     @return:
@@ -210,13 +210,30 @@ def create_user():
     os.system('useradd --system --home=%s/run/cloudera-scm-server/  --no-create-home '
               '--shell=/bin/false --comment "Cloudera SCM User" cloudera-scm' % CMF_ROOT)
 
+    for h in hosts:
+        if h == socket.gethostname():
+            continue
+
+        ssh = ssh_connect(h, ssh_port, username, root_pass, timeout_=10)
+        stdin, stdout, stderr = ssh.exec_command('useradd --system --home=%s/run/cloudera-scm-server/ '
+                                                 '--no-create-home --shell=/bin/false --comment "Cloudera SCM User"  '
+                                                 'cloudera-scm' % CMF_ROOT)
+        for o in stdout.readlines():
+            pass
+
+        ssh.close()
+
 def dispatch_jdk(root_pass, hosts = read_host_file()):
     """
     dispatch jdk to all server
     @return:
     """
-    source = '%s/tools/%s' % (install_root_dir, jdk_bin_name,)
-    target = cm_install_dir + '/%s' % jdk_bin_name
+    source = '/usr/java/%s.tar.gz' % jdk_unpack_name
+    target = cm_install_dir + '/%s.tar.gz' % jdk_unpack_name
+    os.chdir('/usr/java/')
+    os.system('tar -czf %s %s' % (source, jdk_unpack_name,))
+    os.chdir('/home')
+
     err_hosts = []
     for h in hosts:
         if h == socket.gethostname():
@@ -226,18 +243,26 @@ def dispatch_jdk(root_pass, hosts = read_host_file()):
         try:
             sftp = get_sftp(h, ssh_port, username, root_pass)
             # if target exists then remove it first
-            sftp.remove(target)
+            try:
+                sftp.remove(target)
+            except:
+                pass
             # upload the file
             sftp.put(source, target)
             sftp.close()
 
             # unpack the target file
-            ssh = ssh_connect(h, ssh_port, username, root_pass)
-            ssh.exec_command('%s/tools' % install_root_dir)
-            ssh.exec_command('sh %s' % (target,))
-            ssh.exec_command('mkdir /usr/java')
-            ssh.exec_command('rm -rf /usr/java/%s' % jdk_unpack_name) # if exist delete it first
-            ssh.exec_command('mv %s/%s /usr/java/%s' % (cm_install_dir, jdk_unpack_name, jdk_unpack_name))
+            # unpack the target file
+            ssh = ssh_connect(h, ssh_port, username, root_pass, timeout_=30)
+            try:
+                ssh.exec_command('mkdir /usr/java')
+                ssh.exec_command('rm -rf /usr/java/%s' % jdk_unpack_name)
+            except:
+                pass
+            stdin, stdout, stderr = ssh.exec_command('tar zxf %s -C /usr/java' % (target,))
+            for o in stdout.readlines():
+                logInfo(o)
+            ssh.exec_command('chmod 755 /usr/java/%s' % (jdk_unpack_name,))
             ssh.close()
         except Exception, ex:
             err_hosts.append(h)
@@ -253,10 +278,11 @@ def install_jdk(root_pass):
     install jdk
     @return:
     """
-    os.chdir('%s/tools' % install_root_dir)
-    os.system('sh %s/tools/%s' %(install_root_dir, jdk_bin_name))
-    if not os.path.exists('/usr/java'):
-        os.mkdir('/usr/java')
-    os.system('mv %s/tools/%s /usr/java/%s' % (install_root_dir, jdk_unpack_name, jdk_unpack_name))
+    if not os.path.exists('/usr/java/%s' % jdk_unpack_name):
+        os.chdir('%s/tools' % install_root_dir)
+        os.system('sh %s/tools/%s' %(install_root_dir, jdk_bin_name))
+        if not os.path.exists('/usr/java'):
+            os.mkdir('/usr/java')
+        os.system('mv %s/tools/%s /usr/java/%s' % (install_root_dir, jdk_unpack_name, jdk_unpack_name))
 
     dispatch_jdk(root_pass)
