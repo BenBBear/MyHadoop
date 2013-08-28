@@ -1,3 +1,0 @@
-platform30
-platform31
-platform32

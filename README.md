@@ -1,6 +1,34 @@
-MyHadoop
-========
+# MyHadoop
 
-Hadoop的封装及简化使用，使用Hadoop更易于部署使用。
+    致力于简化Hadoop安装、配置、管理和使用。
 
-Cloudera Manager及CDH Hadoop集群的安装, 配置在`myhadoop-install`下。
+**MyHadoop是基于我们的实践摸索出来的Hadoop使用方法的汇总，是我们使用经验的分享。**
+
+它包括安装脚本，分析文档，简单监控工具，建议使用的组件，还有一些方便编程的代码工具，看起来显得有点杂，有点东拼西凑**-_-!**
+
+其实，创建这个项目，只是想要你在使用Hadoop容易一点。
+
+
+    目前本项目在Hadoop的安装管理上使用Cloudera Manager。
+    本项目有简单的使用说明，详细说明请访问其官方网站。
+    
+    本项目所知Hadoop主要是Cloudera公司发行的Hadoop（CDH）。
+
+
+目录说明：
+
+* install
+    
+    安装文档、安装引导程序。主要程序的安装均在此目录。    
+
+* doc
+
+    相关文档。主要是分析、调研文档。
+
+* component
+
+    可选的组件。
+
+* utils
+
+    MR编程代码工具包。
