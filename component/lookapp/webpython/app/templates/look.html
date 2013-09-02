@@ -1,0 +1,153 @@
+<html>
+  <script type="text/javascript" src="static/js/jquery.js"></script>
+  <script type="text/javascript" src="static/js/bootstrap.js"></script>
+  <script type="text/javascript" src="static/js/highchart/js/highcharts.js"></script>
+  <script type="text/javascript" src="static/js/highchart/js/modules/exporting.js"></script>
+  <link href="static/css/bootstrap.css" rel="stylesheet">
+  <head>
+      <title> uc hadoop look app</title>
+  </head>
+  <body>
+      <h1>Hello, hadooper!</h1>
+      <h2>date {{date}} from {{start}} Hour to {{end}} Hour. top {{top}}</h2>
+      <p>{{debug}}</p>
+      <p>请直接改写http的参数查询，date为查询的日期（最近7天有效），start起始的小时，end结束的小时，top展示container最多的app数量</p>
+      <div class="btn-group">
+        <a class="btn" >
+            上一天
+        </a>
+        <a class="btn" >
+            下一天
+        </a>
+        <a class="btn" href="/?date={{date}}&start={{pre_start}}&top={{top}}&type={{type}}">
+            上小时
+        </a>
+        <a class="btn" href="/?date={{date}}&start={{next_start}}&top={{top}}&type={{type}}">
+            下小时
+        </a>
+        <a class="btn" href="/?date={{date}}&start={{start}}&top={{top}}&type=app">
+            app
+        </a>
+        <a class="btn" href="/?date={{date}}&start={{start}}&top={{top}}&type=nodes">
+            node
+        </a>
+      </div>
+        <div id="apps-container"> </div>
+        <div id="yarn-container"> </div>
+    <script type="text/javascript">
+    $(function () {
+            $('#yarn-container').highcharts({
+                chart: {
+                    type: 'area'
+                },
+                title: {
+                    text: 'Yarn container 运行统计图'
+                },
+                subtitle: {
+                    text: 'Source: 依赖于look.sh统计程序'
+                },
+                exporting:{ 
+                     enabled:false //用来设置是否显示‘打印’,'导出'等功能按钮，不设置时默认为显示 
+                },
+                credits: {
+                     text: 'myhadoop',
+                     href: 'http://github.com/zouhc/MyHadoop'
+                },
+                xAxis: {
+                    categories: {{xaxis}},
+                    tickmarkPlacement: 'on',
+                    labels:{ 
+                        step:10
+                    }, 
+                    title: {
+                        enabled: false
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'containers'
+                    },
+                    labels: {
+                        formatter: function() {
+                            return this.value ;
+                        }
+                    }
+                },
+                tooltip: {
+                    shared: true,
+                    valueSuffix: '个'
+                },
+                plotOptions: {
+                    area: {
+                        stacking: 'normal',
+                        lineColor: '#666666',
+                        lineWidth: 1,
+                        marker: {
+                            lineWidth: 1,
+                            lineColor: '#666666',
+                            radius: 1
+                        }
+                    }
+                },
+                series: {{series}}  
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        $(function () {
+                $('#apps-container').highcharts({
+                    chart: {
+                        type: 'line',
+                        marginRight: 130,
+                        marginBottom: 25
+                    },
+                    title: {
+                        text: 'app运行数量和container数量',
+                        x: -20 //center
+                    },
+                    subtitle: {
+                        text: 'Source: 依赖于look.sh统计程序',
+                        x: -20
+                    },
+                    xAxis: {
+                        categories: {{xaxis}},
+                        labels:{ 
+                            step:10
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: '个数'
+                        },
+                        min: 0 ,
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080'
+                        }]
+                    },
+                    tooltip: {
+                        valueSuffix: '个'
+                    },
+                    legend: {
+                        layout: 'vertical',
+                        align: 'right',
+                        verticalAlign: 'top',
+                        x: -10,
+                        y: 100,
+                        borderWidth: 0
+                    },
+                    plotOptions: {
+                        line: {
+                            marker: {
+                                radius: 1
+                            }
+                        }
+                    },
+
+                    series: {{series2}}
+            });
+        });
+        </script>
+  </body>
+</html>
