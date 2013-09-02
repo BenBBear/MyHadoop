@@ -3,8 +3,8 @@
 """
     This script is to change the conf of the CDH services,
 
-    the usage is python my_hadoop_conf.py           or
-    python my_hadoop_conf.py  -f hosts_name.txt
+    the usage is python Config_CDH_V4.py           or
+    python Config_CDH_V4.py  -f hosts_name.txt
 """
 
 
@@ -17,6 +17,7 @@ import textwrap
 from cm_api.api_client import ApiResource
 
 from cm_conf.confs import *
+from CDH_configs_V4 import *
 from utils import *
 
 LOG = logging.getLogger(__name__)
@@ -36,9 +37,9 @@ def setup_logging(level):
 
 def usage():
     """
-    the usage is:    python my_hadoop_conf.py
+    the usage is:    python Config_CDH_V4.py
                                 or
-                     python my_hadoop_conf.py  -f hosts_name.txt
+                     python Config_CDH_V4.py  -f hosts_name.txt
     """
     doc = inspect.getmodule(usage).__doc__
     print >> sys.stderr, textwrap.dedent(doc)

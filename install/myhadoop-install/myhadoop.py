@@ -30,5 +30,9 @@ def install_cm(root_pass):
 
 if __name__ == '__main__':
     root_pass = str(sys.argv[1]) # set root password
+
+    if is_os_gt5():
+        os.system('easy_install termcolor')
+
     check_myhadoop_env(root_pass)
     install_cm(root_pass)

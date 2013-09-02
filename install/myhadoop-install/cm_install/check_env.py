@@ -56,11 +56,11 @@ def check_yum(root_pass, hosts  = read_host_file()):
     for h in hosts:
         try:
             ssh = ssh_connect(h, ssh_port, username, root_pass)
-            stdin, stdout, stderr = ssh_exc_cmd(ssh, 'yum -y install ntpdate')
+            stdin, stdout, stderr = ssh_exc_cmd(ssh, 'yum -y install vi')
             err = stderr.readlines()
             if len(err) != 0:
                 err_hosts.append(h)
-                logInfo("The server %s yum can't install ntpdate, maybe the yum in %s can't work, Please the yum"
+                logInfo("The server %s yum can't install vi, maybe the yum in %s can't work, Please the yum"
                         " in %s. The info is:   " % (h, h, h,), color='red')
                 for s in err:
                     logInfo(s, color='red')
@@ -84,6 +84,8 @@ def syn_sys_time(root_pass, hosts  = read_host_file()):
     for h in hosts:
         try:
             ssh = ssh_connect(h, ssh_port, username, root_pass)
+            stdin, stdout, stderr = ssh_exc_cmd(ssh, 'yum -y install ntpdate')
+            stdout.readlines()
             stdin, stdout, stderr = ssh_exc_cmd(ssh, 'ntpdate cn.pool.ntp.org')
             err = stderr.readlines()
             if len(err) != 0:
@@ -95,8 +97,8 @@ def syn_sys_time(root_pass, hosts  = read_host_file()):
             if h not in err_hosts:
                 err_hosts.append(h)
     if len(err_hosts) != 0:
-        logInfo("Synchronize %s servers failed. %s " % (err_hosts, EXIT_MSG,), color='red')
-        sys.exit(-1)
+        logInfo("Synchronize %s servers failed. " % (err_hosts,), color='red')
+        #sys.exit(-1)
     else:
         logInfo("Synchronize time passed.........", color='green')
 
@@ -129,7 +131,8 @@ def iptables_check(root_pass, hosts  = read_host_file()):
             ssh = ssh_connect(h, ssh_port, username, root_pass)
             stdin, stdout, stderr = ssh_exc_cmd(ssh, '/etc/init.d/iptables status')
 
-            if not stdout.readline().strip().endswith("not running."):
+            if not stdout.readline().strip().endswith("not running.") or not stdout.readline().strip().endswith(
+                    "stopped."):
                 err_hosts.append(h)
                 logInfo("The server %s iptables is running, Please closed it first and reinstall. " % h, color='red')
         except Exception, ex:
@@ -208,4 +211,5 @@ def check_env(root_pass):
     iptables_check(root_pass)
     hosts_check(root_pass)
     check_yum(root_pass)
-    syn_sys_time(root_pass)
+    # there not syn the system time auto.
+    #syn_sys_time(root_pass)

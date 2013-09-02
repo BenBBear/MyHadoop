@@ -1,3 +1,5 @@
-/.idea/
+.idea
 install/myhadoop-install/.idea/
-*pyc
+*.pyc
+install/myhadoop-install/tars/placeholder
+install/myhadoop-install/parcels/placeholder

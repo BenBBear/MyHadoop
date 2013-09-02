@@ -25,13 +25,13 @@ def check_all_env(root_pass, hosts):
     iptables_check(root_pass, hosts=hosts)
     hosts_check(root_pass, hosts=hosts)
     check_yum(root_pass, hosts=hosts)
-    syn_sys_time(root_pass, hosts=hosts)
+    #syn_sys_time(root_pass, hosts=hosts)
 
 def install_pre(root_pass, hosts):
     prepare_dirs(root_pass, hosts=hosts)
     create_soft_links(root_pass, hosts=hosts)
     dispatch_jdk(root_pass, hosts=hosts)
-    create_user(root_pass)
+    create_user(root_pass, isadd=True)
 
 def install_cm_agent(root_pass, hosts):
     dispatch_cm(root_pass, hosts=hosts)

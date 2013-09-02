@@ -75,3 +75,20 @@ def get_sftp(host, port, username, password):
         return sftp
     except Exception, ex:
         raise ex
+
+def is_os_gt5():
+    """
+    The os is greeter than centos 5, is not the
+    @return:
+    """
+    try:
+        f = open('/etc/issue', 'r')
+        line = f.readline()
+        f.close()
+        version = line.split(' ')[2]
+        if float(version) >= 6:
+            return True
+        else:
+            return False
+    except:
+        return False
