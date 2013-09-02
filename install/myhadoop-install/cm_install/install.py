@@ -12,8 +12,7 @@ def unpack_cm():
     unpack the cm software to /home/cloudera-manager
     @return:
     """
-    tars_dir = os.path.abspath(os.path.dirname(__file__)) +  '/../tars'
-    os.system('tar zxf %s/%s -C %s' % (tars_dir, cm_tar, cm_install_dir))
+    os.system('tar -zxf %s/tars/%s -C %s' % (install_root_dir, cm_tar, cm_install_dir))
 
 def init_database():
     """
@@ -45,6 +44,7 @@ def change_cnf(root_pass):
     cm_agent_f = '%s/etc/default/cloudera-scm-agent' % CMF_ROOT
     if os.path.exists('/usr/java/%s' % jdk_unpack_name):
         os.system("sed -i '1 i\%s' %s" % (java_home_str, cm_server_f))
+        os.system("sed -i '1 i\%s' %s" % (java_home_str, cm_agent_f))
     else:
         logInfo("Can't find the JDK, %s" % EXIT_MSG, color='red')
 
@@ -68,14 +68,14 @@ def dispatch_cm(root_pass, hosts = read_host_file()):
     """
     # because use scp to dispatch the file will ack to input the password, so there we pack the agent and use
     # paramiko to dispatch and unpack the file to dist
-    source = '/home/cloudera-manager-myhadoop.tar.gz'
+    source = cm_install_dir + '/cloudera-manager-myhadoop.tar.gz'
     target = cm_install_dir + '/cloudera-manager-myhadoop.tar.gz'
     os.chdir(cm_install_dir)
 
     if not os.path.exists(source):
         os.system('tar -czf %s ./' % source)
 
-    os.chdir('/home')
+    os.chdir(cm_install_dir)
     err_hosts = []
     for h in hosts:
         if h == socket.gethostname():
@@ -95,10 +95,11 @@ def dispatch_cm(root_pass, hosts = read_host_file()):
 
             # unpack the target file
             ssh = ssh_connect(h, ssh_port, username, root_pass)
-            stdin, stdout, stderr = ssh.exec_command('tar -zxvf %s -C %s' % (target, cm_install_dir,))
+            stdin, stdout, stderr = ssh.exec_command('tar -zxf %s -C %s' % (target, cm_install_dir,))
 
             for o in stdout.readlines():
-                logInfo(o)
+                pass
+                #logInfo(o)
 
             ssh.close()
         except Exception, ex:
@@ -120,7 +121,7 @@ def put_local_repo():
     os.mkdir(target)
     os.system('chown cloudera-scm:cloudera-scm %s' % target)
 
-    parcels_dir = os.path.abspath(os.path.dirname(utils.__file__)) +  '/parcels'
+    parcels_dir = install_root_dir +  '/parcels'
     os.system('mv %s/* %s' % (parcels_dir, target,))
 
 
@@ -148,9 +149,7 @@ def start_cm_server():
 
     # use paramiko can't start the server. os here to use os.system
     os.system('%s/etc/init.d/cloudera-scm-server start' % CMF_ROOT)
-    logInfo("CM Server started, Now you can login http://%s:7180 to manager your CDH cluster." % socket.gethostname(
-
-    ), color='green')
+    logInfo("CM Server started, Now you can login http://%s:7180 to manager your CDH cluster." % socket.gethostname(), color='green')
 
 def start_cm_agent(root_pass, hosts = read_host_file()):
     """
@@ -217,12 +216,16 @@ def rollback_to_innit(root_pass, hosts = read_host_file()):
     logInfo("begin rollback for failed servers: %s, " % hosts, color='red')
     os.system('/etc/init.d/mysqld stop')
 
+    target = '/opt/cloudera/parcel-repo'
+    parcels_dir = install_root_dir +  '/parcels/'
+    os.system('mv %s/* %s' % (target, parcels_dir,))
+
     directorys = [
         cm_install_dir,
         CDH_data_dir,
         CDH_install_dir,
-        '/home/mysql-data',
-        '/home/mysql-binlog'
+        MYSQL_DATA_DIR,
+        MYSQL_BINLOG_DIR
     ]
 
     for h in hosts:
@@ -230,7 +233,6 @@ def rollback_to_innit(root_pass, hosts = read_host_file()):
 
         for d in directorys:
             ssh.exec_command('rm -rf %s' % d)
-
         ssh.exec_command('rm -f /opt/cloudera')
 
         ssh.close()

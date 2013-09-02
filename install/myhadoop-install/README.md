@@ -5,21 +5,30 @@ MyHadoop基于Cloudera Manager（CM）和CDH, 为了解决安装CM与CDH需要�
 安装过程中需要等待很长的时间下载，造成安装过程缓慢，为此，此工程将通过CM的tar包和CDH的Parcels包裹安装CM和CDH.
 
 每个CDH集群都有批量修改配置的需求，在CM上可以通过界面修改配置，的确很方便，但在部署安装后需要修改配置的项比较多，通过界面就比较费时了，
-MyHadoop同样提供了脚本通过修改配置文件统一修改所有服务配置。
+MyHadoop同样提供了脚本通过修改配置文件统一修改所有服务配置(CDH_configs_V4.py以实例覆盖的方式修改各个主机上（hosts_name.txt中的主机）
+的配置文件，CDH_configs_V2.py以服务角色的方式统一修改配置默认值，CDH_configs_V2.py方式修改的配置可以被新增加的机器继承)。
 
 MyHadoop使用Mysql数据，会自行安装与配置，数据库密码通过配置获得，默认为123456
 
+> 注： myhadoop-install安装现在支持的操作系统为RedHat系统的5，6
+
 - 主要文件介绍
 
-    - cm_conf目录下的cnfs.py是配置文件CM安装目录、CM tar包名，CM登录信息、mysql密码、ssh端口用CDH配置信息。(CDH配置信息用于统一
-    修改CDH服务配置信息)
+    - cm_conf目录下的cnfs.py是配置文件CM安装目录、CM tar包名，CM登录信息、mysql密码、ssh端口等。
 
-    - install.sh是安装脚本，使用方式：`sh ./install.sh $root_pass `  $root_pass为root用户密码。
+    - install.sh是安装脚本，使用方式：`sh ./install.sh <root_pass> `  root_pass为root用户密码。
 
     - add_node.py是增加机器节点脚本，是在集群安装好后，需要再次增加新的机器到该集群中，使用此脚本， 使用方式：
-    `python add_node.py node1 node2`或者`python add_node.py`主机列表通过修改add_node.py文件中的hostnams列表。
+    `python add_node.py <root_pass> [node1 node2]`或者`python add_node.py <root_pass>`主机列表通过修改add_node.py文件中的
+    hostnams列表。
 
-    - my_hadoop_conf.py是CDH服务配置脚本，通过读取`com_cnf/confs.py`配置信息进行CDH各服务的配置
+    - CDH_configs_V2.py 是以服务角色的方式统一修改配置默认值的CDH配置信息的配置文件。
+
+    - Config_CDH_V2.py 使用`CDH_configs_V2.py`配置文件信息对CDH服务进行配置，使用方式 `python Config_CDH_V2.py`。
+
+    - CDH_configs_V4.py 是以实例覆盖的方式修改各个主机上（`hosts_name.txt`中的主机）的各服务角色配置信息的配置文件。
+
+    - Config_CDH_V4.py 使用`CDH_configs_V4.py`配置文件信息对CDH服务进行配置，使用方式` python Config_CDH_V4.py`。
 
 ## 安装
 
@@ -31,6 +40,8 @@ MyHadoop使用Mysql数据，会自行安装与配置，数据库密码通过配�
 
     - 到`http://archive.cloudera.com/cm4/cm/4/`下载操作系统对应的tar（cloudera-manager-el6-cm4.6.2_x86_64.tar.gz）安装并把
     它放入tars目录中
+
+    - 到Oracle网站下载tar.gz格式的JDK，并把它放入tars目录中
 
     - 到`http://archive.cloudera.com/cdh4/parcels/`下载你想要安装的CDH版本（如这里下载
     `http://archive.cloudera.com/cdh4/parcels/4.2.1/CDH-4.2.1-1.cdh4.2.1.p0.5-el6.parcel`并把下载
@@ -54,7 +65,8 @@ MyHadoop使用Mysql数据，会自行安装与配置，数据库密码通过配�
         cm_tar = 'cloudera-manager-el6-cm4.6.2_x86_64.tar.gz'  # CM的包名
         CMF_ROOT = '%s/cm-4.6.2' % cm_install_dir # cm-4.6.2为CM tar包解压后的目录名
 
-- 把配置好的myhadoop-install上传到安装CM Server的机器上的cm_install_dir目录下(/home/cloudera-manager)。
+        jdk_tar_name = 'jdk-7u3-linux-x64.tar.gz'
+        jdk_unpack_name = 'jdk1.7.0_03'
 
 - 配置各机器的/etc/hosts文件， 如：
 
@@ -64,7 +76,7 @@ MyHadoop使用Mysql数据，会自行安装与配置，数据库密码通过配�
         192.168.30.102      hadoop4
         192.168.30.102      hadoop5
 
-    > 注意主机名不能配置错误
+    > 注意主机名不能配置错误，不要同一主机含有多个域名。
 
 - 关闭selinux
 
@@ -83,9 +95,11 @@ MyHadoop使用Mysql数据，会自行安装与配置，数据库密码通过配�
 
 - 确保执行安装的机器能联外网（执行安装的机器将安装mysql, CM Server）
 
+- 确保各个机器时间同步
+
 #### 安装过程
 
-- 运行./install.sh $root_password 进行安装
+- 运行./install.sh <root_password> 进行安装
 
     安装过程不用交互，安装成功后会提示成功，及提供登录管理的地址
 
@@ -145,18 +159,30 @@ MyHadoop使用Mysql数据，会自行安装与配置，数据库密码通过配�
 
 #### 参数配置
 
-- 修改`cm_conf/confs.py`配置文件中各CDH服务对应的配置项，没有安装的CDH服务不用修改
+- 使用V2对CDH进行配置
 
-- 执行`python my_hadoop_conf.py`进行参数配置修改。
+    - 修改CDH_configs_V2.py配置文件中各CDH服务对应的配置项，没有安装的CDH服务不用修改
 
-- 重起整个集群，使用配置生效
+    - 执行 python Config_CDH_V2.py进行参数配置修改。
 
-- 部署集群客户端配置
+    - 重起整个集群，使用配置生效
+
+    - 部署集群客户端配置
+
+- 使用V4对CDH进行配置
+
+    - 修改CDH_configs_V4.py配置文件中各CDH服务对应的配置项，没有安装的CDH服务不用修改
+
+    - 执行 python Config_CDH_V4.py进行参数配置修改。
+
+    - 重起整个集群，使用配置生效
+
+    - 部署集群客户端配置
 
 
 #### 增加机器
 
-- 执行python add_node.py $root_pass hostname1 hostname2
+- 执行python add_node.py <root_pass> [hostname1 hostname2....]
 
     安装成功后，会在新增加的机器上安装好Cloudera Manager Agent并已启动。
 
@@ -165,3 +191,5 @@ MyHadoop使用Mysql数据，会自行安装与配置，数据库密码通过配�
 - 选择当前管理的主机，把所有主机勾选上。
 
 - 为新增加的机器分配服务角色。
+
+- 如果使用V2对CDH进行配置，则新增加的机器会继承已配置的值。

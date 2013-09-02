@@ -5,12 +5,26 @@ from cm_conf.confs import *
 from utils import *
 import install
 
-def prepare_dirs(root_pass, hosts = read_host_file()):
+def change_cdh_dir_permission(root_pass, hosts=read_host_file()):
+    """
+    Make sure the CDH service have the permission to write her own file
+    @return:
+    """
+    dirs = CDH_install_dir.split("/")
+    for h in hosts:
+        ssh = ssh_connect(h, ssh_port, username, root_pass)
+        for d in dirs:
+            if d:
+                ssh_exc_cmd(ssh, 'chmod a+rx %s' % d)
+
+def prepare_dirs(root_pass, hosts=read_host_file()):
     """
     begin install to create we will use the dirs and also this method will check the dir is exist.
     if the dir is exist install will exit.
     @return:
     """
+    change_cdh_dir_permission(root_pass, hosts)
+
     # hosts = read_host_file()
     err_host = []
     directorys = [
@@ -26,8 +40,9 @@ def prepare_dirs(root_pass, hosts = read_host_file()):
             # ssh_exc_cmd(ssh, 'chmod 777 %s' % d)
             # check the dir is empty
             stdin, stdout, stderr = ssh_exc_cmd(ssh, 'ls %s' % d)
+
             out = stdout.readlines()
-            if d == CDH_data_dir and 'log' in out > -1:
+            if d == CDH_data_dir and 'log' in out :
                 out.remove('log')
 
             if len(out) != 0: # the directory not empty
@@ -40,12 +55,10 @@ def prepare_dirs(root_pass, hosts = read_host_file()):
         logInfo("Prepare install dir failed, In the %s servers some directory %s are not empty, %s"
                 % (err_host, directorys, EXIT_MSG), color='red')
 
-        install.rollback_to_innit(root_pass)
-
         sys.exit(-1)
 
 
-def create_soft_links(root_pass, hosts = read_host_file()):
+def create_soft_links(root_pass, hosts=read_host_file()):
     """
     Create soft links for CDH ln -s /home/cloudera /opt/
     @return:
@@ -60,11 +73,9 @@ def create_soft_links(root_pass, hosts = read_host_file()):
             logInfo("The /opt/cloudera have exist now, before install Myhadoop /opt/cloudera directory should "
                     "have not exist. %s" % EXIT_MSG, color='red')
 
-            install.rollback_to_innit(root_pass)
-
             sys.exit(-1)
 
-        ssh_exc_cmd(ssh, 'ln -s %s /opt/' % CDH_install_dir)
+        ssh_exc_cmd(ssh, 'ln -s %s /opt/cloudera' % CDH_install_dir)
 
 
 def install_mysql(root_pass):
@@ -79,15 +90,25 @@ def install_mysql(root_pass):
     os.system('yum -y install mysql-connector-java')
 
     #create dir
-    os.system("mkdir /home/mysql-data")
-    os.system("mkdir /home/mysql-binlog")
-    os.system("chown mysql:mysql /home/mysql-binlog")
+    os.system("mkdir %s" % MYSQL_DATA_DIR)
+    os.system("mkdir %s" % MYSQL_BINLOG_DIR)
+    os.system("chown mysql:mysql %s" % MYSQL_BINLOG_DIR)
 
     logInfo("config the mysql for cloudera manager", color='green')
+
+    binlog_conf = ""
+    try:
+        if is_os_gt5():
+            binlog_conf = "binlog_format           = mixed"
+        else:
+            binlog_conf = ""
+    except:
+        pass
+
     mysql_conf = """
 [mysqld]
 transaction-isolation=READ-COMMITTED
-datadir=/home/mysql-data
+datadir=%s
 socket=/var/lib/mysql/mysql.sock
 user=mysql
 # Disabling symbolic-links is recommended to prevent assorted security risks
@@ -105,9 +126,10 @@ query_cache_type        = 1
 max_connections         = 200
 
 # log-bin should be on a disk with enough free space
-log-bin=/home/mysql-binlog/mysql_binary_log
+log-bin=%s/mysql_binary_log
 # For MySQL version 5.1.8 or later. Comment out binlog_format for older versions.
-binlog_format           = mixed
+
+%s
 
 read_buffer_size = 2M
 read_rnd_buffer_size = 16M
@@ -126,7 +148,8 @@ innodb_log_file_size = 512M
 [mysqld_safe]
 log-error=/var/log/mysqld.log
 pid-file=/var/run/mysqld/mysqld.pid
-    """
+    """ % (MYSQL_DATA_DIR, MYSQL_BINLOG_DIR, binlog_conf)
+
     os.system("mv /etc/my.cnf /etc/my.cnf.bak")
     try:
         f = file('/etc/my.cnf', 'w')
@@ -136,7 +159,6 @@ pid-file=/var/run/mysqld/mysqld.pid
         logInfo("When config the mysql config file failed. and install will exit.", color='red')
 
         install.rollback_to_innit(root_pass)
-
         sys.exit(-1)
 
     # start mysql server
@@ -165,7 +187,7 @@ pid-file=/var/run/mysqld/mysqld.pid
     stdin.flush()
 
     for s in stdout.readlines():
-        print s
+        pass
 
     ssh.close()
     #os.system('/usr/bin/mysql_secure_installation')
@@ -202,43 +224,78 @@ pid-file=/var/run/mysqld/mysqld.pid
                                                                                                        mysql_pass))
 
 
-def create_user(root_pass, hosts = read_host_file()):
+def create_user(root_pass, hosts=read_host_file(), isadd=False):
     """
     create cm server user
     @return:
     """
-    os.system('useradd --system --home=%s/run/cloudera-scm-server/  --no-create-home '
-              '--shell=/bin/false --comment "Cloudera SCM User" cloudera-scm' % CMF_ROOT)
+    cmd6 = 'useradd -r --home=%s/run/cloudera-scm-server/  --no-create-home --shell=/bin/false --comment "Cloudera SCM User" cloudera-scm' % CMF_ROOT
+    cmd5 = 'useradd -r --home=%s/run/cloudera-scm-server/ --shell=/bin/false --comment "Cloudera SCM User" cloudera-scm' % CMF_ROOT
+
+    if not isadd:
+        if is_os_gt5():
+            os.system(cmd6)
+        else:
+            os.system(cmd5)
+
+    err_hosts = []
 
     for h in hosts:
         if h == socket.gethostname():
             continue
 
         ssh = ssh_connect(h, ssh_port, username, root_pass, timeout_=10)
-        stdin, stdout, stderr = ssh.exec_command('useradd --system --home=%s/run/cloudera-scm-server/ '
-                                                 '--no-create-home --shell=/bin/false --comment "Cloudera SCM User"  '
-                                                 'cloudera-scm' % CMF_ROOT)
-        for o in stdout.readlines():
-            pass
+        if is_os_gt5():
+            stdin, stdout, stderr = ssh.exec_command(cmd6)
+        else:
+            stdin, stdout, stderr = ssh.exec_command(cmd5)
+
+        errors = stderr.readlines()
 
         ssh.close()
 
-def dispatch_jdk(root_pass, hosts = read_host_file()):
+        if len(errors) > 0:
+            err_hosts.append(h)
+
+    if len(err_hosts) != 0:
+        if is_os_gt5():
+            logInfo('Create "cloudera-scm" user failed in %s hosts, you can create "cloudera-scm" user in %s hosts user "%s" command.' %(err_hosts, err_hosts, cmd6))
+        else:
+            logInfo('Create "cloudera-scm" user failed in %s hosts, you can create "cloudera-scm" user in %s hosts user "%s" command.' %(err_hosts, err_hosts, cmd5))
+        sys.exit(-1)
+
+
+
+def install_jdk(root_pass):
+    """
+    install jdk
+    @return:
+    """
+    if not os.path.exists('/usr/java/%s' % jdk_unpack_name):
+        if not os.path.exists('/usr/java'):
+            os.mkdir('/usr/java')
+
+        os.chdir('%s/tools' % install_root_dir)
+        os.system('tar -zxf %s/tars/%s -C /usr/java' % (install_root_dir, jdk_tar_name))
+
+    dispatch_jdk(root_pass)
+
+def dispatch_jdk(root_pass, hosts=read_host_file()):
     """
     dispatch jdk to all server
     @return:
     """
-    source = '/usr/java/%s.tar.gz' % jdk_unpack_name
-    target = cm_install_dir + '/%s.tar.gz' % jdk_unpack_name
-    os.chdir('/usr/java/')
-    os.system('tar -czf %s %s' % (source, jdk_unpack_name,))
-    os.chdir('/home')
+    source = '%s/tars/%s' % (install_root_dir, jdk_tar_name)
+    target = cm_install_dir + '/%s' % jdk_tar_name
+    # os.chdir('/usr/java/')
+    # os.system('tar -czf %s %s' % (source, jdk_unpack_name,))
+    # os.chdir('/home')
 
     err_hosts = []
     for h in hosts:
         if h == socket.gethostname():
             continue
-        # there use scp to dispatch the
+            # there use scp to dispatch the
         logInfo("dispatch the JDK to other servers and install it")
         try:
             sftp = get_sftp(h, ssh_port, username, root_pass)
@@ -247,12 +304,10 @@ def dispatch_jdk(root_pass, hosts = read_host_file()):
                 sftp.remove(target)
             except:
                 pass
-            # upload the file
+                # upload the file
             sftp.put(source, target)
             sftp.close()
 
-            # unpack the target file
-            # unpack the target file
             ssh = ssh_connect(h, ssh_port, username, root_pass, timeout_=30)
             try:
                 ssh.exec_command('mkdir /usr/java')
@@ -261,28 +316,16 @@ def dispatch_jdk(root_pass, hosts = read_host_file()):
                 pass
             stdin, stdout, stderr = ssh.exec_command('tar zxf %s -C /usr/java' % (target,))
             for o in stdout.readlines():
-                logInfo(o)
-            ssh.exec_command('chmod 755 /usr/java/%s' % (jdk_unpack_name,))
+                pass
+
+            ssh.exec_command('chmod 755 /usr/java/%s/bin/*' % (jdk_unpack_name,))
             ssh.close()
         except Exception, ex:
             err_hosts.append(h)
-            logInfo("Upload the file: %s to %s as %s failed. info is: %s " % (source, h, target, ex.message,), color='red')
+            logInfo("Upload the file: %s to %s as %s failed. info is: %s " % (source, h, target, ex.message,),
+                    color='red')
 
     if len(err_hosts) != 0:
         logInfo("Dispatch the JDK in %s hosts failed, %s " % (err_hosts, EXIT_MSG,), color='red')
         install.rollback_to_innit(root_pass)
         sys.exit(-1)
-
-def install_jdk(root_pass):
-    """
-    install jdk
-    @return:
-    """
-    if not os.path.exists('/usr/java/%s' % jdk_unpack_name):
-        os.chdir('%s/tools' % install_root_dir)
-        os.system('sh %s/tools/%s' %(install_root_dir, jdk_bin_name))
-        if not os.path.exists('/usr/java'):
-            os.mkdir('/usr/java')
-        os.system('mv %s/tools/%s /usr/java/%s' % (install_root_dir, jdk_unpack_name, jdk_unpack_name))
-
-    dispatch_jdk(root_pass)
