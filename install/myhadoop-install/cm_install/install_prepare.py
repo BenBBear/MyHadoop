@@ -10,12 +10,14 @@ def change_cdh_dir_permission(root_pass, hosts=read_host_file()):
     Make sure the CDH service have the permission to write her own file
     @return:
     """
-    dirs = CDH_install_dir.split("/")
+    install_dirs = CDH_install_dir
+
     for h in hosts:
         ssh = ssh_connect(h, ssh_port, username, root_pass)
-        for d in dirs:
-            if d:
-                ssh_exc_cmd(ssh, 'chmod a+rx %s' % d)
+        tmp = install_dirs
+        while not tmp == "":
+            ssh_exc_cmd(ssh, 'chmod a+rx %s' % tmp)
+            tmp = tmp[:tmp.rfind('/')]
 
 def prepare_dirs(root_pass, hosts=read_host_file()):
     """

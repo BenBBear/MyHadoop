@@ -10,7 +10,29 @@ MyHadoop同样提供了脚本通过修改配置文件统一修改所有服务配
 
 MyHadoop使用Mysql数据，会自行安装与配置，数据库密码通过配置获得，默认为123456
 
-> 注： myhadoop-install安装现在支持的操作系统为RedHat系统的5，6
+> 注： myhadoop-install安装现在支持的操作系统为RedHat系列的5，6
+
+> myhadoop-install需要python2.5+
+
+
+> RedHat系列的5升级安装python2.6
+>   rpm -ivh http://dl.iuscommunity.org/pub/ius/stable/Redhat/5/x86_64/epel-release-5-4.noarch.rpm
+>   rpm -ivh http://dl.iuscommunity.org/pub/ius/stable/Redhat/5/x86_64/ius-release-1.0-11.ius.el5.noarch.rpm
+	yum -y install python26 python26-devel
+	ln -sf /usr/bin/python26 /usr/bin/python
+	vim /usr/bin/yum    python->python2.4
+
+> RedHat系列的5升级安装python2.7
+>   rpm -ivh http://dl.iuscommunity.org/pub/ius/stable/Redhat/5/x86_64/epel-release-5-4.noarch.rpm
+>   rpm -ivh http://dl.iuscommunity.org/pub/ius/stable/Redhat/5/x86_64/ius-release-1.0-11.ius.el5.noarch.rpm
+	yum -y install python27 python27-devel
+	ln -sf /usr/bin/python2.7 /usr/bin/python
+	vim /usr/bin/yum    python->python2.4
+
+> 安装需要gcc44, 如果没有gcc44可以通过`yum -y install gcc44`
+
+> 源码升级安装python2.75
+    wget "http://www.python.org/ftp/python/2.7.5/Python-2.7.5.tar.bz2" && tar -xvf Python-2.7.5.tar.bz2 && cd Python-2.7.5 && ./configure && make && make install && cd ../ && rm -rf Python-2.7.5*
 
 - 主要文件介绍
 

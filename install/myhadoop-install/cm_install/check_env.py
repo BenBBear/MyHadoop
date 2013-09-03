@@ -130,9 +130,9 @@ def iptables_check(root_pass, hosts  = read_host_file()):
         try:
             ssh = ssh_connect(h, ssh_port, username, root_pass)
             stdin, stdout, stderr = ssh_exc_cmd(ssh, '/etc/init.d/iptables status')
-
-            if not stdout.readline().strip().endswith("not running.") or not stdout.readline().strip().endswith(
-                    "stopped."):
+            
+            output = stdout.readline().strip()
+            if not (output.endswith("not running.") or output.endswith("stopped.")):
                 err_hosts.append(h)
                 logInfo("The server %s iptables is running, Please closed it first and reinstall. " % h, color='red')
         except Exception, ex:
