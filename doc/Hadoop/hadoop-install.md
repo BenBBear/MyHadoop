@@ -1,5 +1,5 @@
 # Hadoop安装
-	
+
 Hadoop经典安装。
 
     此安装是Tar包单用户安装，而非官方的yum系统安装。
@@ -512,12 +512,12 @@ Hadoop经典安装。
         
           <property>
             <name>dfs.hosts</name>
-            <value>etc/hadoop/dfs.include</value>
+            <value>${user.home}/local/hadoop/etc/hadoop/dfs.include</value>
           </property>
         
           <property>
             <name>dfs.hosts.exclude</name>
-            <value>etc/hadoop/dfs.exclude</value>
+            <value>${user.home}/local/hadoop/etc/hadoop/dfs.exclude</value>
           </property>
           
           <property>
@@ -652,12 +652,12 @@ Hadoop经典安装。
         
             <property>
                 <name>yarn.resourcemanager.nodes.include-path</name>
-                <value>yarn.include</value>
+                <value>${user.home}/local/hadoop/etc/hadoop/yarn.include</value>
             </property>
             
             <property>
                 <name>yarn.resourcemanager.nodes.exclude-path</name>
-                <value>yarn.exclude</value>
+                <value>${user.home}/local/hadoop/etc/hadoop/yarn.exclude</value>
             </property>
         
             <property>
