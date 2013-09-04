@@ -21,15 +21,30 @@ Hadoop经典安装。
 
 安装之后的目录如下：
     
-    $home/local/jdk         -- 程序目录
-    $home/local/hadoop      -- 程序目录
-    $home/local/zookeeper   -- 程序目录
-    $home/download          -- 下载目录
-    $home/apps              -- hadoop等安装目录
-    $home/meta              -- 元数据目录
-    $home/data              -- 数据目录
-    $home/yarn              -- yarn本地目录和日志目录
-    $home/temp
+    tree -L 2
+    .
+    ├── apps                                         -- 程序目录
+    │   ├── hadoop-2.0.0-cdh4.2.1
+    │   ├── jdk1.7.0_25
+    │   └── zookeeper-3.4.5-cdh4.2.1
+    ├── data                                         -- 数据目录                 
+    │   └── hadoop
+    ├── download
+    │   ├── hadoop-2.0.0-cdh4.2.1.tar.gz
+    │   ├── jdk-7u25-linux-x64.gz
+    │   └── zookeeper-3.4.5-cdh4.2.1.tar.gz
+    ├── local                                        -- 程序目录
+    │   ├── hadoop -> /home/zhaigy1/apps/hadoop-2.0.0-cdh4.2.1
+    │   ├── jdk -> /home/zhaigy1/apps/jdk1.7.0_25
+    │   └── zookeeper -> /home/zhaigy1/apps/zookeeper-3.4.5-cdh4.2.1
+    ├── meta                                         -- 元数据目录
+    │   ├── hadoop
+    │   └── journal
+    ├── temp                                            
+    │   └── hadoop_temp
+    └── yarn                                         -- yarn本地目录和日志目录
+        ├── local-dir
+        └── log-dir
 
 ## 安装条件
 
@@ -51,17 +66,20 @@ Hadoop经典安装。
    
 ## 安装
 
-Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面查找下载，注意是tar.gz后缀。
+>Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面查找下载，注意是tar.gz后缀。
+
+>注意：如未特殊说明，操作都是在主机**hadoop1**进行
+
 
 ### 准备
 
 假设你在5台机器上安装，安装用户为hadoop。
     
-*   干净的用户  
+*   **干净的用户**
     
     用户最好是新建的，以减少环境影响。多台机器上应该建立相同的用户名并且有相同的密码（纯粹为了方便管理）。
     
-*   主机域名解析文件（/etc/hosts）
+*   **主机域名解析文件（/etc/hosts）**
     
     必须的一步，假设我们的域名定义如下（修改需要root权限）：  
   
@@ -73,7 +91,7 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
     
     *注：需要在全部机器上统一修改*
 
-*   免密码登陆
+*   **SSH免密码登陆**
     
     单机免密码：
 
@@ -88,9 +106,11 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
     
     仅需要NN机器到DN机器免密码就可以了。为了方便，可以如下操作（取巧了）：
 
-        # 在hadoop1机器执行，把.ssh目录整个拷贝到其它机器
-        scp -P 22 -r ~/.ssh $USER@192.168.10.2:$HOME
-        
+        # 在hadoop1机器执行，把.ssh目录整个拷贝到其它机器        
+        scp -P 22 -r ~/.ssh hadoop2:$HOME
+        ssh -p 22 hadoop2 'rm -f ~/.ssh/known_hosts'
+        # 常用SSH配置会检查Host，配置后，需要手动登陆一下各机器验证一下。
+
     *注：此方法让所有机器共用一个密钥文件*
 
 *  时间同步
@@ -99,10 +119,14 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
 
         */30 * * * * /usr/sbin/ntpdate cn.pool.ntp.org>/dev/null 2>&1;/sbin/hwclock -w >/dev/null 2>&1
         注：每30分钟更新一下时间，并修改硬件时钟
+        # 时间服务器可以换成其它的
 
 *   必要的目录
 
-    mkdir -p ~/download ~/local ~/apps
+        # 在hadoop1机器上执行
+        mkdir -p ~/download ~/local ~/apps
+        # 在其它机器上执行
+        ssh -p 22 hadoop2 "mkdir -p ~/local ~/apps"
 
 ### 安装JDK
 
@@ -113,11 +137,13 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
     # 在hadoop1上
     # 下载
     cd ~/download
-    wget http://download.oracle.com/otn-pub/java/jdk/7u25-b15/jdk-7u25-linux-x64.tar.gz
+    # 由于其页面需要同意一个协议，如果你下载不了，可以先从浏览器下载
+    wget "http://download.oracle.com/otn-pub/java/jdk/7u25-b15/jdk-7u25-linux-x64.tar.gz?AuthParam=1378189107_2c7f818767e7f74adfbc947cee3c4c6b" -O jdk-7u25-linux-x64.tar.gz
     # 解压
-    tar -xzvf jdk*.tar.gz
+    tar -xzvf jdk*.gz
     # 安装
-    mv jdk-7u25-linux-x64 ~/apps/
+    rm -f jdk1.7.0_25/src.zip
+    mv jdk1.7.0_25 ~/apps/
     ln -sf $HOME/apps/jdk* $HOME/local/jdk
     # 配置
     vi ~/.bash_profile  # 增加如下内容
@@ -127,8 +153,17 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
         export PATH=$JAVA_HOME/bin:$PATH
     # 重载环境
     source ~/.bash_profile
+    # 检查
+    java -version # 应该显示最新安装的版本
 
     # 在其它机器上做相同的操作，或者把安装好的软件拷贝过去，注意软链不能直接拷贝。
+    # 示例操作如下：
+    cd ~/apps
+    ssh -p 22 hadoop2 "mkdir -p ~/apps"
+    scp -P 22 -r jdk1.7.0_25 hadoop2:~/apps
+    ssh -p 22 hadoop2 "ln -sf \$HOME/apps/jdk* \$HOME/local/jdk"
+    scp -P 22 ~/.bash_profile hadoop2:~/
+    ssh -p 22 hadoop2 "source ~/.bash_profile;java -version"
 
 ### 安装Zookeeper
 
@@ -145,24 +180,31 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
     # 解压
     tar -xzvf zookeeper*.tar.gz
     # 安装
+    rm -rf zookeeper-3.4.5-cdh4.2.1/docs
     mv zookeeper-3.4.5-cdh4.2.1 ~/apps
     ln -sf $HOME/apps/zookeeper* $HOME/local/zookeeper
     # 配置
     cd ~/local/zookeeper/conf
     vi zoo.cfg
-        # 编辑文件内容如下
+
+        # 编辑文件内容如下，注意配置行后别多出空格
         tickTime=2000
         initLimit=10
         syncLimit=2
-        clientPort=50181                                  #可选客户端连接端口    
+        # 可选客户端连接端口
+        clientPort=50181
         maxClientCnxns=200
-        dataDir=/home/hadoop/local/zookeeper/data         #可选数据存储目录
-        dataLogDir=/home/hadoop/local/zookeeper/datalog   #可选数据日志（类似binlog）存储目录
-        server.1=hadoop1:50288:50388      #机器编号和域名:选举端口:leader端口
+        # 可选数据存储目录
+        dataDir=/home/hadoop/local/zookeeper/data
+        # 可选数据日志（类似binlog）存储目录
+        dataLogDir=/home/hadoop/local/zookeeper/datalog
+        # 机器编号和域名:leader端口:选举端口
+        server.1=hadoop1:50288:50388
         server.2=hadoop2:50288:50388
         server.3=hadoop3:50288:50388
         server.4=hadoop4:50288:50388
         server.5=hadoop5:50288:50388
+
     cd ~/local/zookeeper
     sh bin/zkServer-initialize.sh --myid=1
     vi ~/.bash_profile
@@ -176,6 +218,13 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
 
     # 在其它机器上做相同的操作，或者把安装好的软件拷贝过去，注意软链不能直接拷贝。
     # 在配置部分，运行zk初始化时，myid每台机器各不相同，分别是1,2,3,4,5。
+    # 示例操作如下：
+    cd ~/apps
+    ssh -p 22 hadoop2 "mkdir -p ~/apps"
+    scp -P 22 -r zookeeper-3.4.5-cdh4.2.1 hadoop2:~/apps 
+    ssh -p 22 hadoop2 "ln -sf \$HOME/apps/zookeeper* \$HOME/local/zookeeper"
+    ssh -p 22 hadoop2 "cd ~/local/zookeeper;sh bin/zkServer-initialize.sh --myid=2 --force"
+    scp -P 22 ~/.bash_profile hadoop2:~/
 
 启动
 
@@ -184,10 +233,18 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
     bin/zkServer.sh start       #启动
     bin/zkServer.sh status      #查看状态
     # 如果启动失败，请查看当前目录下的zookeeper.out日志文件
+    
+    # 在其它机器启动
+    ssh -p 22 hadoop2 "cd ~/local/zookeeper;bin/zkServer.sh start"
+    ssh -p 22 hadoop2 "cd ~/local/zookeeper;bin/zkServer.sh status"
+
+    注意：最初单台启动时，查看状态可能并不正常，要等全部启动后，再查看状态。
 
 ### 安装Hadoop
 
-以安装4.2.1版本系列为例。
+    以安装4.2.1版本系列为例。
+
+#### 安装
 
     在hadoop1上
     # 下载
@@ -197,9 +254,30 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
     tar -xzvf hadoop-2.0.0-cdh4.2.1.tar.gz
     # 安装
     mv hadoop-2.0.0-cdh4.2.1 ~/apps
-    ln -sf $HOME/apps/hadoop-2.0.0-cdh4.2.1.tar.gz $HOME/local/hadoop
+    ln -sf $HOME/apps/hadoop-2.0.0-cdh4.2.1 $HOME/local/hadoop
+
+同步到其它机器
+
+    cd ~/apps
+    for h in hadoop2 hadoop3 hadoop4 hadoop5; do scp -P 22 -r ./hadoop-2.0.0-cdh4.2.1 $h:~/apps;ssh -p 22 $h 'ln -sf $HOME/apps/hadoop-2.0.0-cdh4.2.1 $HOME/local/hadoop'; done
+
 
 #### 配置
+
+*   环境变量
+        
+        # 在hadoop1上
+        vi ~/.bash_profile
+            # 编辑文件，增加如下内容
+            export HADOOP_HOME=$HOME/local/hadoop
+            export HADOOP_PREFIX=$HADOOP_HOME
+            export HADOOP_BIN=$HADOOP_HOME/bin
+            export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+            export PATH=$HADOOP_BIN:$PATH
+        
+     同步到其它机器
+     
+        for h in hadoop2 hadoop3 hadoop4 hadoop5; do scp -P 22 ~/.bash_profile $h:~/; done
 
 在`~/local/hadoop/etc/hadoop`目录。
 
@@ -208,14 +286,14 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
 *   配置hadoop-env.sh  
         
         # 在最前位置增加
-        shopt -s expand_aliases;
+        shopt -s expand_aliases
         . $HOME/.bash_profile
         
         # 注释掉原有的JAVA_HOME
         # export JAVA_HOME=
 
-        # 如果你的SSH端口不是标准的22，可以修改这个
-        export HADOOP_SSH_OPTS="-p 22"
+        # 如果你的SSH端口不是标准的22，可以增加或修改这个
+        export HADOOP_SSH_OPTS="-p 22 -o StrictHostKeyChecking=false"
 
 *   配置core-site.xml
 
@@ -270,6 +348,10 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
           </property>
         
         </configuration>
+
+    创建对应的目录
+
+        mkdir -p ~/temp/hadoop_temp
 
 *   配置hdfs-site.xml
     
@@ -332,7 +414,7 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
           
           <property>
             <name>dfs.journalnode.edits.dir</name>
-            <value>${user.home}/name/hadoop_journal/edits</value>
+            <value>${user.home}/meta/journal/edits</value>
           </property>
         
           <property>
@@ -353,7 +435,7 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
           <property>
             <name>dfs.ha.fencing.methods</name>
             <!-- 注意这里的端口设置 -->
-            <value>sshfence(hadoop:22)</value>
+            <value>sshfence(${user.name}:22)</value>
           </property>
         
           <property>
@@ -454,6 +536,11 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
         
         </configuration>
 
+    创建对应的目录
+
+        mkdir -p ~/meta/journal/edits ~/meta/hadoop/name ~/data/hadoop
+        touch dfs.include dfs.exclude
+
 *   配置yarn-site.xml
 
     先拷贝默认文件
@@ -498,11 +585,15 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
             <property>
                 <description>hdfs path</description>
                 <name>yarn.nodemanager.remote-app-log-dir</name>
-                <value>/var/log</value>
+                <value>/user</value>
             </property>
-        
+            
             <property>
-        
+                <description>hdfs path</description>
+                <name>yarn.nodemanager.remote-app-log-dir-suffix</name>
+                <value>logs</value>
+            </property>
+
             <property>
                 <name>yarn.nodemanager.webapp.address</name>
                 <value>0.0.0.0:50842</value>
@@ -550,6 +641,11 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
             </property>
 
         </configuration>
+
+    创建对应的目录
+    
+        mkdir -p ~/yarn/local-dir ~/yarn/log-dir
+        touch yarn.include yarn.exclude
 
 *   配置mapred-site.xml
 
@@ -610,6 +706,20 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
         
         </configuration>
 
+*   编辑slaves文件
+
+        vi slaves
+            haoop1
+            haoop2
+            haoop3
+            haoop4
+            haoop5    
+
+*   同步配置到其它机器
+
+        cd ~/local/hadoop/etc
+        for h in hadoop2 hadoop3 hadoop4 hadoop5; do ssh -p 22 $h "rm -rf ~/local/hadoop/etc/hadoop"; scp -P 22 -r ./hadoop $h:~/local/hadoop/etc/; ssh -p 22 $h "mkdir -p ~/temp/hadoop_temp ~/meta/journal/edits ~/meta/hadoop/name ~/data/hadoop ~/yarn/local-dir ~/yarn/log-dir"; done
+
 #### 初始化
 
     # 在hadoop1执行
@@ -617,12 +727,10 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
     cd ~/local/hadoop
     sbin/hadoop-daemons.sh --hostnames "hadoop1 hadoop2 hadoop3 hadoop4 hadoop5" start journalnode
     
-    mkdir -p ~/meta/hadoop
     hadoop namenode -format
     
     # 从hadoop1拷贝元数据到hadoop2，保持元数据一致
-    ssh -p 22 hadoop2 "mkdir -p $HOME/meta/hadoop"
-    scp -P 22 -r ~/meta/hadoop/name $USER@hadoop2:$HOME/meta/hadoop 
+    scp -P 22 -r ~/meta/hadoop/name hadoop2:$HOME/meta/hadoop 
 
     # 检查确保zookeeper成功启动
     hdfs zkfc -formatZK
@@ -633,11 +741,24 @@ Tar包安装，相关Tar包在[http://archive.cloudera.com/cdh4/cdh/4]()页面�
     cd ~/local/hadoop
     sbin/start-dfs.sh
     
-    # 此时，如果成功，可以通过浏览器访问http://hadoop1:50070来看Hdfs系统
+    # 此时，如果成功，可以通过浏览器访问http://hadoop1:50070来看HDFS系统
+    # http://hadoop2:50070可以看到备机
+
+    # 在HDFS上创建YARN必要的目录
+    hdfs dfs -mkdir /tmp
+    hdfs dfs -chmod -R 1777 /tmp
+    hdfs dfs -mkdir /user
+    hdfs dfs -chmod -R 1777 /user    
+
+    /user
+    /var/log
+    ${yarn.app.mapreduce.am.staging-dir}/${user.name}/history/intermediate-done-dir
+    ${yarn.app.mapreduce.am.staging-dir}/${user.name}/history/done
 
     sbin/start-yarn.sh
     # 此时，如果成功，可以通过浏览器访问http://hadoop1:50088来看Yarn系统
 
+    
 
 ---
 

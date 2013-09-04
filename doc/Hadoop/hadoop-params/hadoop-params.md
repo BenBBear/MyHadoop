@@ -347,6 +347,9 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 * **dfs.datanode.ipc.address=0.0.0.0:50020**
 	>DN的IPC地址和端口。0表示任意空闲端口。
 	
+* **dfs.namenode.rpc-address=0.0.0.0:50090**
+    >NN的RPC地址和端口
+     
 * **dfs.namenode.http-address=0.0.0.0:50070**
 	>NN的HTTP地址和端口。0表示任意空闲端口。
 	
@@ -822,6 +825,9 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 	>汇聚日志的地方，目录路径，HDFS系统。
 	>  >**对于开了权限检查的系统，注意权限问题。HDFS上。**
 
+* **yarn.nodemanager.remote-app-log-dir-suffix=logs**
+	>汇聚日志目录路径后缀。汇聚目录创建在{yarn.nodemanager.remote-app-log-dir}/${user}/{thisParam}
+
 * **yarn.nodemanager.resource.memory-mb=8192**
 	>NM上可以用于container申请的物理内存大小，MB。
 
@@ -971,9 +977,6 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 
 * yarn.nodemanager.localizer.fetch.thread-count=4
 	>用于本地化获取的线程数。
-
-* yarn.nodemanager.remote-app-log-dir-suffix=logs
-	>汇聚日志目录路径后缀。汇聚目录创建在{yarn.nodemanager.remote-app-log-dir}/${user}/{thisParam}
 
 * yarn.nodemanager.container-monitor.interval-ms=3000
 	>监控container的频率，毫秒。
