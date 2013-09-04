@@ -20,10 +20,10 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 
 主要配置文件：
 
-* [core](#core)
-* [hdfs](#hdfs)
-* [yarn](#yarn)
-* [mapred](#mapred)
+* <font size=4>[core](#core)</font>
+* <font size=4>[hdfs](#hdfs)</font>
+* <font size=4>[yarn](#yarn)</font>
+* <font size=4>[mapred](#mapred)</font>
 
 重要性表示如下：
 
