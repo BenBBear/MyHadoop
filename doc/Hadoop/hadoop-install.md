@@ -122,7 +122,8 @@ Hadoop经典安装。
 
     在root用户的定时任务中增加：
 
-        */30 * * * * /usr/sbin/ntpdate cn.pool.ntp.org>/dev/null 2>&1;/sbin/hwclock -w >/dev/null 2>&1
+        */30 * * * * /usr/sbin/ntpdate cn.pool.ntp.org>/dev/null \
+            2>&1;/sbin/hwclock -w >/dev/null 2>&1
         注：每30分钟更新一下时间，并修改硬件时钟
         # 时间服务器可以换成其它的
 
@@ -143,7 +144,8 @@ Hadoop经典安装。
     # 下载
     cd ~/download
     # 由于其页面需要同意一个协议，如果你下载不了，可以先从浏览器下载
-    wget "http://download.oracle.com/otn-pub/java/jdk/7u25-b15/jdk-7u25-linux-x64.tar.gz?AuthParam=1378189107_2c7f818767e7f74adfbc947cee3c4c6b" -O jdk-7u25-linux-x64.tar.gz
+    wget "http://download.oracle.com/otn-pub/java/jdk/7u25-b15/\
+        jdk-7u25-linux-x64.tar.gz" -O jdk-7u25-linux-x64.tar.gz
     # 解压
     tar -xzvf jdk*.gz
     # 安装
@@ -228,7 +230,8 @@ Hadoop经典安装。
     ssh -p 22 hadoop2 "mkdir -p ~/apps"
     scp -P 22 -r zookeeper-3.4.5-cdh4.2.1 hadoop2:~/apps 
     ssh -p 22 hadoop2 "ln -sf \$HOME/apps/zookeeper* \$HOME/local/zookeeper"
-    ssh -p 22 hadoop2 "cd ~/local/zookeeper;sh bin/zkServer-initialize.sh --myid=2 --force"
+    ssh -p 22 hadoop2 "cd ~/local/zookeeper;sh bin/zkServer-initialize.sh \
+        --myid=2 --force"
     scp -P 22 ~/.bash_profile hadoop2:~/
 
 启动
@@ -264,8 +267,10 @@ Hadoop经典安装。
 同步到其它机器
 
     cd ~/apps
-    for h in hadoop2 hadoop3 hadoop4 hadoop5; do scp -P 22 -r ./hadoop-2.0.0-cdh4.2.1 $h:~/apps;ssh -p 22 $h 'ln -sf $HOME/apps/hadoop-2.0.0-cdh4.2.1 $HOME/local/hadoop'; done
-
+    for h in hadoop2 hadoop3 hadoop4 hadoop5; do
+      scp -P 22 -r ./hadoop-2.0.0-cdh4.2.1 $h:~/apps;
+      ssh -p 22 $h 'ln -sf $HOME/apps/hadoop-2.0.0-cdh4.2.1 $HOME/local/hadoop';
+    done
 
 #### 配置
 
@@ -282,7 +287,9 @@ Hadoop经典安装。
         
      同步到其它机器
      
-        for h in hadoop2 hadoop3 hadoop4 hadoop5; do scp -P 22 ~/.bash_profile $h:~/; done
+        for h in hadoop2 hadoop3 hadoop4 hadoop5; do
+          scp -P 22 ~/.bash_profile $h:~/;
+        done
 
 在`~/local/hadoop/etc/hadoop`目录。
 
@@ -304,7 +311,8 @@ Hadoop经典安装。
 
     先拷贝一个默认值文件
         
-        cp $HOME/local/hadoop/src/hadoop-common-project/hadoop-common/src/main/resources/core-default.xml .
+        cp $HOME/local/hadoop/src/hadoop-common-project/hadoop-common/src/\
+            main/resources/core-default.xml .
     
     新增，或者修改core-site.xml，完整内容如下：
 
@@ -324,7 +332,8 @@ Hadoop经典安装。
         
           <property>
             <name>ha.zookeeper.quorum</name>
-            <value>hadoop1:50181,hadoop2:50181,hadoop3:50181,hadoop4:50181,hadoop5:50181</value>
+            <value>hadoop1:50181,hadoop2:50181,hadoop3:50181,\
+                hadoop4:50181,hadoop5:50181</value>
           </property>
         
           <property>
@@ -362,7 +371,8 @@ Hadoop经典安装。
     
     先拷贝默认配置文件
 
-        cp $HOME/local/hadoop/src/hadoop-hdfs-project/hadoop-hdfs/src/main/resources/hdfs-default.xml .
+        cp $HOME/local/hadoop/src/hadoop-hdfs-project/hadoop-hdfs/src\
+            /main/resources/hdfs-default.xml .
 
     在创建或修改hdfs-site.xml，完整内容如下：  
     *注意：其中有需要制定ssh端口的地方，请根据实际设置*
@@ -408,7 +418,8 @@ Hadoop经典安装。
 
           <property>
             <name>dfs.namenode.shared.edits.dir</name>
-            <value>qjournal://hadoop1:50485;hadoop2:50485;hadoop3:50485;hadoop4:50485;hadoop5:50485/mycluster</value>
+            <value>qjournal://hadoop1:50485;hadoop2:50485;hadoop3:50485;\
+            hadoop4:50485;hadoop5:50485/mycluster</value>
           </property>
          
           <!-- journal , QJM -->
@@ -434,7 +445,8 @@ Hadoop经典安装。
 
           <property>
             <name>dfs.client.failover.proxy.provider.mycluster</name>
-            <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+            <value>org.apache.hadoop.hdfs.server.namenode.ha.\
+                ConfiguredFailoverProxyProvider</value>
           </property>
         
           <property>
@@ -550,7 +562,8 @@ Hadoop经典安装。
 
     先拷贝默认文件
 
-        cp $HOME/local/hadoop/src/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-common/src/main/resources/yarn-default.xml .
+        cp $HOME/local/hadoop/src/hadoop-yarn-project/hadoop-yarn/\
+            hadoop-yarn-common/src/main/resources/yarn-default.xml .
 
     创建或者修改yarn-site.xml，完整内容如下：
 
@@ -611,8 +624,10 @@ Hadoop经典安装。
         
             <property>
                 <name>yarn.resourcemanager.scheduler.class</name>
-                 <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler</value>
-                <!-- <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler</value>  -->
+                <value>org.apache.hadoop.yarn.server.resourcemanager.\
+                    scheduler.capacity.CapacityScheduler</value>
+                <!-- <value>org.apache.hadoop.yarn.server.\
+                    resourcemanager.scheduler.fair.FairScheduler</value>  -->
             </property>
         
             <property>
@@ -666,7 +681,9 @@ Hadoop经典安装。
 
     先拷贝默认配置文件
 
-        cp $HOME/local/hadoop/src/hadoop-mapreduce-project/hadoop-mapreduce-client/hadoop-mapreduce-client-core/src/main/resources/mapred-default.xml .
+        cp $HOME/local/hadoop/src/hadoop-mapreduce-project/\
+            hadoop-mapreduce-client/hadoop-mapreduce-client-core/\
+            src/main/resources/mapred-default.xml .
 
     创建或修改mapred-site.xml文件，完整内容如下：
 
@@ -686,12 +703,20 @@ Hadoop经典安装。
 
             <property>
                 <name>mapreduce.map.java.opts</name>
-                <value>-Xmx512m -XX:+DisableExplicitGC -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection -XX:+CMSClassUnloadingEnabled -Dclient.encoding.override=UTF-8 -Dfile.encoding=UTF-8 -Duser.language=zh -Duser.region=CN</value>
+                <value>-Xmx512m -XX:+DisableExplicitGC -XX:+UseConcMarkSweepGC \
+                    -XX:+UseCMSCompactAtFullCollection \
+                    -XX:+CMSClassUnloadingEnabled \
+                    -Dclient.encoding.override=UTF-8 -Dfile.encoding=UTF-8 \
+                    -Duser.language=zh -Duser.region=CN</value>
             </property>
 
             <property>
                 <name>mapreduce.reduce.java.opts</name>
-                <value>-Xmx512m -XX:+DisableExplicitGC -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection -XX:+CMSClassUnloadingEnabled -Dclient.encoding.override=UTF-8 -Dfile.encoding=UTF-8 -Duser.language=zh -Duser.region=CN</value>
+                <value>-Xmx512m -XX:+DisableExplicitGC -XX:+UseConcMarkSweepGC \
+                    -XX:+UseCMSCompactAtFullCollection \
+                    -XX:+CMSClassUnloadingEnabled \
+                    -Dclient.encoding.override=UTF-8 -Dfile.encoding=UTF-8 \
+                    -Duser.language=zh -Duser.region=CN</value>
             </property>
 
             <property>
@@ -773,14 +798,21 @@ Hadoop经典安装。
 *   同步配置到其它机器
 
         cd ~/local/hadoop/etc
-        for h in hadoop2 hadoop3 hadoop4 hadoop5; do ssh -p 22 $h "rm -rf ~/local/hadoop/etc/hadoop"; scp -P 22 -r ./hadoop $h:~/local/hadoop/etc/; ssh -p 22 $h "mkdir -p ~/temp/hadoop_temp ~/meta/journal/edits ~/meta/hadoop/name ~/data/hadoop ~/yarn/local-dir ~/yarn/log-dir"; done
+        for h in hadoop2 hadoop3 hadoop4 hadoop5; do
+            ssh -p 22 $h "rm -rf ~/local/hadoop/etc/hadoop"; 
+            scp -P 22 -r ./hadoop $h:~/local/hadoop/etc/; 
+            ssh -p 22 $h "mkdir -p ~/temp/hadoop_temp ~/meta/journal/edits \
+                ~/meta/hadoop/name ~/data/hadoop ~/yarn/local-dir \
+                ~/yarn/log-dir";
+        done
 
 #### 初始化
 
     # 在hadoop1执行
     # 启动journal nodes
     cd ~/local/hadoop
-    sbin/hadoop-daemons.sh --hostnames "hadoop1 hadoop2 hadoop3 hadoop4 hadoop5" start journalnode
+    sbin/hadoop-daemons.sh --hostnames "hadoop1 hadoop2 hadoop3 hadoop4 \
+        hadoop5" start journalnode
     
     hadoop namenode -format
     
