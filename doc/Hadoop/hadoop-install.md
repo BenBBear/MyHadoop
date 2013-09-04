@@ -12,9 +12,9 @@ Hadoop经典安装。
 
     hadoop1 NN，DN，RM，NM，ZK，JN，ZKFC
     hadoop2 NN，DN，NM，ZK，JN，ZKFC
-    hadoop1 DN，NM，ZK，JN
-    hadoop1 DN，NM，ZK，JN
-    hadoop1 DN，NM，ZK，JN
+    hadoop3 DN，NM，ZK，JN
+    hadoop4 DN，NM，ZK，JN
+    hadoop5 DN，NM，ZK，JN
 
     注：NN=NameNode，DN=DataNode，ZK=ZookeeperNode，JN=JournalNode，
         ZKFC=Zookeeper Failover Controller，RM=Resouse Manager，NM=NodeManager
@@ -110,8 +110,13 @@ Hadoop经典安装。
         scp -P 22 -r ~/.ssh hadoop2:$HOME
         ssh -p 22 hadoop2 'rm -f ~/.ssh/known_hosts'
         # 常用SSH配置会检查Host，配置后，需要手动登陆一下各机器验证一下。
+    
+    或者使用标准的方式，拷贝到其它机器
+    
+        sh-copy-id -i ~/.ssh/id_rsa.pub "-p 22 user@server"
 
-    *注：此方法让所有机器共用一个密钥文件*
+    *注：此方法让所有机器共用一个密钥文件*  
+    **注意：有2个NN，在我们的示例中是hadoop1和hadoop2**
 
 *  时间同步
 
@@ -619,7 +624,12 @@ Hadoop经典安装。
                 <name>yarn.scheduler.maximum-allocation-mb</name>
                 <value>4096</value>
             </property>
-        
+            
+            <property>
+                <name>yarn.resourcemanager.am.max-retries</name>
+                <value>4</value>
+            </property>
+
             <property>
                 <name>yarn.app.mapreduce.am.resource.mb</name>
                 <value>640</value>
@@ -638,6 +648,11 @@ Hadoop经典安装。
             <property>
                 <name>yarn.nodemanager.resource.memory-mb</name>
                 <value>4096</value>
+            </property>
+
+            <property>
+                <name>yarn.log-aggregation.retain-seconds</name>
+                <value>604800</value>
             </property>
 
         </configuration>
@@ -670,17 +685,12 @@ Hadoop经典安装。
             </property>
 
             <property>
-                <name>mapreduce.jobhistory.intermediate-done-dir</name>
-                <value>${yarn.app.mapreduce.am.staging-dir}/${user.name}/history/intermediate-done-dir</value>
+                <name>mapreduce.map.java.opts</name>
+                <value>-Xmx512m -XX:+DisableExplicitGC -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection -XX:+CMSClassUnloadingEnabled -Dclient.encoding.override=UTF-8 -Dfile.encoding=UTF-8 -Duser.language=zh -Duser.region=CN</value>
             </property>
 
             <property>
-                <name>mapreduce.jobhistory.done-dir</name>
-                <value>${yarn.app.mapreduce.am.staging-dir}/${user.name}/history/done</value>
-            </property>
-
-            <property>
-                <name>mapred.child.java.opts</name>
+                <name>mapreduce.reduce.java.opts</name>
                 <value>-Xmx512m -XX:+DisableExplicitGC -XX:+UseConcMarkSweepGC -XX:+UseCMSCompactAtFullCollection -XX:+CMSClassUnloadingEnabled -Dclient.encoding.override=UTF-8 -Dfile.encoding=UTF-8 -Duser.language=zh -Duser.region=CN</value>
             </property>
 
@@ -700,10 +710,55 @@ Hadoop经典安装。
             </property>
 
             <property>
+                <name>mapreduce.job.reduce.slowstart.completedmaps</name>
+                <value>0.85</value>
+            </property>
+
+            <property>
                 <name>mapreduce.reduce.shuffle.input.buffer.percent</name>
                 <value>0.60</value>
             </property>
         
+            <property>
+                <name>yarn.app.mapreduce.am.resource.mb</name>
+                <value>640</value>
+            </property>
+            
+            <property>
+                <name>yarn.app.mapreduce.am.command-opts</name>
+                <value>-Xmx500m</value>
+            </property>
+
+            <property>
+                <name>mapreduce.task.io.sort.factor</name>
+                <value>20</value>
+            </property>
+
+            <property>
+                <name>mapreduce.task.io.sort.mb</name>
+                <value>200</value>
+            </property>
+            
+            <property>
+                <name>mapreduce.map.memory.mb</name>
+                <value>640</value>
+            </property>
+            
+            <property>
+                <name>mapreduce.reduce.memory.mb</name>
+                <value>640</value>
+            </property>
+           
+            <property>
+                <name>mapreduce.job.ubertask.enable</name>
+                <value>false</value>
+            </property>
+            
+            <property>
+                <name>mapreduce.jobhistory.cleaner.enable</name>
+                <value>true</value>
+            </property>
+
         </configuration>
 
 *   编辑slaves文件
@@ -748,17 +803,10 @@ Hadoop经典安装。
     hdfs dfs -mkdir /tmp
     hdfs dfs -chmod -R 1777 /tmp
     hdfs dfs -mkdir /user
-    hdfs dfs -chmod -R 1777 /user    
-
-    /user
-    /var/log
-    ${yarn.app.mapreduce.am.staging-dir}/${user.name}/history/intermediate-done-dir
-    ${yarn.app.mapreduce.am.staging-dir}/${user.name}/history/done
+    hdfs dfs -chmod -R 1777 /user  
 
     sbin/start-yarn.sh
     # 此时，如果成功，可以通过浏览器访问http://hadoop1:50088来看Yarn系统
-
-    
 
 ---
 

@@ -1031,6 +1031,7 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 * **mapreduce.job.userhistorylocation=null**
     >用户可以指定一个地方存储一个特定Job的日志。如果不设置，日志存放在输出目录下的"_logs/history/"子目录中。用户可以指定none取消日志行为。
     >   >**建议取消`none`**
+    >   **查不到相关代码，暂时忽略这个参数**
 
 * **mapreduce.task.io.sort.factor=10**
 	>文件排序时，一次合并IO流的数量。此选项影响打开的文件句柄数。
@@ -1137,15 +1138,29 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 
 * **mapreduce.jobhistory.cleaner.enable=FALSE**
 	>是否开启jobhistory的自动清理。*建议开启*
+	>注意，这里仅对done目录生效，不是日志聚合目录。
 		
 * **mapreduce.jobhistory.done-dir=${yarn.app.mapreduce.am.staging-dir}**
-	>jobhistory的完成目录,会自动在此目录后添加/history/done
-	
+	>jobhistory的完成目录。
+
+	>如果不配置，会使用yarn.app.mapreduce.am.staging-dir，会自动在此目录后添加/history/done。
+
+    >实际存储时，还会按时间和job编号前x位划分。例如:${yarn.app.mapreduce.am.staging-dir}/history/done/2012/08/07/123456
+
+    >建议不配置。
+
 * **mapreduce.jobhistory.intermediate-done-dir=${yarn.app.mapreduce.am.staging-dir}**
-	>jobhistory的中间目录,会自动添加/history/done_intermediate
+	>jobhistory的中间目录。实际使用时${mapreduce.jobhistory.intermediate-done-dir}/${user.name}。过一段时间，会转移到done目录。
+
+    >如果不配置，会使用yarn.app.mapreduce.am.staging-dir，并会自动添加/history/done_intermediate。例如：${yarn.app.mapreduce.am.staging-dir}/history/done_intermediate/${user.name}/
+
+    >建议不配置。
 	
 * **mapreduce.jobhistory.webapp.address=0.0.0.0:19888**
 	>MR JobHistory服务的网页界面的域名和端口
+
+* **mapreduce.jobhistory.max-age-ms=7 * 24 * 60 * 60 * 1000L 7day**
+    >jobhistory最多存储日志，超过此时间就清理
 
 * **mapreduce.jobhistory.cleaner.interval-ms=1 * 24 * 60 * 60 * 1000 1day**
 	>jobhistory的自动清理间隔。*建议7天*
