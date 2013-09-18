@@ -406,7 +406,7 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 	>DN的心跳间隔，秒
 
 * **dfs.namenode.handler.count=10**
-	>NN的服务线程数。用于处理RPC请求，不需要太多。
+	>NN的服务线程数。用于处理RPC请求。
 
 * **dfs.namenode.safemode.threshold-pct=0.999f**
 	>数据进入安全模式阀值，百分比，float形式，数据块达到最小副本数（dfs.namenode.replication.min）的百分比。值小于等于0意味着在退出安全模式前不等待数据修复。大于1的值将导致无法离开安全模式。
@@ -433,7 +433,7 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 	>  >**建议值：2200，约3天的**
 
 * **dfs.datanode.handler.count=10**
-	>DN的服务线程数。*这些线程仅用于接收请求，处理业务命令，如果是数据传输任务。会在开启后台线程。所以这里不需要太大的数字*
+	>DN的服务线程数。*这些线程仅用于接收请求，处理业务命令*
 	
 * **dfs.datanode.failed.volumes.tolerated=0**
 	>可以接受的卷的失败数量。默认值0表示，任一个卷失败都会导致DN关闭。
@@ -644,6 +644,7 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 	>Image文件传输时可以使用的最大带宽，秒字节。0表示没有限制。*HA方式使用不到，可不关注*
 
 * dfs.datanode.max.transfer.threads=4096
+    > = 旧参数 dfs.datanode.max.xcievers
 	>DN上传送数据出入的最大线程数。
 
 * dfs.datanode.readahead.bytes=4193404
@@ -670,6 +671,9 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 * dfs.ha.tail-edits.period=60
 	>StandbyNode以此频率检测共享目录中最新的日志，秒。
 	
+* dfs.ha.zkfc.port=8019
+    >zkfc的rpc端口
+
 * dfs.support.append=TRUE
 	>是否允许append。
 
@@ -712,7 +716,7 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 	>秒，在fuse_dfs中缓存libhdfs连接对象的超时时间。 小值使用内存小。大值可以加快访问，通过避开创建新的连接对象。
 
 * hadoop.fuse.timer.period=5
-	>秒，*安全选项，暂不关注*
+	>秒
 	
 * dfs.metrics.percentiles.intervals=null
 	>Comma-delimited set of integers denoting the desired rollover intervals (in seconds) for percentile latency metrics on the Namenode and Datanode. By default, percentile latency metrics are disabled.
@@ -1136,7 +1140,7 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 * **mapreduce.application.classpath=$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/*,$HADOOP_MAPRED_HOME/share/hadoop/mapreduce/lib/\***
 	>MR application的CLASSPATH。逗号分隔的列表
 
-* **mapreduce.jobhistory.cleaner.enable=FALSE**
+* **mapreduce.jobhistory.cleaner.enable=true**
 	>是否开启jobhistory的自动清理。*建议开启*
 	>注意，这里仅对done目录生效，不是日志聚合目录。
 		
@@ -1163,7 +1167,7 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
     >jobhistory最多存储日志，超过此时间就清理
 
 * **mapreduce.jobhistory.cleaner.interval-ms=1 * 24 * 60 * 60 * 1000 1day**
-	>jobhistory的自动清理间隔。*建议7天*
+	>jobhistory的自动清理间隔。*建议1天*
 	
 * mapreduce.job.committer.setup.cleanup.needed=true
     >如果需要Job启动和清理工作，设置为true。
@@ -1326,6 +1330,7 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 	>Job结束通知的URL，运行包含$jobId和$jobStatus，在发送时会替换为真实值。
 
 * mapreduce.job.end-notification.retry.attempts=5
+* 
 	>参考mapreduce.job.end-notification.max.attempts
 
 * mapreduce.job.end-notification.retry.interval=1
