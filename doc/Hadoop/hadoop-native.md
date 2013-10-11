@@ -35,6 +35,11 @@
 编译后的libhadoop.so和libhdfs.so使用find查找
     
     find . -name "libhadoop.so"
+    
+    $HADOOP_HOME/src/hadoop-hdfs-project/hadoop-hdfs/target/native/target/usr/local/lib/libhdfs.so
+    $HADOOP_HOME/src/hadoop-hdfs-project/hadoop-hdfs/src/main/native/libhdfs
+    
+    $HADOOP_HOME/src/hadoop-common-project/hadoop-common/target/native/target/usr/local/lib/libhadoop.so
 
 把对应的.so文件移动到hadoop的lib/native目录，重启即可
 

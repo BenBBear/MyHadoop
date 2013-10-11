@@ -336,10 +336,16 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 ### <a name="hdfs">hdfs-default.xml</a>
 
 * hadoop.hdfs.configuration.version=1
-	>配置文件的版本
+	
+    配置文件的版本
 
 * **dfs.datanode.address=0.0.0.0:50010**
-	>DN服务地址和端口，用于数据传输。0表示任意空闲端口。
+	
+    DN服务地址和端口，用于数据传输。0表示任意空闲端口。
+	
+        xferPort	dfs.datanode.address		50010	数据流地址	数据传输
+        infoPort	dfs.datanode.http.address	50075
+        ipcPort		dfs.datanode.ipc.address	50020	命令
 	
 * **dfs.datanode.http.address=0.0.0.0:50075**
 	>DN的HTTP服务地址和端口。0表示任意空闲端口。
@@ -483,6 +489,12 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 * **dfs.namenode.audit.loggers=default**
 	>审查日志的实现类列表，能够接收audit事件。它们需要实现 org.apache.hadoop.hdfs.server.namenode.AuditLogger接口。默认值"default"可以用于引用默认的audit logger， 它使用配置的日志系统。安装客户自己的audit loggers可能影响NN的稳定性和性能。
 	>  >**建议default，开启**
+
+*   dfs.client.socket-timeout=60\*1000
+
+*   dfs.datanode.socket.write.timeout=8\*60\*1000
+
+*   dfs.datanode.socket.reuse.keepalive=1000
 
 * dfs.namenode.logging.level=info
 	>DFS的NN的日志等级。值可以是：info，dir(跟踪命名空间变动)，"block" (跟踪块的创建删除，replication变动)，或者"all".
@@ -823,7 +835,7 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 
 * **yarn.nodemanager.log.retain-seconds=10800**
 	>保留用户日志的时间，秒。在日志汇聚功能关闭时生效。
-	>  >**建议（10800）7天**
+	>  >**建议7天**
 
 * **yarn.nodemanager.remote-app-log-dir=/tmp/logs**
 	>汇聚日志的地方，目录路径，HDFS系统。
@@ -1065,7 +1077,7 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 	>map阶段的启动参数，此处设置的最大堆的内存必须要比申请的内存少。
 
 * **mapreduce.reduce.java.opts=null**
-	>map阶段的启动参数，此处设置的最大堆的内存必须要比申请的内存少
+	>reduce阶段的启动参数，此处设置的最大堆的内存必须要比申请的内存少。
 
 * **mapreduce.reduce.env=null**
 	>map启动的环境变量
@@ -1347,3 +1359,11 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 
 * mapreduce.job.map.output.collector.class=org.apache.hadoop.mapred.MapTask$MapOutputBuffer
 	>指定使用哪个MapOutputCollector实现
+
+
+
+## 未录入参数
+
+*   dfs.namenode.heartbeat.recheck-interval=5*60*1000
+    
+    心跳重新检查间隔
