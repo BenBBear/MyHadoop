@@ -5,3 +5,4 @@
 !/install/myhadoop-install/tars/placeholder
 /install/myhadoop-install/parcels/*
 !/install/myhadoop-install/parcels/placeholder
+*.class

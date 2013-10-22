@@ -3,6 +3,7 @@ package cn.uc.hadoop;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,24 +18,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.FileUtil;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.fs.PathFilter;
-import org.apache.hadoop.fs.Trash;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.SequenceFile.CompressionType;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
+import javax.security.auth.login.Configuration;
 
+/***
+ * @deprecated see {@link cn.uc.hadoop.utils.FSUtils}
+ */
+@Deprecated
 final public class FSUtils {
 
 	public static final class WriteMapper extends
@@ -69,6 +58,8 @@ final public class FSUtils {
 		}
 
 	}
+
+	private static FileSystem defaultFs;
 
 	/**
 	 * 在HDFS内的文件数据拷贝，非分布式实现。
@@ -132,6 +123,16 @@ final public class FSUtils {
 			}
 		}
 		return dir;
+	}
+
+	public static FileSystem getDefaultFileSystem() throws IOException {
+		if (defaultFs != null) {
+			return defaultFs;
+		} else {
+			Configuration conf = new Configuration();
+			defaultFs = FileSystem.get(conf);
+			return defaultFs;
+		}
 	}
 
 	/**
@@ -497,15 +498,5 @@ final public class FSUtils {
 			throws IOException {
 		Trash trashTmp = new Trash(fs, fs.getConf());
 		return trashTmp.moveToTrash(src);
-	}
-	
-	private static FileSystem defaultFs;
-	public static FileSystem getDefaultFileSystem() throws IOException{
-		if(defaultFs!=null) return defaultFs;
-		else{
-			Configuration conf = new Configuration();
-			defaultFs = FileSystem.get(conf);
-			return defaultFs;
-		}
 	}
 }

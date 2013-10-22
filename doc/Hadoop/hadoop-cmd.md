@@ -23,9 +23,9 @@ Hadoop的命令在如下目录：
       jmxget               从NN或者DN获取JMX输出值。（高级功能，用于调试）
       oiv                  应用离线查看器查看一个fsimage。（高级功能，用于调试）
       oev                  应用离线查看器查看一个edits文件。（高级功能，用于调试）
-      fetchdt              获取一个代理令牌从NN。（）
+      fetchdt              获取一个代理令牌从NN。
       getconf              获取配置值从配置文件。（编写shell脚本时可能用到）
-      groups               获取用户属于哪个group组
+      groups               获取用户属于哪个group组。
 
 ### hdfs dfs
 
@@ -162,7 +162,6 @@ HA功能管理
     
         [-checkHealth <serviceId>]
         [-help <command>]
-
 
 ## hdfs fsck
 
