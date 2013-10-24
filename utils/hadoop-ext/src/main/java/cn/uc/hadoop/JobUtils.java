@@ -1,13 +1,18 @@
 package cn.uc.hadoop;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.security.auth.login.Configuration;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.ContentSummary;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.util.StringUtils;
 
-import com.sun.xml.internal.ws.util.StringUtils;
 
 /***
  * @deprecated see {@link cn.uc.hadoop.utils.JobUtils}

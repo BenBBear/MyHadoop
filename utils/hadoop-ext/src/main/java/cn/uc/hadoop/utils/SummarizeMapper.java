@@ -1,22 +1,9 @@
-package com.uc.ssp.summarize;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+package cn.uc.hadoop.utils;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-
-import com.uc.ssp.common.Const;
-import com.uc.ssp.common.KVParser;
-import com.uc.ssp.common.SequenceParser;
-import com.uc.ssp.common.SequencePosition;
-import com.uc.ssp.common.Util;
 
 public class SummarizeMapper extends Mapper<LongWritable, Text, Text, Text> {
 
