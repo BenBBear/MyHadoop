@@ -45,12 +45,13 @@ public class TextFirstPartitioner extends Partitioner<Text, Text> implements
 	@Override
 	public int getPartition(Text key, Text value, int numPartitions) {
 		byte[] k = key.getBytes();
-		if (k == null || k.length == 0)
+		int klength = key.getLength();
+		if (k == null || klength == 0)
 			return 0;
-		int pos = UTF8ByteArrayUtils.findBytes(k, 0, k.length, split);
+		int pos = UTF8ByteArrayUtils.findBytes(k, 0, klength, split);
 		int hashcode = 0;
 		if (pos == -1) {
-			hashcode = WritableComparator.hashBytes(k, k.length);
+			hashcode = WritableComparator.hashBytes(k, klength);
 		} else {
 			hashcode = WritableComparator.hashBytes(k, pos);
 		}
