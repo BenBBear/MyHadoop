@@ -1,0 +1,63 @@
+<div class="container-fluid">
+	<div class="row-fluid">
+		<div class="span12">
+			<div class="row-fluid">
+				<h3>
+						统计条件
+				</h3>
+			</div>
+			<div class="row-fluid">
+				<div class="span6" >
+					<select id="nm-params-host-select" style="height:30px" multiple class="chosen-select">
+					</select>
+				</div>
+				<div class="span6">
+					<select id="nm-params-field-select"  multiple class="chosen-select">
+						<option selected="selected" value="containerNum">Container数量</option>
+						<option selected="selected" value="amNum">Am数量</option>
+						<option selected="selected" value="map">Map状况</option>
+						<option selected="selected" value="reduce">Reduces状况</option>
+						<option value="file">中间文件读写</option>
+						<option value="hdfs">HDFS读写</option>
+					</select>
+				</div>
+			</div>
+			<div class="row-fluid" style="margin-top:10px">
+				<div class="span12">
+					<lebal> 统计时间&nbsp; </lebal>
+					<select id="nm-params-happenTime-select" style="width:120px;" onchange="changeNmHappenTimeParams()" class="chosen-select">
+					  <!-- <option selected="selected" value ="-1">无</option>  -->
+					  <option value ="10">最近10分钟</option>
+					  <option value ="60">最近1小时</option>
+					  <option value ="180">最近3小时</option>
+					  <option value="720">最近12小时</option>
+					  <option selected="selected"  value="1440">最近1天</option>
+					  <option value="4320">最近3天</option>
+					  <option value="10080">最近7天</option>
+					  <option value ="-2">自定义</option>
+					</select>
+					<div style="display:none" id="nm-params-happenTime-divs">
+						<input id="nm-params-happenTime-min" type="text"  style="width:130px;height:30px;" class="form_datetime"  value="">
+						<lebal> &lt; happenTime &lt; </lebal>
+						<input id="nm-params-happenTime-max" type="text"  style="width:130px;height:30px;" class="form_datetime"  value="">
+					</div>
+					<lebal style="padding-left:10px"> 统计间隔&nbsp; </lebal>
+					<select id="nm-params-happenTime-split-select" style="width:120px;">
+					  <option value ="10">10分钟</option>
+					  <option selected="selected" value ="60">1小时</option>
+					  <option value ="180">3小时</option>
+					  <option value="360">6小时</option>
+					  <option value="1440">1天</option>
+					</select>
+				</div>
+			</div>
+			<div class="row-fluid" style="margin-top:10px">
+				<button style="width:70px;" class="btn btn-default" onclick="nmQuery()">查询</button>
+			</div>
+			<div class="row-fluid">
+				<div class="span12" id="nm-draw-div">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
