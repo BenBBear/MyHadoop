@@ -5,7 +5,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparator;
 import org.apache.hadoop.io.WritableUtils;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.util.UTF8ByteArrayUtils;
+import org.apache.log4j.Logger;
+import org.mortbay.log.Log;
 
 /**
  * 本函数用于Text的序列化byte数组 用于二次排序中的分组排序
@@ -23,7 +26,7 @@ import org.apache.hadoop.util.UTF8ByteArrayUtils;
  */
 public class TextFirstGroupComparator extends WritableComparator implements
 		Configurable {
-	protected TextFirstGroupComparator() {
+	public TextFirstGroupComparator() {
 		super(Text.class);
 	}
 
@@ -43,13 +46,12 @@ public class TextFirstGroupComparator extends WritableComparator implements
 		return conf;
 	}
 
-	public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
-		
+	public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {		
 		int n1 = WritableUtils.decodeVIntSize(b1[s1]);
 	    int n2 = WritableUtils.decodeVIntSize(b2[s2]);
 		s1+=n1;l1-=n1;s2+=n2;l2-=n2;
-		int p1 = UTF8ByteArrayUtils.findBytes(b1, s1, l1, split);
-		int p2 = UTF8ByteArrayUtils.findBytes(b2, s2, l2 , split);
+		int p1 = UTF8ByteArrayUtils.findBytes(b1, s1, s1+l1, split);
+		int p2 = UTF8ByteArrayUtils.findBytes(b2, s2, s2+l2 , split);
 		return WritableComparator
 				.compareBytes(b1, s1, p1-s1, b2, s2, p2-s2);
 	}
@@ -58,4 +60,6 @@ public class TextFirstGroupComparator extends WritableComparator implements
 	public int compare(Text o1, Text o2) {
 		return o1.compareTo(o2);
 	}
+	
+
 }
