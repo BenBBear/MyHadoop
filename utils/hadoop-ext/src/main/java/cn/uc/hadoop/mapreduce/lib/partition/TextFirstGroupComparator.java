@@ -15,6 +15,8 @@ import org.mortbay.log.Log;
  * 
  * 使用规则：map的key是 A+分隔符+B 会按照A的字典序比较,相同的会分入一个partition。
  * 
+ * 使用规则：如果map中找不到key,将使用整个key用作比较。
+ * 
  * 使用规则：map的key是 A+分隔符类型+B,会根据第一列的内容进行分区 1.设置分隔符
  * conf.set(TextFirstGroupComparator.TEXT_FIRST_GROUP_COMPATATOR,"``");
  * 2.设置partitioner的类 job.setPartitionerClass(TextFirstPartitioner.class);
@@ -52,8 +54,11 @@ public class TextFirstGroupComparator extends WritableComparator implements
 		s1+=n1;l1-=n1;s2+=n2;l2-=n2;
 		int p1 = UTF8ByteArrayUtils.findBytes(b1, s1, s1+l1, split);
 		int p2 = UTF8ByteArrayUtils.findBytes(b2, s2, s2+l2 , split);
+		//找不到split
+		if( p1 != -1 ) l1 = p1 - s1;
+		if( p2 != -1 ) l2 = p2 - s2;
 		return WritableComparator
-				.compareBytes(b1, s1, p1-s1, b2, s2, p2-s2);
+				.compareBytes(b1, s1, l1, b2, s2, l2);
 	}
 
 	// @Override
