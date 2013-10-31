@@ -6,3 +6,6 @@
 /install/myhadoop-install/parcels/*
 !/install/myhadoop-install/parcels/placeholder
 *.class
+
+/utils/hadoop-ext/.*
+/utils/hadoop-ext/target
