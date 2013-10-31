@@ -1,5 +1,6 @@
 package cn.uc.hadoop.utils;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.CharacterCodingException;
@@ -14,6 +15,7 @@ public class TestTextUtils {
 	private	String s2 = "真的不错啊";
 	private	String s3 = "abcd";
 	private	char c = '真';
+	private	char c1 = c;
 	private	char c2 = 'a';
 	 static abstract class SimpleBenchMark{
 		protected abstract String getName();
@@ -202,6 +204,51 @@ public class TestTextUtils {
 			assertTrue(TextUtils.find(t2,',',4)==3);
 			assertTrue(TextUtils.find(t1,',',7)==-1);
 			
+			
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void testStartsWith(){
+		try{
+			assertTrue(TextUtils.startsWith(new Text(s1),s1.substring(0,1)));
+			assertTrue(TextUtils.startsWith(new Text(s1),s1.substring(0,1).getBytes()));
+			assertTrue(TextUtils.startsWith(new Text(s1),c1));
+			
+			assertTrue(TextUtils.startsWith(this.getLessByteText(s1),s1.substring(0,1)));
+			assertTrue(TextUtils.startsWith(this.getLessByteText(s1),s1.substring(0,1).getBytes()));
+			assertTrue(TextUtils.startsWith(this.getLessByteText(s1),c1));
+			
+			assertFalse(TextUtils.startsWith(new Text(s1),s3));
+			assertFalse(TextUtils.startsWith(new Text(s1),s3.getBytes()));
+			assertFalse(TextUtils.startsWith(new Text(s1),c2));
+			
+			assertFalse(TextUtils.startsWith(new Text(s3),s1));
+			
+			assertTrue(TextUtils.startsWith(new Text(s1),s1));
+			assertTrue(TextUtils.startsWith(new Text(""),""));
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void testEndsWith(){
+		try{
+			assertTrue(TextUtils.endsWith(new Text(s1),"abcd"));
+			assertTrue(TextUtils.endsWith(new Text(s1),"abcd".getBytes()));
+			assertTrue(TextUtils.endsWith(new Text(s1),"d"));
+			
+			assertFalse(TextUtils.endsWith(new Text(s1),"真心"));
+			assertFalse(TextUtils.endsWith(new Text(s1),"真心".getBytes()));
+			assertFalse(TextUtils.endsWith(new Text(s1),"c"));
+			
+			assertTrue(TextUtils.endsWith(new Text(s1),s1));
+			assertTrue(TextUtils.endsWith(new Text(""),""));
 			
 		}
 		catch(Exception e){

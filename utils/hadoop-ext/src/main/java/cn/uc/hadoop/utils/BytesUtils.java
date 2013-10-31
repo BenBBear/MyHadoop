@@ -113,7 +113,7 @@ public class BytesUtils {
 	 */
 
 	public static boolean startsWith(byte[] utf, int start, int end, byte[] b) {
-		if (end - start < b.length) {
+		if ( (end - start) < b.length) {
 			return false;
 		}
 		for (int i = start, j = 0; j < b.length; i++, j++) {
@@ -139,10 +139,10 @@ public class BytesUtils {
 	 */
 
 	public static boolean endsWith(byte[] utf, int start, int end, byte[] b) {
-		if (end - start < b.length) {
+		if( (end - start) < b.length) {
 			return false;
 		}
-		for (int i = end - b.length, j = 0; j < b.length; i++, j++) {
+		for (int i = end-1 , j = b.length-1; j >=0; i--, j--) {
 			if (utf[i] != b[j]) {
 				return false;
 			}
