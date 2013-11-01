@@ -25,25 +25,27 @@ public final class TextUtils {
 		}
 	};
 
-//	private static ThreadLocal<CharsetDecoder> DECODER_FACTORY = new ThreadLocal<CharsetDecoder>() {
-//		protected CharsetDecoder initialValue() {
-//			return Charset.forName("UTF-8").newDecoder()
-//					.onMalformedInput(CodingErrorAction.REPORT)
-//					.onUnmappableCharacter(CodingErrorAction.REPORT);
-//		}
-//	};
+	// private static ThreadLocal<CharsetDecoder> DECODER_FACTORY = new
+	// ThreadLocal<CharsetDecoder>() {
+	// protected CharsetDecoder initialValue() {
+	// return Charset.forName("UTF-8").newDecoder()
+	// .onMalformedInput(CodingErrorAction.REPORT)
+	// .onUnmappableCharacter(CodingErrorAction.REPORT);
+	// }
+	// };
 
 	public static byte[] encode(char c) throws CharacterCodingException {
-		return encode(new char[]{c});
+		return encode(new char[] { c });
 	}
 
 	public static byte[] encode(String s) throws CharacterCodingException {
 		return encode(s.toCharArray());
 	}
+
 	public static byte[] encode(char[] cArray) throws CharacterCodingException {
 		ENCODER_FACTORY.get().reset();
 		CharBuffer cb = CharBuffer.wrap(cArray);
-		ByteBuffer bb =  ENCODER_FACTORY.get().encode(cb);
+		ByteBuffer bb = ENCODER_FACTORY.get().encode(cb);
 		byte[] temp = new byte[bb.limit()];
 		System.arraycopy(bb.array(), 0, temp, 0, bb.limit());
 		return temp;
@@ -199,6 +201,8 @@ public final class TextUtils {
 	// 以下是字段的下标从0开始,
 	// 例如 "aa,bb,cc,dd" 分隔符是"," 的情况下有4个字段,aa是下标为0的字段,bb是下标为1的字段
 	// 例如 "aabbccdd" 分隔符是"," 的情况下有1个字段,aabbccdd是下标为0的字段
+	// 例如 "aabbccdd" 获取第二个字段将会返回null
+	// 例如 "aabb,,ccdd" 获取第二个字段将会返回"" (非空，长度为0的字符串)
 	public static Text findField(Text text, String split, int n)
 			throws CharacterCodingException {
 		byte[] b = encode(split);
@@ -212,59 +216,63 @@ public final class TextUtils {
 	}
 
 	public static Text findField(Text text, byte[] split, int n) {
-		Text re = new Text();
+		if (text == null)
+			return null;
 		byte[] b = text.getBytes();
 		int end = text.getLength();
 		int pos = -1;
 		int nextStart = 0;
 		int s = -1, e = -1;
-		for (int i = 1; i <= n; i++) {
-			pos = BytesUtils.findBytes(b, nextStart, end, b);
+		int i = 0;
+		for (i = 0; i <= n; i++) {
+			pos = BytesUtils.findBytes(b, nextStart, end, split);
 			if (pos < 0) {
 				break;
 			} else {
-				if (i == n - 1) {
-					s = pos;
-				} else if (i == n) {
+				if (i == n) {
+					s = nextStart;
 					e = pos;
+					break;
 				}
 			}
 			nextStart = pos + 1;
 		}
+		// 寻找到最后一个
+		if (pos < 0 && i == n) {
+			s = nextStart;
+			e = end;
+		}
 		if (s < 0) {
-			return re;
+			return null;
 		} else {
-			if (e < 0) {
-				re.set(b, s + 1, (end - s + 1));
-				return re;
-			} else {
-				re.set(b, s + 1, (e - s - 1));
-				return re;
-			}
+			Text re = new Text();
+			re.set(b, s, e - s);
+			return re;
 		}
 	}
 
 	// 以下是Text打断的相关函数,一种是针对一个单一的分隔符，打断为两个Text.一种是类似string的split的全体打断.
 
 	// 例如 "aa,bb,cc,dd" 分隔符是"," 的情况下.按照第2个分隔符打断后，返回["aa,bb" "cc,dd"]
-	// 假如目标分隔符不存在，则返回一个包含原来的text的数组
-	public Text[] split(Text text, String split, int n)
+	// 假如目标分隔符不存在，则返回null
+	public static Text[] split(Text text, String split, int n)
 			throws CharacterCodingException {
 		return split(text, encode(split), n);
 	}
 
-	public Text[] split(Text text, char split, int n)
+	public static Text[] split(Text text, char split, int n)
 			throws CharacterCodingException {
 		return split(text, encode(split), n);
 	}
 
-	public Text[] split(Text text, byte[] split, int n) {
+	public static Text[] split(Text text, byte[] split, int n) {
+		if (text == null)
+			return null;
 		byte[] b = text.getBytes();
 		int length = text.getLength();
 		int pos = BytesUtils.findNthBytes(b, 0, length, split, n);
 		if (pos == -1) {
-			Text temp = new Text(text);
-			return new Text[] { temp };
+			return null;
 		} else {
 			Text t1 = new Text();
 			t1.set(b, 0, pos);
@@ -275,46 +283,52 @@ public final class TextUtils {
 	}
 
 	// 以下是全体打断函数
-	public Text[] split(Text text, String split)
+	public static Text[] split(Text text, String split)
 			throws CharacterCodingException {
 		return split(text, encode(split));
 	}
 
-	public Text[] split(Text text, char split) throws CharacterCodingException {
+	public static Text[] split(Text text, char split)
+			throws CharacterCodingException {
 		return split(text, encode(split));
 	}
 
-	public Text[] split(Text text, byte[] split) {
+	public static Text[] split(Text text, byte[] split) {
 		// TODO 使用静态数组?
+		if (text == null)
+			return null;
 
 		// 采集分割后的下标,如果下标超出maxlength，将复制数组，拓展大小到原来的2倍
 		int maxLength = 16;
 		int now = 0;
 		int[] startMark = new int[maxLength];
-		int[] lenMark = new int[maxLength];
+		int[] endMark = new int[maxLength];
 
 		byte[] b = text.getBytes();
 		int length = text.getLength();
 		int pos = -1;
 		int nextStart = 0;
-		int pre = 0;
 		do {
-			pos = BytesUtils.findBytes(b, nextStart, length, b);
+			pos = BytesUtils.findBytes(b, nextStart, length, split);
+			if (now == maxLength) {// 一般情况下都不需要拓展
+				int newLength = maxLength << 1;
+				int[] temp = new int[newLength];
+				System.arraycopy(startMark, 0, temp, 0, maxLength);
+				startMark = temp;
+
+				temp = new int[newLength];
+				System.arraycopy(endMark, 0, temp, 0, maxLength);
+				endMark = temp;
+
+				maxLength = newLength;
+			}
 			if (pos >= 0) {
-				if (now == maxLength) {// 一般情况下都不需要拓展
-					int newLength = maxLength << 1;
-					int[] temp = new int[newLength];
-					System.arraycopy(startMark, 0, temp, 0, maxLength);
-					startMark = temp;
-
-					temp = new int[newLength];
-					System.arraycopy(lenMark, 0, temp, 0, maxLength);
-					lenMark = temp;
-
-					maxLength = newLength;
-				}
-				startMark[now] = pre;
-				lenMark[now] = pos - pre;
+				startMark[now] = nextStart;
+				endMark[now] = pos;
+				now++;
+			} else {
+				startMark[now] = nextStart;
+				endMark[now] = length;
 				now++;
 			}
 			nextStart = pos + 1;
@@ -322,8 +336,8 @@ public final class TextUtils {
 		Text[] tArray = new Text[now];
 		for (int i = 0; i < now; i++) {
 			tArray[i] = new Text();
-			if (lenMark[i] != 0) {
-				tArray[i].set(b, startMark[i], lenMark[i]);
+			if (endMark[i] != 0) {
+				tArray[i].set(b, startMark[i], (endMark[i] - startMark[i]));
 			}
 		}
 		return tArray;
@@ -342,38 +356,40 @@ public final class TextUtils {
 	}
 
 	public static Text subField(Text text, byte[] split, int start, int end) {
-		Text re = new Text();
+		if (start <0 || end <0 || start > end)
+			return null;
+		
 		byte[] b = text.getBytes();
 		int length = text.getLength();
-		int pos = -1, prepos = -1;
+		int pos = -1;
 		int nextStart = 0;
-		int s = -1, e = -1;
-		for (int i = 1; i <= end; i++) {
-			pos = BytesUtils.findBytes(b, nextStart, length, b);
+		int s = -1, e = -1, i;
+		for (i = 0; i <= end; i++) {
+			pos = BytesUtils.findBytes(b, nextStart, length, split);
 			if (pos < 0) {
-				if (i == start + 1) {
-					s = prepos + 1;
-				}
-				if (i == end) {
-					e = pos - 1;
-				}
 				break;
 			} else {
-				if (i == start + 1) {
-					s = prepos + 1;
+				if (i == start) {
+					s = nextStart;
 				}
 				if (i == end) {
-					e = pos - 1;
+					e = pos;
 				}
-				prepos = pos;
 			}
 			nextStart = pos + 1;
 		}
+		if (i == start && pos < 0) {
+			e = nextStart;
+		}
+		if (i == end && pos < 0) {
+			e = length;
+		}
 		if (s != -1 && e != -1) {
-			re.set(b, s, e);
+			Text re = new Text();
+			re.set(b, s, e-s);
 			return re;
 		} else {
-			return re;
+			return null;
 		}
 
 	}
@@ -392,27 +408,29 @@ public final class TextUtils {
 			}
 		}
 	}
-	
-	private static byte upLowDiff = 'A'-'a';
+
+	private static byte upLowDiff = 'A' - 'a';
 	private static byte aByte = 'a';
 	private static byte zByte = 'z';
 	private static byte AByte = 'A';
 	private static byte ZByte = 'Z';
-	public static void toLowerCase(Text text){
+
+	public static void toLowerCase(Text text) {
 		byte[] b = text.getBytes();
 		int length = text.getLength();
-		for(int i=0;i<length;i++){
-			if(b[i]>=AByte && b[i]<= ZByte){
-				b[i]-=upLowDiff;
+		for (int i = 0; i < length; i++) {
+			if (b[i] >= AByte && b[i] <= ZByte) {
+				b[i] -= upLowDiff;
 			}
 		}
 	}
-	public static void toUpperCase(Text text){
+
+	public static void toUpperCase(Text text) {
 		byte[] b = text.getBytes();
 		int length = text.getLength();
-		for(int i=0;i<length;i++){
-			if(b[i]>=aByte && b[i]<= zByte){
-				b[i]+=upLowDiff;
+		for (int i = 0; i < length; i++) {
+			if (b[i] >= aByte && b[i] <= zByte) {
+				b[i] += upLowDiff;
 			}
 		}
 	}

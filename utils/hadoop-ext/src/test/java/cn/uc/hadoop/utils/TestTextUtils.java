@@ -185,6 +185,7 @@ public class TestTextUtils {
 			assertTrue(TextUtils.find(this.getLessByteText(s1,"z"), 'z')==-1);
 			
 			//寻找第N个
+			assertTrue(TextUtils.find(this.getLessByteText(s1,s1), 'a',0)==-1);
 			assertTrue(TextUtils.find(this.getLessByteText(s1,s1), 'a',1)==b2.length);
 			
 			Text t = this.getLessByteText(s1+s1,s1);
@@ -254,6 +255,168 @@ public class TestTextUtils {
 		catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+	
+	private static String ss1="abc,def,ghi,jkl,opq";
+	private static String ss2=",abc,def,ghi,jkl,opq,";
+	private static String ss3=",,,,,";
+	private static String ss4="abcde";
+	@Test
+	public void testFindField(){
+		try{
+			Text text = this.getLessByteText(ss1);
+			assertTrue(TextUtils.findField(text, "," , 0).equals(new Text("abc")));
+			assertTrue(TextUtils.findField(text, "," , 1).equals(new Text("def")));
+			assertTrue(TextUtils.findField(text, "," , 4).equals(new Text("opq")));
+			assertTrue(TextUtils.findField(text, "," , 5)==null);
+			assertTrue(TextUtils.findField(text, "," , 10)==null);
+			
+			text = this.getLessByteText(ss2);
+			assertTrue(TextUtils.findField(text, "," , 0).equals(new Text("")));
+			assertTrue(TextUtils.findField(text, "," , 1).equals(new Text("abc")));
+			assertTrue(TextUtils.findField(text, "," , 6).equals(new Text("")));
+			assertTrue(TextUtils.findField(text, "," , 7)==null);
+			
+			
+			text = this.getLessByteText(ss3);
+			assertTrue(TextUtils.findField(text, "," , 0).equals(new Text("")));
+			assertTrue(TextUtils.findField(text, "," , 1).equals(new Text("")));
+			assertTrue(TextUtils.findField(text, "," , 5).equals(new Text("")));
+			assertTrue(TextUtils.findField(text, "," , 6)==null);
+			
+			text = this.getLessByteText(ss4);
+			assertTrue(TextUtils.findField(text, "," , 0).equals(new Text("abcde")));
+			assertTrue(TextUtils.findField(text, "," , 1)==null);
+			assertTrue(TextUtils.findField(text, "," , 6)==null);
+			
+			
+			assertTrue(TextUtils.findField(null, "," , 1)==null);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	private boolean compareSpliteResult(Text[] t,String... a){
+		if( t.length != a.length ) return false;
+		for ( int i=0;i<t.length;i++){
+			if( ! t[i].equals(new Text(a[i])) ) return false;
+			if( ! t[i].toString().equals(a[i]) ) return false;
+		}
+		return true;
+	}
+	@Test
+	public void testSplit(){
+		try{
+			//以下测试split 到2个字段的
+			Text text = this.getLessByteText(ss1);
+
+			assertTrue(TextUtils.split(text, "," , 0)==null);
+			
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 1),"abc","def,ghi,jkl,opq"));
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 3),"abc,def,ghi","jkl,opq"));
+			assertTrue(TextUtils.split(text, "," , 5)==null);
+			assertTrue(TextUtils.split(text, "," , 10)==null);
+
+			text = this.getLessByteText(ss2);
+			assertTrue(TextUtils.split(text, "," , 0)==null);
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 1),"","abc,def,ghi,jkl,opq,"));
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 6),",abc,def,ghi,jkl,opq",""));
+			assertTrue(TextUtils.findField(text, "," , 7)==null);
+			
+			
+			text = this.getLessByteText(ss3);
+			assertTrue(TextUtils.split(text, "," , 0)==null);
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 1),"",",,,,"));
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 2),",",",,,"));
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 3),",,",",,"));
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 5),",,,,",""));
+			assertTrue(TextUtils.split(text, "," , 6)==null);
+			
+			text = this.getLessByteText(ss4);
+			assertTrue(TextUtils.split(text, "," , 0)==null);
+			assertTrue(TextUtils.split(text, "," , 1)==null);
+			assertTrue(TextUtils.split(text, "," , 6)==null);
+			
+			
+			//以下测试split所有的
+			text = this.getLessByteText(ss1);
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," ),"abc","def","ghi","jkl","opq"));
+			text = this.getLessByteText(ss2);
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," ),"","abc","def","ghi","jkl","opq",""));
+			text = this.getLessByteText(ss3);
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," ),"","","","","",""));
+			text = this.getLessByteText(ss4);
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," ),"abcde"));
+			assertTrue(compareSpliteResult(TextUtils.split(new Text(), "," ),""));
+			assertTrue(TextUtils.split(null, "," )==null);
+			
+			//以下测试split所有的，且数组需要拓展的情况，即出来的字段大于16个
+			text = this.getLessByteText(",0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,,");
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," ),"",
+					"0","1","2","3","4","5","6","7","8","9",
+					"10","11","12","13","14","15","16","17","18","19",
+					"20","21","22","23","24","25","26","27","28","29",
+					"30","31","32","33","34","35","36","37","38","39","40","",""));
+			
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void testSubField(){
+		try{
+			Text text = this.getLessByteText(ss1);
+			assertTrue(TextUtils.subField(text,",",4,2)==null);
+			assertTrue(TextUtils.subField(text,",",2,4).equals(new Text("ghi,jkl,opq")));
+			assertTrue(TextUtils.subField(text,",",2,2).equals(new Text("ghi")));
+			assertTrue(TextUtils.subField(text,",",0,0).equals(new Text("abc")));
+			assertTrue(TextUtils.subField(text,",",0,4).equals(new Text("abc,def,ghi,jkl,opq")));
+			assertTrue(TextUtils.subField(text,",",0,5)==null);
+			
+			text = this.getLessByteText(ss2);
+			assertTrue(TextUtils.subField(text,",",4,2)==null);
+			assertTrue(TextUtils.subField(text,",",2,4).equals(new Text("def,ghi,jkl")));
+			assertTrue(TextUtils.subField(text,",",2,2).equals(new Text("def")));
+			assertTrue(TextUtils.subField(text,",",0,0).equals(new Text("")));
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void testReplaceField(){
+		try{
+			Text text = this.getLessByteText(ss1);
+	
+			assertTrue(TextUtils.split(text, "," , 0)==null);
+			
+			Text[] tArray = TextUtils.split(text, ",");
+			TextUtils.replaceField(tArray,"abc","def");
+			assertTrue(compareSpliteResult(tArray,"def","def","ghi","jkl","opq"));
+			TextUtils.replaceField(tArray,"def","ghi");
+			assertTrue(compareSpliteResult(tArray,"ghi","ghi","ghi","jkl","opq"));
+			TextUtils.replaceField(tArray,"ghi","jkl");
+			assertTrue(compareSpliteResult(tArray,"jkl","jkl","jkl","jkl","opq"));
+			TextUtils.replaceField(tArray,"jkl","");
+			assertTrue(compareSpliteResult(tArray,"","","","","opq"));
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void testUpperLowerField(){
+		Text t = new Text(s1);
+		TextUtils.toUpperCase(t);
+		t.equals(new Text(s1.toUpperCase()));
+		
+		TextUtils.toLowerCase(t);
+		t.equals(new Text(s1.toLowerCase()));
 	}
 	
 	//below is beachmark
