@@ -9,6 +9,8 @@ import java.util.Random;
 import org.apache.hadoop.io.Text;
 import org.junit.Test;
 
+import cn.uc.hadoop.exception.TextSplitIndexOutOfBoundsException;
+
 public class TestTextUtils {
 	private	String s = "真的不错啊abcd";
 	private	String s1 = s;
@@ -109,6 +111,7 @@ public class TestTextUtils {
 			assertTrue(bs[bs2.length] == cs2[0]);
 
 		} catch (Exception e) {
+			assertTrue(false);
 			e.printStackTrace();
 		}
 
@@ -164,6 +167,7 @@ public class TestTextUtils {
 			assertTrue(t10.equals(new Text("真的挺快的啊")));
 			
 		} catch (Exception e) {
+			assertTrue(false);
 			e.printStackTrace();
 		}
 
@@ -208,6 +212,7 @@ public class TestTextUtils {
 			
 		}
 		catch(Exception e){
+			assertTrue(false);
 			e.printStackTrace();
 		}
 	}
@@ -233,7 +238,7 @@ public class TestTextUtils {
 			assertTrue(TextUtils.startsWith(new Text(""),""));
 		}
 		catch(Exception e){
-			e.printStackTrace();
+			assertTrue(false);
 		}
 	}
 	
@@ -268,35 +273,44 @@ public class TestTextUtils {
 			assertTrue(TextUtils.findField(text, "," , 0).equals(new Text("abc")));
 			assertTrue(TextUtils.findField(text, "," , 1).equals(new Text("def")));
 			assertTrue(TextUtils.findField(text, "," , 4).equals(new Text("opq")));
-			assertTrue(TextUtils.findField(text, "," , 5)==null);
-			assertTrue(TextUtils.findField(text, "," , 10)==null);
 			
 			text = this.getLessByteText(ss2);
 			assertTrue(TextUtils.findField(text, "," , 0).equals(new Text("")));
 			assertTrue(TextUtils.findField(text, "," , 1).equals(new Text("abc")));
 			assertTrue(TextUtils.findField(text, "," , 6).equals(new Text("")));
-			assertTrue(TextUtils.findField(text, "," , 7)==null);
 			
 			
 			text = this.getLessByteText(ss3);
 			assertTrue(TextUtils.findField(text, "," , 0).equals(new Text("")));
 			assertTrue(TextUtils.findField(text, "," , 1).equals(new Text("")));
 			assertTrue(TextUtils.findField(text, "," , 5).equals(new Text("")));
-			assertTrue(TextUtils.findField(text, "," , 6)==null);
 			
 			text = this.getLessByteText(ss4);
 			assertTrue(TextUtils.findField(text, "," , 0).equals(new Text("abcde")));
-			assertTrue(TextUtils.findField(text, "," , 1)==null);
-			assertTrue(TextUtils.findField(text, "," , 6)==null);
-			
-			
-			assertTrue(TextUtils.findField(null, "," , 1)==null);
 		}
 		catch(Exception e){
-			e.printStackTrace();
+			assertTrue(false);
 		}
 	}
-	
+	@Test(expected=TextSplitIndexOutOfBoundsException.class)
+	public void testFindFieldException1() throws CharacterCodingException{
+		Text text = this.getLessByteText(ss1);
+		TextUtils.findField(text, "," , 5);
+	}
+	@Test(expected=TextSplitIndexOutOfBoundsException.class)
+	public void testFindFieldException2() throws CharacterCodingException{
+		Text text = this.getLessByteText(ss1);
+		TextUtils.findField(text, "," , 10);
+	}
+	@Test(expected=TextSplitIndexOutOfBoundsException.class)
+	public void testFindFieldException3() throws CharacterCodingException{
+		Text text = this.getLessByteText(ss4);
+		assertTrue(TextUtils.findField(text, "," , 1)==null);
+	}
+	@Test(expected=NullPointerException.class)
+	public void testFindFieldException4() throws CharacterCodingException{
+		TextUtils.findField(null, "," , 1);
+	}
 	private boolean compareSpliteResult(Text[] t,String... a){
 		if( t.length != a.length ) return false;
 		for ( int i=0;i<t.length;i++){
@@ -310,34 +324,107 @@ public class TestTextUtils {
 		try{
 			//以下测试split 到2个字段的
 			Text text = this.getLessByteText(ss1);
-
-			assertTrue(TextUtils.split(text, "," , 0)==null);
+			boolean exceptionError = false;
+			try{
+				exceptionError = false;
+				assertTrue(TextUtils.split(text, "," , 0)==null);
+			}
+			catch(TextSplitIndexOutOfBoundsException e){
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
+			
 			
 			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 1),"abc","def,ghi,jkl,opq"));
 			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 3),"abc,def,ghi","jkl,opq"));
-			assertTrue(TextUtils.split(text, "," , 5)==null);
-			assertTrue(TextUtils.split(text, "," , 10)==null);
+			try{
+				exceptionError = false;
+				assertTrue(TextUtils.split(text, "," , 5)==null);
+			}
+			catch(TextSplitIndexOutOfBoundsException e){
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
+			
+			try{
+				exceptionError = false;
+				assertTrue(TextUtils.split(text, "," , 10)==null);
+			}
+			catch(TextSplitIndexOutOfBoundsException e){
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
+			
+			
 
 			text = this.getLessByteText(ss2);
-			assertTrue(TextUtils.split(text, "," , 0)==null);
+			
+			try{
+				exceptionError = false;
+				assertTrue(TextUtils.split(text, "," , 0)==null);
+			}
+			catch(TextSplitIndexOutOfBoundsException e){
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
+			
+			
 			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 1),"","abc,def,ghi,jkl,opq,"));
 			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 6),",abc,def,ghi,jkl,opq",""));
-			assertTrue(TextUtils.findField(text, "," , 7)==null);
+
+			try{
+				exceptionError = false;
+				assertTrue(TextUtils.findField(text, "," , 7)==null);
+			}
+			catch(TextSplitIndexOutOfBoundsException e){
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
 			
 			
 			text = this.getLessByteText(ss3);
-			assertTrue(TextUtils.split(text, "," , 0)==null);
+			try{
+				exceptionError = false;
+				assertTrue(TextUtils.split(text, "," , 0)==null);
+			}
+			catch(TextSplitIndexOutOfBoundsException e){
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
+			
 			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 1),"",",,,,"));
 			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 2),",",",,,"));
 			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 3),",,",",,"));
 			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 5),",,,,",""));
-			assertTrue(TextUtils.split(text, "," , 6)==null);
+			
+			try{
+				exceptionError = false;
+				assertTrue(TextUtils.split(text, "," , 6)==null);
+			}
+			catch(TextSplitIndexOutOfBoundsException e){
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
 			
 			text = this.getLessByteText(ss4);
-			assertTrue(TextUtils.split(text, "," , 0)==null);
-			assertTrue(TextUtils.split(text, "," , 1)==null);
-			assertTrue(TextUtils.split(text, "," , 6)==null);
 			
+			try{
+				exceptionError = false;
+				assertTrue(TextUtils.split(text, "," , 0)==null);
+			}
+			catch(TextSplitIndexOutOfBoundsException e){
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
+			
+			try{
+				exceptionError = false;
+				assertTrue(TextUtils.split(text, "," , 1)==null);
+			}
+			catch(TextSplitIndexOutOfBoundsException e){
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
 			
 			//以下测试split所有的
 			text = this.getLessByteText(ss1);
@@ -362,6 +449,7 @@ public class TestTextUtils {
 		}
 		catch(Exception e){
 			e.printStackTrace();
+			assertTrue(false);
 		}
 	}
 	
@@ -369,21 +457,45 @@ public class TestTextUtils {
 	public void testSubField(){
 		try{
 			Text text = this.getLessByteText(ss1);
-			assertTrue(TextUtils.subField(text,",",4,2)==null);
+			boolean exceptionError = false;
+			try{
+				exceptionError = false;
+				TextUtils.subField(text,",",4,2);
+			}
+			catch(Exception e){
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
 			assertTrue(TextUtils.subField(text,",",2,4).equals(new Text("ghi,jkl,opq")));
 			assertTrue(TextUtils.subField(text,",",2,2).equals(new Text("ghi")));
 			assertTrue(TextUtils.subField(text,",",0,0).equals(new Text("abc")));
 			assertTrue(TextUtils.subField(text,",",0,4).equals(new Text("abc,def,ghi,jkl,opq")));
-			assertTrue(TextUtils.subField(text,",",0,5)==null);
+			try{
+				exceptionError = false;
+				TextUtils.subField(text,",",0,5);
+			}
+			catch(Exception e){
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
 			
 			text = this.getLessByteText(ss2);
-			assertTrue(TextUtils.subField(text,",",4,2)==null);
+			try{
+				exceptionError = false;
+				TextUtils.subField(text,",",4,2);
+			}
+			catch(Exception e){
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
+			
 			assertTrue(TextUtils.subField(text,",",2,4).equals(new Text("def,ghi,jkl")));
 			assertTrue(TextUtils.subField(text,",",2,2).equals(new Text("def")));
 			assertTrue(TextUtils.subField(text,",",0,0).equals(new Text("")));
 		}
 		catch(Exception e){
 			e.printStackTrace();
+			assertTrue(false);
 		}
 	}
 	
@@ -391,11 +503,19 @@ public class TestTextUtils {
 	public void testReplaceField(){
 		try{
 			Text text = this.getLessByteText(ss1);
-	
-			assertTrue(TextUtils.split(text, "," , 0)==null);
-			
+			boolean exceptionError = false;
+			try{
+				exceptionError = false;
+				TextUtils.split(text, "," , 0);
+			}
+			catch(Exception e){
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
+
 			Text[] tArray = TextUtils.split(text, ",");
 			TextUtils.replaceField(tArray,"abc","def");
+			
 			assertTrue(compareSpliteResult(tArray,"def","def","ghi","jkl","opq"));
 			TextUtils.replaceField(tArray,"def","ghi");
 			assertTrue(compareSpliteResult(tArray,"ghi","ghi","ghi","jkl","opq"));
@@ -406,6 +526,22 @@ public class TestTextUtils {
 		}
 		catch(Exception e){
 			e.printStackTrace();
+			assertTrue(false);
+			
+		}
+	}
+	
+	
+	@Test
+	public void testJoin(){
+		try{
+			Text[] text = new Text[]{this.getLessByteText(ss1) , this.getLessByteText(ss2) , this.getLessByteText(ss3)};
+			assertTrue(TextUtils.join(text, "`").toString().equals(ss1+"`"+ss2+"`"+ss3));
+			assertTrue(TextUtils.join(TextUtils.split(this.getLessByteText(ss1), ","),",").toString().equals(ss1));
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			assertTrue(false);
 		}
 	}
 	

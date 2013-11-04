@@ -4,11 +4,12 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 
 import org.apache.hadoop.io.Text;
+
+import cn.uc.hadoop.exception.TextSplitIndexOutOfBoundsException;
 
 /**
  * 操作Hadoop的Text，关注性能。
@@ -216,8 +217,6 @@ public final class TextUtils {
 	}
 
 	public static Text findField(Text text, byte[] split, int n) {
-		if (text == null)
-			return null;
 		byte[] b = text.getBytes();
 		int end = text.getLength();
 		int pos = -1;
@@ -243,7 +242,7 @@ public final class TextUtils {
 			e = end;
 		}
 		if (s < 0) {
-			return null;
+			throw new TextSplitIndexOutOfBoundsException(n);
 		} else {
 			Text re = new Text();
 			re.set(b, s, e - s);
@@ -272,7 +271,7 @@ public final class TextUtils {
 		int length = text.getLength();
 		int pos = BytesUtils.findNthBytes(b, 0, length, split, n);
 		if (pos == -1) {
-			return null;
+			throw new TextSplitIndexOutOfBoundsException(n);
 		} else {
 			Text t1 = new Text();
 			t1.set(b, 0, pos);
@@ -356,9 +355,16 @@ public final class TextUtils {
 	}
 
 	public static Text subField(Text text, byte[] split, int start, int end) {
-		if (start <0 || end <0 || start > end)
-			return null;
-		
+		if (start < 0) {
+			throw new TextSplitIndexOutOfBoundsException(start);
+		}
+		if (end < 0) {
+			throw new TextSplitIndexOutOfBoundsException(end);
+		}
+		if (start > end) {
+			throw new TextSplitIndexOutOfBoundsException(end - start);
+		}
+
 		byte[] b = text.getBytes();
 		int length = text.getLength();
 		int pos = -1;
@@ -384,14 +390,15 @@ public final class TextUtils {
 		if (i == end && pos < 0) {
 			e = length;
 		}
-		if (s != -1 && e != -1) {
-			Text re = new Text();
-			re.set(b, s, e-s);
-			return re;
-		} else {
-			return null;
+		if (s == -1) {
+			throw new TextSplitIndexOutOfBoundsException(start);
 		}
-
+		if (e == -1) {
+			throw new TextSplitIndexOutOfBoundsException(end);
+		}
+		Text re = new Text();
+		re.set(b, s, e - s);
+		return re;
 	}
 
 	// 将text数组中进行替换
@@ -407,6 +414,48 @@ public final class TextUtils {
 				text[i].set(place, 0, place.length);
 			}
 		}
+	}
+
+	// 将text数组使用指定的分隔符进行拼接,合并到一个text中
+	public static Text join(Text[] text, String split)
+			throws CharacterCodingException {
+		return join(text, encode(split));
+	}
+
+	public static Text join(Text[] text, char split)
+			throws CharacterCodingException {
+		return join(text, encode(split));
+	}
+
+	public static Text join(Text[] text, byte[] split) {
+		int length = text.length;
+		int sumLength = 0;
+		for (int i = 0; i < length; i++) {
+			sumLength += text[i].getLength();
+			sumLength += split.length;
+		}
+		// 减去最后一个
+		sumLength -= split.length;
+
+		byte[] dest = new byte[sumLength];
+		
+		int destPos = 0;
+		// 复制原来的text
+		destPos = 0;
+		// 添加新增的text
+		for (int i = 0; i < length; i++) {
+			if (i != 0) {
+				// 复制一个split
+				System.arraycopy(split, 0, dest, destPos, split.length);
+				destPos += split.length;
+			}
+			System.arraycopy(text[i].getBytes(), 0, dest, destPos,
+					text[i].getLength());
+			destPos += text[i].getLength();
+		}
+		Text re = new Text();
+		re.set(dest);
+		return re;
 	}
 
 	private static byte upLowDiff = 'A' - 'a';
