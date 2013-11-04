@@ -327,7 +327,7 @@ public class TestTextUtils {
 			boolean exceptionError = false;
 			try{
 				exceptionError = false;
-				assertTrue(TextUtils.split(text, "," , 0)==null);
+				assertTrue(TextUtils.splitToTwo(text, "," , 0)==null);
 			}
 			catch(TextSplitIndexOutOfBoundsException e){
 				exceptionError = true;
@@ -335,11 +335,11 @@ public class TestTextUtils {
 			assertTrue(exceptionError);
 			
 			
-			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 1),"abc","def,ghi,jkl,opq"));
-			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 3),"abc,def,ghi","jkl,opq"));
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, "," , 1),"abc","def,ghi,jkl,opq"));
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, "," , 3),"abc,def,ghi","jkl,opq"));
 			try{
 				exceptionError = false;
-				assertTrue(TextUtils.split(text, "," , 5)==null);
+				assertTrue(TextUtils.splitToTwo(text, "," , 5)==null);
 			}
 			catch(TextSplitIndexOutOfBoundsException e){
 				exceptionError = true;
@@ -348,7 +348,7 @@ public class TestTextUtils {
 			
 			try{
 				exceptionError = false;
-				assertTrue(TextUtils.split(text, "," , 10)==null);
+				assertTrue(TextUtils.splitToTwo(text, "," , 10)==null);
 			}
 			catch(TextSplitIndexOutOfBoundsException e){
 				exceptionError = true;
@@ -361,7 +361,7 @@ public class TestTextUtils {
 			
 			try{
 				exceptionError = false;
-				assertTrue(TextUtils.split(text, "," , 0)==null);
+				assertTrue(TextUtils.splitToTwo(text, "," , 0)==null);
 			}
 			catch(TextSplitIndexOutOfBoundsException e){
 				exceptionError = true;
@@ -369,8 +369,8 @@ public class TestTextUtils {
 			assertTrue(exceptionError);
 			
 			
-			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 1),"","abc,def,ghi,jkl,opq,"));
-			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 6),",abc,def,ghi,jkl,opq",""));
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, "," , 1),"","abc,def,ghi,jkl,opq,"));
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, "," , 6),",abc,def,ghi,jkl,opq",""));
 
 			try{
 				exceptionError = false;
@@ -385,21 +385,21 @@ public class TestTextUtils {
 			text = this.getLessByteText(ss3);
 			try{
 				exceptionError = false;
-				assertTrue(TextUtils.split(text, "," , 0)==null);
+				assertTrue(TextUtils.splitToTwo(text, "," , 0)==null);
 			}
 			catch(TextSplitIndexOutOfBoundsException e){
 				exceptionError = true;
 			}
 			assertTrue(exceptionError);
 			
-			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 1),"",",,,,"));
-			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 2),",",",,,"));
-			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 3),",,",",,"));
-			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 5),",,,,",""));
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, "," , 1),"",",,,,"));
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, "," , 2),",",",,,"));
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, "," , 3),",,",",,"));
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, "," , 5),",,,,",""));
 			
 			try{
 				exceptionError = false;
-				assertTrue(TextUtils.split(text, "," , 6)==null);
+				assertTrue(TextUtils.splitToTwo(text, "," , 6)==null);
 			}
 			catch(TextSplitIndexOutOfBoundsException e){
 				exceptionError = true;
@@ -410,7 +410,7 @@ public class TestTextUtils {
 			
 			try{
 				exceptionError = false;
-				assertTrue(TextUtils.split(text, "," , 0)==null);
+				assertTrue(TextUtils.splitToTwo(text, "," , 0)==null);
 			}
 			catch(TextSplitIndexOutOfBoundsException e){
 				exceptionError = true;
@@ -419,7 +419,7 @@ public class TestTextUtils {
 			
 			try{
 				exceptionError = false;
-				assertTrue(TextUtils.split(text, "," , 1)==null);
+				assertTrue(TextUtils.splitToTwo(text, "," , 1)==null);
 			}
 			catch(TextSplitIndexOutOfBoundsException e){
 				exceptionError = true;
@@ -429,6 +429,11 @@ public class TestTextUtils {
 			//以下测试split所有的
 			text = this.getLessByteText(ss1);
 			assertTrue(compareSpliteResult(TextUtils.split(text, "," ),"abc","def","ghi","jkl","opq"));
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 3),"abc","def","ghi,jkl,opq"));
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 1),"abc,def,ghi,jkl,opq"));
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 2),"abc","def,ghi,jkl,opq"));
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 5),"abc","def","ghi","jkl","opq"));
+			assertTrue(compareSpliteResult(TextUtils.split(text, "," , 7),"abc","def","ghi","jkl","opq"));
 			text = this.getLessByteText(ss2);
 			assertTrue(compareSpliteResult(TextUtils.split(text, "," ),"","abc","def","ghi","jkl","opq",""));
 			text = this.getLessByteText(ss3);
@@ -436,7 +441,7 @@ public class TestTextUtils {
 			text = this.getLessByteText(ss4);
 			assertTrue(compareSpliteResult(TextUtils.split(text, "," ),"abcde"));
 			assertTrue(compareSpliteResult(TextUtils.split(new Text(), "," ),""));
-			assertTrue(TextUtils.split(null, "," )==null);
+			
 			
 			//以下测试split所有的，且数组需要拓展的情况，即出来的字段大于16个
 			text = this.getLessByteText(",0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,,");
@@ -506,7 +511,7 @@ public class TestTextUtils {
 			boolean exceptionError = false;
 			try{
 				exceptionError = false;
-				TextUtils.split(text, "," , 0);
+				TextUtils.splitToTwo(text, "," , 0);
 			}
 			catch(Exception e){
 				exceptionError = true;

@@ -254,17 +254,17 @@ public final class TextUtils {
 
 	// 例如 "aa,bb,cc,dd" 分隔符是"," 的情况下.按照第2个分隔符打断后，返回["aa,bb" "cc,dd"]
 	// 假如目标分隔符不存在，则返回null
-	public static Text[] split(Text text, String split, int n)
+	public static Text[] splitToTwo(Text text, String split, int n)
 			throws CharacterCodingException {
-		return split(text, encode(split), n);
+		return splitToTwo(text, encode(split), n);
 	}
 
-	public static Text[] split(Text text, char split, int n)
+	public static Text[] splitToTwo(Text text, char split, int n)
 			throws CharacterCodingException {
-		return split(text, encode(split), n);
+		return splitToTwo(text, encode(split), n);
 	}
 
-	public static Text[] split(Text text, byte[] split, int n) {
+	public static Text[] splitToTwo(Text text, byte[] split, int n) {
 		if (text == null)
 			return null;
 		byte[] b = text.getBytes();
@@ -284,21 +284,42 @@ public final class TextUtils {
 	// 以下是全体打断函数
 	public static Text[] split(Text text, String split)
 			throws CharacterCodingException {
-		return split(text, encode(split));
+		return split(text, encode(split), 0);
 	}
 
 	public static Text[] split(Text text, char split)
 			throws CharacterCodingException {
-		return split(text, encode(split));
+		return split(text, encode(split), 0);
 	}
 
 	public static Text[] split(Text text, byte[] split) {
-		// TODO 使用静态数组?
-		if (text == null)
-			return null;
+		return split(text, split, 0);
+	}
 
+	public static Text[] split(Text text, String split, int limit)
+			throws CharacterCodingException {
+		return split(text, encode(split), limit);
+	}
+
+	public static Text[] split(Text text, char split, int limit)
+			throws CharacterCodingException {
+		return split(text, encode(split), limit);
+	}
+
+	public static Text[] split(Text text, byte[] split, int limit) {
+		if( limit == 0){
+			return new Text[]{};
+		}
+		if( limit == 1){
+			return new Text[]{new Text(text)};
+		}
+		// TODO 使用静态数组?
 		// 采集分割后的下标,如果下标超出maxlength，将复制数组，拓展大小到原来的2倍
 		int maxLength = 16;
+		if (limit > 1) {
+			//如果固定了切分的数量,则最大的标记数组时可以预计的
+			maxLength = limit + 1;
+		}
 		int now = 0;
 		int[] startMark = new int[maxLength];
 		int[] endMark = new int[maxLength];
@@ -321,10 +342,17 @@ public final class TextUtils {
 
 				maxLength = newLength;
 			}
-			if (pos >= 0) {
+			if (pos >= 0 ) {
 				startMark[now] = nextStart;
 				endMark[now] = pos;
 				now++;
+				//到达上限了
+				if( now == limit -1){
+					startMark[now] = pos + 1;
+					endMark[now] = length;
+					now++;
+					break;
+				}
 			} else {
 				startMark[now] = nextStart;
 				endMark[now] = length;
@@ -332,6 +360,7 @@ public final class TextUtils {
 			}
 			nextStart = pos + 1;
 		} while (pos >= 0);
+		//复制字节到数组中
 		Text[] tArray = new Text[now];
 		for (int i = 0; i < now; i++) {
 			tArray[i] = new Text();
@@ -438,7 +467,7 @@ public final class TextUtils {
 		sumLength -= split.length;
 
 		byte[] dest = new byte[sumLength];
-		
+
 		int destPos = 0;
 		// 复制原来的text
 		destPos = 0;
