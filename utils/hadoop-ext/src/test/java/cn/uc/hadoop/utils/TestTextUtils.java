@@ -450,7 +450,7 @@ public class TestTextUtils {
 			assertTrue(compareSpliteResult(TextUtils.split(text, "," ),"abcde"));
 			assertTrue(compareSpliteResult(TextUtils.split(new Text(), "," ),""));
 			assertTrue(compareSpliteResult(TextUtils.split(new Text("abcd,,abc,,ab"), ",," ),"abcd","abc","ab"));
-			
+			assertTrue(compareSpliteResult(TextUtils.split(new Text("abcd,,abc,,ab,,"), ",,",3 ),"abcd","abc","ab,,"));
 			//以下测试split所有的，且数组需要拓展的情况，即出来的字段大于16个
 			text = this.getLessByteText(",0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,,");
 			assertTrue(compareSpliteResult(TextUtils.split(text, "," ),"",

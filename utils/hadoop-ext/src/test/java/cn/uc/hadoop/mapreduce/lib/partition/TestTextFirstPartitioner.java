@@ -20,10 +20,10 @@ public class TestTextFirstPartitioner {
 		int[] result = new int[100];
 		HashSet set = new HashSet();
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(new File("C:/Users/Administrator/Downloads/head_1000_data_x")));
+			BufferedReader br = new BufferedReader(new FileReader(new File("C:/Users/Administrator/Downloads/head_10000_data_x")));
 			String line = null;
 			while((line=br.readLine())!=null){
-				int x = part.getPartition(new Text(line), new Text("haha"), 52);
+				int x = part.getPartition(new Text(line), new Text("haha"), 51);
 				
 				result[x]++;
 				set.add(line);

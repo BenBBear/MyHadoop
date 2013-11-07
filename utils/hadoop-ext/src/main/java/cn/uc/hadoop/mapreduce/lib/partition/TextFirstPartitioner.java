@@ -51,12 +51,18 @@ public class TextFirstPartitioner extends Partitioner<Text, Text> implements
 		int pos = UTF8ByteArrayUtils.findBytes(k, 0, klength, split);
 		int hashcode = 0;
 		if (pos == -1) {
-			hashcode = WritableComparator.hashBytes(k, klength);
+			hashcode = MyHashBytes(k, 0, klength);
 		} else {
-			hashcode = WritableComparator.hashBytes(k, pos);
+			hashcode = MyHashBytes(k, 0, pos);
 		}
 		return (hashcode & Integer.MAX_VALUE) % numPartitions;
 	}
 	
-
+	//使用大质数代替31增强hash性
+	public static int MyHashBytes(byte[] bytes, int offset, int length) {
+	    int hash = 1;
+	    for (int i = offset; i < offset + length; i++)
+	      hash = (95549 * hash) + (int)bytes[i];
+	    return hash;
+	  }
 }

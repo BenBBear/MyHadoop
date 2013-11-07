@@ -345,7 +345,7 @@ public final class TextUtils {
 				now++;
 				//到达上限了
 				if( now == limit -1){
-					startMark[now] = pos + 1;
+					startMark[now] = pos + split.length;
 					endMark[now] = length;
 					now++;
 					break;
