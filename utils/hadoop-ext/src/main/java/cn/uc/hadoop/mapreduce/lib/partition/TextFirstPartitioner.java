@@ -64,5 +64,5 @@ public class TextFirstPartitioner extends Partitioner<Text, Text> implements
 	    for (int i = offset; i < offset + length; i++)
 	      hash = (95549 * hash) + (int)bytes[i];
 	    return hash;
-	  }
+	}
 }

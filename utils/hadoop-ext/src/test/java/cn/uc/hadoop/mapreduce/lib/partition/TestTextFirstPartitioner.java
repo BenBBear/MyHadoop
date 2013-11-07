@@ -13,7 +13,7 @@ import org.junit.Test;
 public class TestTextFirstPartitioner {
 
 	@Test
-	public void testHashValue() {
+	public void testHashavg() {
 		
 		TextFirstPartitioner part = new TextFirstPartitioner();
 		part.setConf(new Configuration());
@@ -38,6 +38,24 @@ public class TestTextFirstPartitioner {
 		}
 		System.out.println(part.getPartition(new Text("fffffffffffa123c25d448468179f22929113999``dccdcd"), new Text("haha"), 12));
 		
+		
+		
+//		fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testHashRight() {
+		try{
+			TextFirstPartitioner part = new TextFirstPartitioner();
+			part.setConf(new Configuration());
+			int x = part.getPartition(new Text("2013-05-30`104`java``report``27`2``0``20130530000000-20130530010000"), new Text("haha"), 51);
+			System.out.println(x);
+			int y = part.getPartition(new Text("2013-05-30`104`java``hiveresult``27`2` ``20130530000000-20130530010000"), new Text("haha"), 51);
+			System.out.println(y);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
 		
 		
 //		fail("Not yet implemented");
