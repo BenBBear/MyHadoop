@@ -194,6 +194,10 @@ public class TestTextUtils {
 			
 			Text t = this.getLessByteText(s1+s1,s1);
 			assertTrue(TextUtils.find(t, 'a',2)==b2.length+b1.length);
+
+			assertTrue(TextUtils.find(new Text("abcd,,,,,,cbd"), ",,",1)==4);
+			assertTrue(TextUtils.find(new Text("abcd,,,,,,cbd"), ",,",2)==6);
+			assertTrue(TextUtils.find(new Text("abcd,,,,,,cbd"), ",,",3)==8);
 			
 			//特殊字符串
 			String s1="a,,bcd,e,f,g";
@@ -279,7 +283,6 @@ public class TestTextUtils {
 			assertTrue(TextUtils.findField(text, "," , 1).equals(new Text("abc")));
 			assertTrue(TextUtils.findField(text, "," , 6).equals(new Text("")));
 			
-			
 			text = this.getLessByteText(ss3);
 			assertTrue(TextUtils.findField(text, "," , 0).equals(new Text("")));
 			assertTrue(TextUtils.findField(text, "," , 1).equals(new Text("")));
@@ -287,6 +290,9 @@ public class TestTextUtils {
 			
 			text = this.getLessByteText(ss4);
 			assertTrue(TextUtils.findField(text, "," , 0).equals(new Text("abcde")));
+			
+			assertTrue(TextUtils.findField(new Text("abcd,,abc,,,,"), ",," , 1).equals(new Text("abc")));
+			assertTrue(TextUtils.findField(new Text("abcd,,abc,,,,"), ",," , 2).equals(new Text("")));
 		}
 		catch(Exception e){
 			assertTrue(false);
@@ -337,6 +343,8 @@ public class TestTextUtils {
 			
 			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, "," , 1),"abc","def,ghi,jkl,opq"));
 			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, "," , 3),"abc,def,ghi","jkl,opq"));
+			
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(new Text("abcd``abcd"), "``" , 1),"abcd","abcd"));
 			try{
 				exceptionError = false;
 				assertTrue(TextUtils.splitToTwo(text, "," , 5)==null);
@@ -441,7 +449,7 @@ public class TestTextUtils {
 			text = this.getLessByteText(ss4);
 			assertTrue(compareSpliteResult(TextUtils.split(text, "," ),"abcde"));
 			assertTrue(compareSpliteResult(TextUtils.split(new Text(), "," ),""));
-			
+			assertTrue(compareSpliteResult(TextUtils.split(new Text("abcd,,abc,,ab"), ",," ),"abcd","abc","ab"));
 			
 			//以下测试split所有的，且数组需要拓展的情况，即出来的字段大于16个
 			text = this.getLessByteText(",0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,,");
@@ -475,6 +483,7 @@ public class TestTextUtils {
 			assertTrue(TextUtils.subField(text,",",2,2).equals(new Text("ghi")));
 			assertTrue(TextUtils.subField(text,",",0,0).equals(new Text("abc")));
 			assertTrue(TextUtils.subField(text,",",0,4).equals(new Text("abc,def,ghi,jkl,opq")));
+			assertTrue(TextUtils.subField(new Text("abcd,,abc,,ab,,a"),",,",1,2).equals(new Text("abc,,ab")));
 			try{
 				exceptionError = false;
 				TextUtils.subField(text,",",0,5);
@@ -542,6 +551,7 @@ public class TestTextUtils {
 		try{
 			Text[] text = new Text[]{this.getLessByteText(ss1) , this.getLessByteText(ss2) , this.getLessByteText(ss3)};
 			assertTrue(TextUtils.join(text, "`").toString().equals(ss1+"`"+ss2+"`"+ss3));
+			assertTrue(TextUtils.join(text, "``").toString().equals(ss1+"``"+ss2+"``"+ss3));
 			assertTrue(TextUtils.join(TextUtils.split(this.getLessByteText(ss1), ","),",").toString().equals(ss1));
 		}
 		catch(Exception e){
@@ -594,12 +604,8 @@ public class TestTextUtils {
 				return "append test";
 			}
 			protected String test1(int number) {
-//				Random random = new Random();
-//				String s1 = generateString(random, "abcdefgh",10);
-//				String s2 = generateString(random, "abcdefgh",10);
-//				String s3 = generateString(random, "abcdefgh",10);
 				for(int i=0;i<number;i++){
-					String temp = s1+s2+s3;
+					String s = s1+s2+s3;
 				}
 				return "String + ";
 			}
@@ -625,10 +631,49 @@ public class TestTextUtils {
 		sbm.runBeanchMark(1000);
 	}
 	
+	public void textSplitAndAppendBeanchMark(){
+		SimpleBenchMark sbm = new SimpleBenchMark(){
+			protected String getName() {
+				return "SplitAndAppend test";
+			}
+			protected String test1(int number) {
+				String temp = "20131022000000`00.03.cd.1a.09.49`1103-4231082793-1121fb48`351101234567890`800`139`8.8.1.243`tangxj@rbbd` `um`ucbrowser`zh-cn` ` `加拿大`android`0` ` ` ` ` `1`1`61.0`1";
+				Text t = new Text();
+				Text r = new Text();
+				for(int i=0;i<number;i++){
+					t.set(temp);
+					String[] x = t.toString().split("`");
+					StringBuilder sb = new StringBuilder();
+					for(String s:x){
+						sb.append(s);
+					}
+					sb.toString();
+					r.set(sb.toString());
+				}
+				return "String and stringbuilder ";
+			}
+			protected String test2(int number) {
+				String temp = "20131022000000`00.03.cd.1a.09.49`1103-4231082793-1121fb48`351101234567890`800`139`8.8.1.243`tangxj@rbbd` `um`ucbrowser`zh-cn` ` `加拿大`android`0` ` ` ` ` `1`1`61.0`1";
+				byte[] tb = temp.getBytes();
+				Text t = new Text(temp);
+				Text r = null;
+				byte[] split = "`".getBytes();
+				for(int i=0;i<number;i++){
+					t.set(tb);
+					Text[] tArray = TextUtils.split(t, split);
+					r = TextUtils.join(tArray, split);
+				}
+				return "TextUtils.split and append()";
+			}
+		};
+		sbm.runBeanchMark(10000);
+	}
+	
 //	@Test
 	public void beanchMark(){
 //		testEncodeBeanchMark();
-		testAppendBeanchMark();
+//		testAppendBeanchMark();
+		textSplitAndAppendBeanchMark();
 	}
 	public static void main(String[] arga){
 		TestTextUtils ttu = new TestTextUtils();

@@ -234,7 +234,7 @@ public final class TextUtils {
 					break;
 				}
 			}
-			nextStart = pos + 1;
+			nextStart = pos + split.length;
 		}
 		// 寻找到最后一个
 		if (pos < 0 && i == n) {
@@ -276,7 +276,7 @@ public final class TextUtils {
 			Text t1 = new Text();
 			t1.set(b, 0, pos);
 			Text t2 = new Text();
-			t2.set(b, pos + 1, (length - pos - 1));
+			t2.set(b, pos + split.length, (length - pos - split.length));
 			return new Text[] { t1, t2 };
 		}
 	}
@@ -307,9 +307,6 @@ public final class TextUtils {
 	}
 
 	public static Text[] split(Text text, byte[] split, int limit) {
-		if( limit == 0){
-			return new Text[]{};
-		}
 		if( limit == 1){
 			return new Text[]{new Text(text)};
 		}
@@ -358,7 +355,7 @@ public final class TextUtils {
 				endMark[now] = length;
 				now++;
 			}
-			nextStart = pos + 1;
+			nextStart = pos + split.length;
 		} while (pos >= 0);
 		//复制字节到数组中
 		Text[] tArray = new Text[now];
@@ -411,7 +408,7 @@ public final class TextUtils {
 					e = pos;
 				}
 			}
-			nextStart = pos + 1;
+			nextStart = pos + split.length;
 		}
 		if (i == start && pos < 0) {
 			e = nextStart;

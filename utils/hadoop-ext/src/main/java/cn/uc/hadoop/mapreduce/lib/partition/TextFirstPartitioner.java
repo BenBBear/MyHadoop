@@ -55,7 +55,7 @@ public class TextFirstPartitioner extends Partitioner<Text, Text> implements
 		} else {
 			hashcode = WritableComparator.hashBytes(k, pos);
 		}
-		return Math.abs(hashcode) % numPartitions;
+		return (hashcode & Integer.MAX_VALUE) % numPartitions;
 	}
 	
 

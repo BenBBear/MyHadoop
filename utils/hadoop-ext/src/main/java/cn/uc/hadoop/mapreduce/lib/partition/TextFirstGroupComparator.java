@@ -5,10 +5,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparator;
 import org.apache.hadoop.io.WritableUtils;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.util.UTF8ByteArrayUtils;
-import org.apache.log4j.Logger;
-import org.mortbay.log.Log;
 
 /**
  * 本函数用于Text的序列化byte数组 用于二次排序中的分组排序

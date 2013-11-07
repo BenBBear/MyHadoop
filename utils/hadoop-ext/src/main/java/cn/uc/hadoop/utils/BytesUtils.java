@@ -93,7 +93,7 @@ public class BytesUtils {
 			if (pos < 0) {
 				return pos;
 			}
-			nextStart = pos + 1;
+			nextStart = pos + b.length;
 		}
 		return pos;
 	}
