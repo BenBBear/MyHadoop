@@ -307,14 +307,14 @@ public final class TextUtils {
 	}
 
 	public static Text[] split(Text text, byte[] split, int limit) {
-		if( limit == 1){
-			return new Text[]{new Text(text)};
+		if (limit == 1) {
+			return new Text[] { new Text(text) };
 		}
 		// TODO 使用静态数组?
 		// 采集分割后的下标,如果下标超出maxlength，将复制数组，拓展大小到原来的2倍
 		int maxLength = 16;
 		if (limit > 1) {
-			//如果固定了切分的数量,则最大的标记数组时可以预计的
+			// 如果固定了切分的数量,则最大的标记数组时可以预计的
 			maxLength = limit + 1;
 		}
 		int now = 0;
@@ -339,12 +339,12 @@ public final class TextUtils {
 
 				maxLength = newLength;
 			}
-			if (pos >= 0 ) {
+			if (pos >= 0) {
 				startMark[now] = nextStart;
 				endMark[now] = pos;
 				now++;
-				//到达上限了
-				if( now == limit -1){
+				// 到达上限了
+				if (now == limit - 1) {
 					startMark[now] = pos + split.length;
 					endMark[now] = length;
 					now++;
@@ -357,7 +357,7 @@ public final class TextUtils {
 			}
 			nextStart = pos + split.length;
 		} while (pos >= 0);
-		//复制字节到数组中
+		// 复制字节到数组中
 		Text[] tArray = new Text[now];
 		for (int i = 0; i < now; i++) {
 			tArray[i] = new Text();
@@ -454,7 +454,13 @@ public final class TextUtils {
 	}
 
 	public static Text join(Text[] text, byte[] split) {
-		int length = text.length;
+		return join(text, text.length, split);
+	}
+
+	public static Text join(Text[] text, int length, byte[] split) {
+		if (length == 0) {
+			return new Text();
+		}
 		int sumLength = 0;
 		for (int i = 0; i < length; i++) {
 			sumLength += text[i].getLength();
