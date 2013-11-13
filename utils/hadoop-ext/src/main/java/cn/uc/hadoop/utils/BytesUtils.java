@@ -138,7 +138,6 @@ public class BytesUtils {
 	 *            目标数组
 	 * @return 如果，目标数组是测试原始数组的后缀将返回true，否则返回false
 	 */
-
 	public static boolean endsWith(byte[] utf, int start, int end, byte[] b) {
 		if( (end - start) < b.length) {
 			return false;

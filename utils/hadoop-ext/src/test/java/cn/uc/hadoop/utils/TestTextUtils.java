@@ -544,7 +544,28 @@ public class TestTextUtils {
 			
 		}
 	}
-	
+	@Test
+	public void testsubText(){
+		try{
+			String s="abc,def,ghi,jkl,opq";
+			Text text = this.getLessByteText(s);
+			assertTrue(TextUtils.subText(text,3).toString().equals(s.substring(3)));
+			assertTrue(TextUtils.subText(text,3,5).toString().equals(s.substring(3,5)));
+			boolean exceptionError=false;
+			try{
+				exceptionError = false;
+				TextUtils.subText(text,3,50);
+			}
+			catch(Exception e){
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			assertTrue(false);
+		}
+	}
 	
 	@Test
 	public void testJoin(){

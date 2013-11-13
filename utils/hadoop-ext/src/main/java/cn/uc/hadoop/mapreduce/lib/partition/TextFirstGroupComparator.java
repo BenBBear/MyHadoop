@@ -8,6 +8,7 @@ import org.apache.hadoop.io.WritableUtils;
 import org.apache.hadoop.util.UTF8ByteArrayUtils;
 
 /**
+ * <pre>
  * 本函数用于Text的序列化byte数组 用于二次排序中的分组排序
  * 
  * 使用规则：map的key是 A+分隔符+B 会按照A的字典序比较,相同的会分入一个partition。
@@ -19,7 +20,7 @@ import org.apache.hadoop.util.UTF8ByteArrayUtils;
  * 2.设置partitioner的类 job.setPartitionerClass(TextFirstPartitioner.class);
  * job.setGroupingComparatorClass(TextFirstGroupComparator.class); 3.在map阶段的输出按照
  * A+分隔符类型+B的格式输出
- * 
+ * </pre>
  * @author qiujw
  * 
  */

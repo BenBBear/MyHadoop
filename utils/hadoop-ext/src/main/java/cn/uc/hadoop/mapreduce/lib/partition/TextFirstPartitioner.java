@@ -8,7 +8,7 @@ import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.util.UTF8ByteArrayUtils;
 
 /**
- * 
+ *  <pre>
  * 本函数用于Text的第一列的分区函数 用于二次排序中的分区
  * 
  * 使用规则：map的key是 A+分隔符类型+B,会根据第一列的内容进行分区
@@ -38,7 +38,7 @@ import org.apache.hadoop.util.UTF8ByteArrayUtils;
  * reduce-
  *   a2`b1,v2
  *   a2`b2,v2
- *   
+ * </pre>  
  * @author qiujw
  * 
  */

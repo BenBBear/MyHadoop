@@ -7,12 +7,13 @@ import org.apache.hadoop.io.WritableComparator;
 import org.apache.hadoop.io.WritableUtils;
 
 /**
+ * <pre>
  * 使用此比较器，可以使reduce的输入按照字典序的逆序排列。
  * 
  * 一般MR使用的比较器是基于整个字节的。而Text在序列化的时候，会使用长度作为头字节。
  * 所以使用默认的MR的比较器，较短长度的key会排在前面。
  * 使用此比较器，可以使reduce的输入按照字典序的逆序排列。
- * 
+ * </pre>
  * @author qiujw
  *
  */

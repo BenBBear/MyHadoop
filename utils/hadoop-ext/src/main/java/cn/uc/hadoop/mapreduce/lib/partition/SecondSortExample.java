@@ -19,6 +19,7 @@ import org.apache.hadoop.util.GenericOptionsParser;
 import cn.uc.hadoop.JobUtils;
 
 /**
+ * <pre>
  * 本例子展示了二次排序的使用方法
  * 二次排序满足了以下需求：
  * 在map中按照 A+分隔符+B的格式输出
@@ -43,7 +44,7 @@ import cn.uc.hadoop.JobUtils;
  * 
  * 
  * </code>
- * 
+ * </pre>
  * @author qiujw
  *
  */

@@ -7,6 +7,7 @@ import org.apache.hadoop.io.Text;
 import cn.uc.hadoop.exception.TextSplitIndexOutOfBoundsException;
 
 /**
+ * <pre>
  * 本TextRecord设计为和Record.class类似。 使用前设置split，并传入Text进行打散保存。
  * 然后，使用getField进行处理或者替换。 最后，使用getRecord获取整个Text文本.
  * 
@@ -35,6 +36,7 @@ import cn.uc.hadoop.exception.TextSplitIndexOutOfBoundsException;
  * 
  * 推荐： 如果需要对一个记录进行5次以上的的字段获取等操作的时候，使用TextRecord，可获得更好的性能。 否则，使用TextUtils
  * 
+ * </pre>
  * 
  * @author qiujw
  * 
