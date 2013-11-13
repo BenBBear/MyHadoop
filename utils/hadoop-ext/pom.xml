@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>hadoop-ext</groupId>
 	<artifactId>hadoop-ext</artifactId>
-	<version>1.0.9</version>
+	<version>1.0.10</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -185,7 +185,18 @@
 					</execution>
 				</executions>
 			</plugin>
-
+<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-javadoc-plugin</artifactId>
+  <executions>
+    <execution>
+      <id>attach-javadocs</id>
+      <goals>
+        <goal>jar</goal>
+      </goals>
+    </execution>
+  </executions>
+			</plugin>	
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
 				<version>2.1</version>
