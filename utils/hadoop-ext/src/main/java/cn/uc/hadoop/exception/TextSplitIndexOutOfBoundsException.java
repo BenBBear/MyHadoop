@@ -2,17 +2,16 @@ package cn.uc.hadoop.exception;
 
 public class TextSplitIndexOutOfBoundsException extends IndexOutOfBoundsException {
 	/**
-	 * Constructs a <code>StringIndexOutOfBoundsException</code> with no detail
+	 * Constructs a <code>TextSplitIndexOutOfBoundsException</code> with no detail
 	 * message.
 	 * 
-	 * @since JDK1.0.
 	 */
 	public TextSplitIndexOutOfBoundsException() {
 		super();
 	}
 
 	/**
-	 * Constructs a <code>StringIndexOutOfBoundsException</code> with the
+	 * Constructs a <code>TextSplitIndexOutOfBoundsException</code> with the
 	 * specified detail message.
 	 * 
 	 * @param s
@@ -23,7 +22,7 @@ public class TextSplitIndexOutOfBoundsException extends IndexOutOfBoundsExceptio
 	}
 
 	/**
-	 * Constructs a new <code>StringIndexOutOfBoundsException</code> class with
+	 * Constructs a new <code>TextSplitIndexOutOfBoundsException</code> class with
 	 * an argument indicating the illegal index.
 	 * 
 	 * @param index

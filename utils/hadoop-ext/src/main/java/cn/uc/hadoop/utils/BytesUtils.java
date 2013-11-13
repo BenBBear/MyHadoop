@@ -2,27 +2,27 @@ package cn.uc.hadoop.utils;
 
 /**
  * 参考了UTF8ByteArrayUtils的代码
- * 
+ * 实现了一些基本的基于字节数组的比较
  * @author qiujw
  * 
  */
 public class BytesUtils {
 	/**
-	 * Tests weather the b1 and b2 is the same
+	 * 测试两个数组是否相同
 	 * 
 	 * @param b1
-	 *            byte array want to compare
+	 *            待比较数组1
 	 * @param s1
-	 *            starting offset
+	 *            待比较数组1，初始偏移量
 	 * @param l1
-	 *            byte's length
+	 *            待比较数组1，
 	 * @param b2
-	 *            byte array want to compare
+	 *            待比较数组2
 	 * @param s2
-	 *            starting offset
+	 *            偏移量
 	 * @param l2
-	 *            byte's length
-	 * @return return true ,if b1 is the same with b2.Return false or not.
+	 *            长度
+	 * @return 如果相同则返回true,否则返回false
 	 */
 
 	public static boolean same(byte[] b1, int s1, int l1, byte[] b2, int s2,
@@ -39,17 +39,17 @@ public class BytesUtils {
 	}
 
 	/**
-	 * Find the first occurrence of the given bytes b in a UTF-8 encoded string
+	 * 在原始数组中寻找目标数组b
 	 * 
 	 * @param utf
-	 *            a byte array containing a UTF-8 encoded string
+	 *            原始字节数组
 	 * @param start
-	 *            starting offset
+	 *            开始下标
 	 * @param end
-	 *            ending position
+	 *            结束下标
 	 * @param b
-	 *            the bytes to find
-	 * @return position that first byte occures otherwise -1
+	 *            目标数组
+	 * @return 如果找到目标数组，则返回对应的下标，否则返回-1
 	 */
 	public static int findBytes(byte[] utf, int start, int end, byte[] b) {
 		int matchEnd = end - b.length;
@@ -69,20 +69,21 @@ public class BytesUtils {
 	}
 
 	/**
-	 * Find the nth occurrence of the given byte b in a UTF-8 encoded string
+	 * 在原始数组中寻找第N个目标数组b
+	 * 按照最左匹配原则，寻找到一个目标数组后，将不会对匹配的数组进行重复匹配
 	 * 
 	 * @param utf
-	 *            a byte array containing a UTF-8 encoded string
+	 *            原始数组
 	 * @param start
-	 *            starting offset
+	 *            开始下标
 	 * @param end
-	 *            ending position
+	 *            结束下标
 	 * @param b
-	 *            the byte to find
+	 *            目标数组
 	 * @param n
-	 *            the desired occurrence of the given byte
-	 * @return position that nth occurrence of the given byte if exists;
-	 *         otherwise -1
+	 *            寻找第N个目标数组
+	 *            
+	 * @return 如果找到第N个目标数组，则返回对应的下标，否则返回-1
 	 */
 	public static int findNthBytes(byte[] utf, int start, int end, byte[] b,
 			int n) {
@@ -99,17 +100,17 @@ public class BytesUtils {
 	}
 
 	/**
-	 * Tests if this byte starts with the specified byte.
+	 * 测试目标数组是不是原始数组的前缀
 	 * 
 	 * @param utf
-	 *            a byte array containing a UTF-8 encoded string
+	 *            原始数组
 	 * @param start
-	 *            starting offset
+	 *            开始下标
 	 * @param end
-	 *            ending position
+	 *            结束下标
 	 * @param b
-	 *            the byte to find
-	 * @return true if the byte starts with the specified byte.False or not.
+	 *            目标数组
+	 * @return 如果，目标数组是测试原始数组的前缀将返回true，否则返回false
 	 */
 
 	public static boolean startsWith(byte[] utf, int start, int end, byte[] b) {
@@ -125,17 +126,17 @@ public class BytesUtils {
 	}
 
 	/**
-	 * Tests if this byte ends with the specified byte.
+	 * 测试目标数组是不是原始数组的后缀
 	 * 
 	 * @param utf
-	 *            a byte array containing a UTF-8 encoded string
+	 *            原始数组
 	 * @param start
-	 *            starting offset
+	 *            开始下标
 	 * @param end
-	 *            ending position
+	 *            结束下标
 	 * @param b
-	 *            the byte to find
-	 * @return true if the byte starts with the specified byte.False or not.
+	 *            目标数组
+	 * @return 如果，目标数组是测试原始数组的后缀将返回true，否则返回false
 	 */
 
 	public static boolean endsWith(byte[] utf, int start, int end, byte[] b) {

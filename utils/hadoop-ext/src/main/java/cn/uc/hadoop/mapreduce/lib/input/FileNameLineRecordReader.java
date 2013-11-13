@@ -41,8 +41,9 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.LineReader;
 
 /**
- * 使用文件名作为key,内容作为value
- * 
+ * 配合FileNameTextinputformat使用。
+ * 使用文件名作为key,每行内容作为value
+ * @author qiujw
  */
 public class FileNameLineRecordReader extends RecordReader<Text, Text> {
   private static final Log LOG = LogFactory.getLog(FileNameLineRecordReader.class);

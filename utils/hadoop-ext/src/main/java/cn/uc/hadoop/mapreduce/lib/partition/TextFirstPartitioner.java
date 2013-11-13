@@ -16,8 +16,29 @@ import org.apache.hadoop.util.UTF8ByteArrayUtils;
  * 2.设置partitioner的类 
  * 		job.setPartitionerClass(TextFirstPartitioner.class);
  * 		job.setGroupingComparatorClass(TextFirstGroupComparator.class);
+ *      job.setSortComparatorClass(TextSortComparator.class);
+ *      //job.setSortComparatorClass(ReverseTextSortComparator.class);
  * 3.在map阶段的输出按照 A+分隔符类型+B的格式输出
  * 
+ * 例如：map阶段输出 如下KV对
+ * ( a1`b1,v1   
+ *   a2`b1,v2
+ *   a11`b1,v3
+ *   a2`b2,v2
+ *   a1`b2,v1 
+ *   a11`b2,v3)
+ * 则在reduce阶段，将会得到如下的输入,(按照key的分隔符前面的部分分组，按照key的分隔符后面的部分字典序输入)
+ * 
+ * reduce-
+ *   a1`b1,v1
+ *   a1`b2,v1 
+ * reduce-
+ *   a11`b1,v3
+ *   a11`b2,v3
+ * reduce-
+ *   a2`b1,v2
+ *   a2`b2,v2
+ *   
  * @author qiujw
  * 
  */
