@@ -27,9 +27,13 @@ Parcel是：<http://archive.cloudera.com/gplextras/parcels/latest/>
 在YARN的Gateway的YARN 客户端配置安全阀（yarn-site.xml）中增加：
 
     <property>
-    <name>yarn.application.classpath</name>
-    <value>$HADOOP_CONF_DIR,$HADOOP_COMMON_HOME/*,$HADOOP_COMMON_HOME/lib/*,$HADOOP_HDFS_HOME/*,$HADOOP_HDFS_HOME/lib/*,$HADOOP_MAPRED_HOME/*,$HADOOP_MAPRED_HOME/lib/*,$YARN_HOME/*,$YARN_HOME/lib/*,/opt/cloudera/parcels/HADOOP_LZO/lib/hadoop/lib/*,/opt/cloudera/parcels/CDH/lib/hbase/*,/opt/cloudera/parcels/CDH/lib/hbase/lib/*</value>
+      <name>yarn.application.classpath</name>
+      <value>$HADOOP_CONF_DIR,$HADOOP_COMMON_HOME/*,$HADOOP_COMMON_HOME/lib/*,$HADOOP_HDFS_HOME/*,$HADOOP_HDFS_HOME/lib/*,$HADOOP_MAPRED_HOME/*,$HADOOP_MAPRED_HOME/lib/*,$YARN_HOME/*,$YARN_HOME/lib/*,/opt/cloudera/parcels/HADOOP_LZO/lib/hadoop/lib/*,/opt/cloudera/parcels/CDH/lib/hbase/*,/opt/cloudera/parcels/CDH/lib/hbase/lib/*</value>
     </property>
+	<property>
+	  <name>mapreduce.admin.user.env</name>
+	  <value>LD_LIBRARY_PATH=$HADOOP_COMMON_HOME/lib/native:/opt/cloudera/parcels/HADOOP_LZO/lib/hadoop/lib/native</value>
+	</property>
 
 另外，你可能需要安装lzo，如果你的机器上没有的话。（因为Parcel中提供的是hadoop-lzo，不包括lzo本身）
 
