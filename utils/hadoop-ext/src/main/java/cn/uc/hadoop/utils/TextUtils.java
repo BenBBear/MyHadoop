@@ -1,6 +1,5 @@
 package cn.uc.hadoop.utils;
 
-import java.lang.reflect.Array;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 
@@ -11,11 +10,6 @@ import org.apache.hadoop.io.Text;
  */
 public final class TextUtils {
 	private static final Charset UTF8 = Charset.forName("UTF-8");
-
-	private static byte[] charGetBytes(char ch) {
-		CharBuffer cb = CharBuffer.wrap(new char[ch]);
-		return UTF8.encode(cb).array();
-	}
 
 	public static void append(Text text, char ch) {
 		byte[] bs = charGetBytes(ch);
@@ -28,17 +22,24 @@ public final class TextUtils {
 		text.append(bs, 0, bs.length);
 	}
 
+	private static byte[] charGetBytes(char ch) {
+		CharBuffer cb = CharBuffer.wrap(new char[ch]);
+		return UTF8.encode(cb).array();
+	}
+
 	public static boolean endsWith(Text text, String endStr) {
 		byte[] eByte = endStr.getBytes(UTF8);
 		// 注意长度是length的长度
 		byte[] tByte = text.getBytes();
 		int tByteLength = text.getLength();
-		if (eByte.length > tByteLength)
+		if (eByte.length > tByteLength) {
 			return false;
+		}
 		int i, j;
 		for (i = eByte.length - 1, j = tByteLength - 1; i >= 0 && j >= 0; i--, j--) {
-			if (eByte[i] != tByte[j])
+			if (eByte[i] != tByte[j]) {
 				return false;
+			}
 		}
 		if (i < 0 || j < 0) {
 			return true;
@@ -50,22 +51,22 @@ public final class TextUtils {
 		byte[] bs = charGetBytes(what);
 		byte[] textByte = text.getBytes();
 		int textByteLength = text.getLength();
-		if (textByteLength == 0 || bs.length == 0)
+		if (textByteLength == 0 || bs.length == 0) {
 			return -1;
+		}
 		for (int i = 0; i < textByteLength; i++) {
-			if (textByte[i] == bs[0])
+			if (textByte[i] == bs[0]) {
 				return i;
+			}
 		}
 		return -1;
 	}
 
-	/** 这个有点难
-	 * 支持几个简单的标记 
-	 * %d 
-	 * %s 
+	/**
+	 * 这个有点难 支持几个简单的标记 %d %s
 	 */
 	public static void format(Text text, String format, Object... params) {
-		
+
 	}
 
 	/** 暂不做 */
@@ -100,7 +101,7 @@ public final class TextUtils {
 	 */
 	public static String subString(Text text, int start, int len) {
 		String temp = "";
-		temp.format(format, args)
+		temp.format(format, args);
 		return null;
 	}
 
@@ -111,6 +112,6 @@ public final class TextUtils {
 	public static void toUpperCase(Text text) {
 
 	}
-	
-	//todo string join with sp
+
+	// todo string join with sp
 }
