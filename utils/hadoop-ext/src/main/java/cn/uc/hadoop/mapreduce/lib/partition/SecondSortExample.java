@@ -19,11 +19,32 @@ import org.apache.hadoop.util.GenericOptionsParser;
 import cn.uc.hadoop.JobUtils;
 
 /**
+ * <pre>
  * 本例子展示了二次排序的使用方法
  * 二次排序满足了以下需求：
  * 在map中按照 A+分隔符+B的格式输出
  * 在reduce中会获得A相同的所有的记录，且记录是按照B排序
  * 
+ * <code>
+ * Job job = Job.getInstance(conf, "word count");
+ * ...
+ * //设置分割的标志
+ * job.getConfiguration().set(TextFirstPartitioner.TEXT_FIRST_GROUP_COMPATATOR, field);
+ * 
+ * //设置分区函数
+ * job.setPartitionerClass(TextFirstPartitioner.class);
+ *
+ * //设置reduce分组判断函数
+ * job.setGroupingComparatorClass(TextFirstGroupComparator.class);
+ * 
+ * //如果需要正序，请使用TextSortComparator
+ * //如果需要逆序，请使用ReverseTextSortComparator
+ * job.setSortComparatorClass(TextSortComparator.class);
+ * job.setSortComparatorClass(ReverseTextSortComparator.class);
+ * 
+ * 
+ * </code>
+ * </pre>
  * @author qiujw
  *
  */

@@ -15,7 +15,7 @@ import org.apache.hadoop.util.StringUtils;
 
 
 /***
- * @deprecated see {@link cn.uc.hadoop.utils.JobUtils}
+ * @deprecated see {@link cn.uc.hadoop.JobUtils}
  */
 @Deprecated
 public class JobUtils {

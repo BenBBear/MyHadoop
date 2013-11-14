@@ -8,7 +8,7 @@ import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.util.UTF8ByteArrayUtils;
 
 /**
- * 
+ *  <pre>
  * 本函数用于Text的第一列的分区函数 用于二次排序中的分区
  * 
  * 使用规则：map的key是 A+分隔符类型+B,会根据第一列的内容进行分区
@@ -16,8 +16,29 @@ import org.apache.hadoop.util.UTF8ByteArrayUtils;
  * 2.设置partitioner的类 
  * 		job.setPartitionerClass(TextFirstPartitioner.class);
  * 		job.setGroupingComparatorClass(TextFirstGroupComparator.class);
+ *      job.setSortComparatorClass(TextSortComparator.class);
+ *      //job.setSortComparatorClass(ReverseTextSortComparator.class);
  * 3.在map阶段的输出按照 A+分隔符类型+B的格式输出
  * 
+ * 例如：map阶段输出 如下KV对
+ * ( a1`b1,v1   
+ *   a2`b1,v2
+ *   a11`b1,v3
+ *   a2`b2,v2
+ *   a1`b2,v1 
+ *   a11`b2,v3)
+ * 则在reduce阶段，将会得到如下的输入,(按照key的分隔符前面的部分分组，按照key的分隔符后面的部分字典序输入)
+ * 
+ * reduce-
+ *   a1`b1,v1
+ *   a1`b2,v1 
+ * reduce-
+ *   a11`b1,v3
+ *   a11`b2,v3
+ * reduce-
+ *   a2`b1,v2
+ *   a2`b2,v2
+ * </pre>  
  * @author qiujw
  * 
  */
@@ -45,17 +66,24 @@ public class TextFirstPartitioner extends Partitioner<Text, Text> implements
 	@Override
 	public int getPartition(Text key, Text value, int numPartitions) {
 		byte[] k = key.getBytes();
-		if (k == null || k.length == 0)
+		int klength = key.getLength();
+		if (k == null || klength == 0)
 			return 0;
-		int pos = UTF8ByteArrayUtils.findBytes(k, 0, k.length, split);
+		int pos = UTF8ByteArrayUtils.findBytes(k, 0, klength, split);
 		int hashcode = 0;
 		if (pos == -1) {
-			hashcode = WritableComparator.hashBytes(k, k.length);
+			hashcode = MyHashBytes(k, 0, klength);
 		} else {
-			hashcode = WritableComparator.hashBytes(k, pos);
+			hashcode = MyHashBytes(k, 0, pos);
 		}
-		return Math.abs(hashcode) % numPartitions;
+		return (hashcode & Integer.MAX_VALUE) % numPartitions;
 	}
 	
-
+	//使用大质数代替31增强hash性
+	public static int MyHashBytes(byte[] bytes, int offset, int length) {
+	    int hash = 1;
+	    for (int i = offset; i < offset + length; i++)
+	      hash = (95549 * hash) + (int)bytes[i];
+	    return hash;
+	}
 }

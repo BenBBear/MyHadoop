@@ -32,7 +32,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import com.google.common.base.Charsets;
 
 /**
- * 次 FileNameTextinputformat 改写了 TextInputFormat 将输入key改为文件名而不是偏移量
+ * 此 FileNameTextinputformat 改写了 TextInputFormat 将输入key改为文件名而不是偏移量
  * @author qiujw
  *
  */

@@ -27,6 +27,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
 /**
+ * <pre>
  * 本job用于进行字段替换,适用于以下场景 假定有A字典文件，B日志文件，需要将B中的某一个字段通过字典文件进行映射 例如： dictA的字典文件格式为
  * 10,iphone 11,nokiaN9 12,xiaomi ... dictB的字典文件格式为 100,china 101,american
  * 102,japan ...
@@ -47,7 +48,7 @@ import com.google.common.collect.Lists;
  * 
  * TODO 日志解析部分使用接口实现,当前仅支持逗号分隔的字符串格式。允许实现自己喜欢的格式。
  * 
- * 
+ * </pre>
  * @author qiujw
  * @version 1.1
  */

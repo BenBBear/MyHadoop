@@ -24,6 +24,7 @@ import com.hadoop.compression.lzo.LzoIndex;
 /** 
  * 改写自CDH4.2.1的TextOutputFormat.class
  * 需要Hadoop-Lzo的jar包
+ * 使用此类会自动在job结束的时候，针对输出文件中带后缀的为lzo的文件建立分布式索引。
  *  
  */
 public class LzoTextOutputFormat<K, V> extends FileOutputFormat<K, V> {
