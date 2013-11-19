@@ -1,4 +1,5 @@
 >本文重点描述实际操作和实践部分。理论部分和介绍将一笔带过。
+>测试结果：在CM下的kerberos，遇到严重的bug不能顺畅跑通。在自己的Hadoop下，能够顺利跑通。
 
 #Hadoop的认证机制
 详细介绍请参考[Hadoop安全机制研究](http://dongxicheng.org/mapreduce/hadoop-security/)
@@ -187,9 +188,9 @@ Kerberos是一种网络认证协议，其设计目标是通过密钥系统为客
             kadmin:xst -k /xxx/xxx/kerberos.keytab hdfs/hadoop1
 - 用户操作
     
-    1.查看当前的认证用户:klist
-    2.认证用户:kinit -kt /xx/xx/kerberos.keytab hdfs/hadoop1
-    3.删除当前的认证的缓存: kdestroy
+    1. 查看当前的认证用户:klist
+    2. 认证用户:kinit -kt /xx/xx/kerberos.keytab hdfs/hadoop1
+    3. 删除当前的认证的缓存: kdestroy
 
 ##在CM上使用Kerberos认证
 
@@ -230,11 +231,8 @@ Kerberos是一种网络认证协议，其设计目标是通过密钥系统为客
     - HBASE：
         - 勾选HBase Service > Configuration > Authentication 
         - 勾选HBase Service > Configuration  > Authorization 
-    
-###分布式KDC
->测试KDC的容错
->对当前服务的影响
-###keytab失效
+        - 
+5. 启动即可    
 
 >重大的bug:
 当我在测试机上成功跑通之后，重新删除了kerberos的数据库后。关闭掉所有服务的安全选项。
