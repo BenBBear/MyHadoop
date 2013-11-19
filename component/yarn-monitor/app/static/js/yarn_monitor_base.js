@@ -31,6 +31,21 @@ function toFinalStatus(finalStatus){
 	return map[finalStatus];
 }
 //***********
+//object length
+function getlength(obj){
+	var temp = 0;
+	for(var id in obj){
+		temp++;
+	}
+	return temp;
+}
+//***********
+function incDomText(selecter,inc){
+	var now = parseInt($(selecter).text())
+	now += inc;
+	$(selecter).text(now)
+}
+//***********
 function datetime_to_unix(datetime){
 	if( datetime.length < 4  ) return null;
     var tmp_datetime = datetime.replace(/:/g,'-');

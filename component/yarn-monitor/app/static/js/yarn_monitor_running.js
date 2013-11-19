@@ -44,13 +44,18 @@ function formatTableTd(key,value){
 	}
 	return value
 }
+function getTitleInfoHtml(queueName,sum){
+	return ':一共运行了<em id="title-'+queueName+'-sum" >'+sum+'</em>个应用.'+
+			'采集了<em id="title-'+queueName+'-coll" >0</em>个应用的数据，'+
+			'采集的应用共运行个<em id="title-'+queueName+'-map">0</em>个Map'+
+			'和<em id="title-'+queueName+'-reduce" >0</em>个Reduce';
+}
 function getQueuePanelHtml(queueName,queue){
 	var displayTitleList = new Array("应用id","用户","名称","AM机器","提交至今时间","进度","Am运行时间","Map(总数,待运行,正运行,失败,杀死,成功)","Reduce(总数,待运行,正运行,失败,杀死,成功)")
 	var titleList = new Array("id","user","name","amHostHttpAddress","elapsedTime","progress")
 	var contentList = new Array();
 	for(var id in queue){
-		app = queue[id]
-		runningAppList.push(id)
+		var app = queue[id]
 		var tds = new Array();
 		for(var key in titleList){
 			var title = titleList[key];
@@ -68,10 +73,10 @@ function getQueuePanelHtml(queueName,queue){
 	var tableHtml = getTable("queueName",displayTitleList,contentList);
 	return tableHtml;
 }
-function addQueuePanel(accordionId,collapseTitle,accordionBody,collapseId){
+function addQueuePanel(accordionId,collapseTitle,titleInfo,accordionBody,collapseId){
 	var panelTitle ='<div class="panel-heading"><h4 class="panel-title">'+
 	        '<a data-toggle="collapse" data-toggle="collapse" data-parent="#'+accordionId+'" href="#'+collapseId+'">'+
-	        collapseTitle+'</a></h4></div>';
+	        collapseTitle+'</a>'+titleInfo+'</h4></div>';
 	var open = " in "
 	var panelBody = '<div id="'+collapseId+'" class="panel-collapse collapse '+open+'"><div class="panel-body">'+
 			accordionBody+'</div></div>'
@@ -86,11 +91,13 @@ function showRunningApp(runningApp){
 	var appidList = [];
 	for(var queueName in runningApp["queues"]){
 		var queue = runningApp["queues"][queueName];
-		addQueuePanel("running-accordion","队列:["+queueName+"]",getQueuePanelHtml(queueName,queue),"panel"+index);
+		console.log(queue)
+		addQueuePanel("running-accordion","队列:["+queueName+"]",getTitleInfoHtml(queueName,getlength(queue)),
+					getQueuePanelHtml(queueName,queue),"panel"+index);
 		index++;
 	}
 }
-function loadRunningAppInfo(appid){
+function loadRunningAppInfo(appid,queueName){
 	var appQuery;
 	appQuery = new XMLHttpRequest();
 	appQuery.onreadystatechange=function(){
@@ -99,10 +106,16 @@ function loadRunningAppInfo(appid){
 			$("#"+appid+"-amTime").text(formatElapsedTime(jobinfo['amTime']))
 			var keyList = ["mapsTotal","mapsPending","mapsRunning","failedMapAttempts","killedMapAttempts","successfulMapAttempts",
 			               "reducesTotal","reducesPending","reducesRunning","failedReduceAttempts","killedReduceAttempts","successfulReduceAttempts"];
+			//回调更新表格中的数据
 			for(var k in keyList){
 				var key = keyList[k]
 				$("#"+appid+"-"+key).text(jobinfo[key])
 			}
+			//回调更新队列的汇总信息
+			//更新 title-'+queueName+'-coll"  title-'+queueName+'-map" title-'+queueName+'-reduce"
+			incDomText("#title-"+queueName+"-coll",1)
+			incDomText("#title-"+queueName+"-map",jobinfo['mapsRunning'])
+			incDomText("#title-"+queueName+"-reduce",jobinfo['reducesRunning'])
 		}
   	}
 	var url = "/db/appProxy?appid="+appid;
@@ -114,11 +127,16 @@ function loadRunningApp(){
 	appQuery = new XMLHttpRequest();
 	appQuery.onreadystatechange=function(){
 		if (appQuery.readyState==4 && appQuery.status==200){
-			runningAppList = []
-			showRunningApp(JSON.parse(appQuery.responseText));
-			for(var key in runningAppList){
-				appid = runningAppList[key]
-				loadRunningAppInfo(appid)
+			var runningApp = JSON.parse(appQuery.responseText)
+			//生成每个队列的的基本信息
+			showRunningApp( runningApp );
+			console.log(runningApp);
+			//生成采集每个app的回调
+			for(var queueName in runningApp["queues"]){
+				var queue = runningApp["queues"][queueName];
+				for(var appid in queue){
+					loadRunningAppInfo(appid,queueName)
+				}
 			}
     	}
   	}
