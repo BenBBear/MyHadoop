@@ -47,8 +47,10 @@ function formatTableTd(key,value){
 function getTitleInfoHtml(queueName,sum){
 	return ':一共运行了<em id="title-'+queueName+'-sum" >'+sum+'</em>个应用.'+
 			'采集了<em id="title-'+queueName+'-coll" >0</em>个应用的数据，'+
-			'采集的应用共运行个<em id="title-'+queueName+'-map">0</em>个Map'+
-			'和<em id="title-'+queueName+'-reduce" >0</em>个Reduce';
+			'采集的应用正在运行<em id="title-'+queueName+'-mapsRunning">0</em>个Map'+
+			'和<em id="title-'+queueName+'-reducesRunning" >0</em>个Reduce,'+
+			'还需要运行<em id="title-'+queueName+'-mapsPending">0</em>个Map'+
+			'和<em id="title-'+queueName+'-reducesPending" >0</em>个Reduce'
 }
 function getQueuePanelHtml(queueName,queue){
 	var displayTitleList = new Array("应用id","用户","名称","AM机器","提交至今时间","进度","Am运行时间","Map(总数,待运行,正运行,失败,杀死,成功)","Reduce(总数,待运行,正运行,失败,杀死,成功)")
@@ -114,8 +116,10 @@ function loadRunningAppInfo(appid,queueName){
 			//回调更新队列的汇总信息
 			//更新 title-'+queueName+'-coll"  title-'+queueName+'-map" title-'+queueName+'-reduce"
 			incDomText("#title-"+queueName+"-coll",1)
-			incDomText("#title-"+queueName+"-map",jobinfo['mapsRunning'])
-			incDomText("#title-"+queueName+"-reduce",jobinfo['reducesRunning'])
+			incDomText("#title-"+queueName+"-mapsRunning",jobinfo['mapsRunning'])
+			incDomText("#title-"+queueName+"-reducesRunning",jobinfo['reducesRunning'])
+			incDomText("#title-"+queueName+"-mapsPending",jobinfo['mapsPending'])
+			incDomText("#title-"+queueName+"-reducesPending",jobinfo['reducesPending'])
 		}
   	}
 	var url = "/db/appProxy?appid="+appid;
