@@ -102,3 +102,54 @@
 
         fusermount -u $HOME/mnt/dfs
     
+
+## hadoop lzo
+
+hadoop lzo是独立于hadoop的一个压缩组件。需要单独下载。
+
+可以从这里： 对于Hadoop 2.0之后的版本
+https://github.com/kambatla/hadoop-lzo
+
+也可以从这里：对于Hadoop 0.2, 1.0版本
+https://github.com/twitter/hadoop-lzo
+
+对照ReadMe中的要求配置必要软件。
+
+然后：
+ant compile-native jar
+
+如果你的lzo安装不是在默认的目录，编译时报找不到lzo库，你需要修改build.xml文件：
+以我的安装示例来说是：
+
+    <exec dir="${build.native}" executable="sh" failonerror="true">
+       <env key="OS_NAME" value="${os.name}"/>
+       <env key="OS_ARCH" value="${os.arch}"/>
+       <!-- 下面两个根据实际情况修改 -->
+       <env key="CFLAGS" value="-I${user.home}/local/lzo/include"/>
+       <env key="LDFLAGS" value="-Wl,--no-as-needed -L${user.home}/local/lzo/lib"/>
+       <env key="JVM_DATA_MODEL" value="${sun.arch.data.model}"/>
+       <env key="NATIVE_SRCDIR" value="${native.src.dir}"/>
+       <arg line="${native.src.dir}/configure"/>
+    </exec>
+
+编译成功后，把
+
+    cp build/native/L*/lib/libgplcompression.so* ~/local/hadoop/lib/native/
+    cp build/hadoop-lzo-0.4.15.jar ~/local/hadoop/share/hadoop/common/lib/
+
+最后需要修改配置， core-site.xml：
+
+    <property>
+        <name>io.compression.codecs</name>
+        <value>org.apache.hadoop.io.compress.GzipCodec,org.apache.hadoop.io.compress.SnappyCodec,com.hadoop.compression.lzo.LzoCodec,com.hadoop.compression.lzo.LzopCodec</value>
+    </property>
+    <property>
+        <name>io.compression.codec.lzo.class</name>
+        <value>com.hadoop.compression.lzo.LzoCodec</value>
+    </property>
+
+
+## open-ssl 安装
+
+linux-generic64
+
