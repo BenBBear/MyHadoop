@@ -1,9 +1,6 @@
 package cn.uc.hadoop.utils;
 
-<<<<<<< HEAD
-=======
 import java.nio.ByteBuffer;
->>>>>>> 49af7719a4d2fab888da4e566b5845c8dcc5432b
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
@@ -54,11 +51,6 @@ public final class TextUtils {
 	// }
 	// };
 
-<<<<<<< HEAD
-	public static void append(Text text, char ch) {
-		byte[] bs = charGetBytes(ch);
-		text.append(bs, 0, bs.length);
-=======
 	/**
 	 * 将char按照UTF8的编码方式转为byte[]
 	 * 
@@ -116,7 +108,6 @@ public final class TextUtils {
 			bArray[i] = encode(s[i]);
 		}
 		append(text, bArray);
->>>>>>> 49af7719a4d2fab888da4e566b5845c8dcc5432b
 	}
 
 	/**
@@ -136,26 +127,6 @@ public final class TextUtils {
 		append(text, bArray);
 	}
 
-<<<<<<< HEAD
-	private static byte[] charGetBytes(char ch) {
-		CharBuffer cb = CharBuffer.wrap(new char[ch]);
-		return UTF8.encode(cb).array();
-	}
-
-	public static boolean endsWith(Text text, String endStr) {
-		byte[] eByte = endStr.getBytes(UTF8);
-		// 注意长度是length的长度
-		byte[] tByte = text.getBytes();
-		int tByteLength = text.getLength();
-		if (eByte.length > tByteLength) {
-			return false;
-		}
-		int i, j;
-		for (i = eByte.length - 1, j = tByteLength - 1; i >= 0 && j >= 0; i--, j--) {
-			if (eByte[i] != tByte[j]) {
-				return false;
-			}
-=======
 	/**
 	 * 将b的所有字节数组添加到text后面
 	 * 
@@ -168,7 +139,6 @@ public final class TextUtils {
 		int sumLength = text.getLength();
 		for (int i = 0; i < length; i++) {
 			sumLength += b[i].length;
->>>>>>> 49af7719a4d2fab888da4e566b5845c8dcc5432b
 		}
 		byte[] dest = new byte[sumLength];
 		int destPos = 0;
@@ -183,19 +153,6 @@ public final class TextUtils {
 		text.set(dest);
 	}
 
-<<<<<<< HEAD
-	public static int find(Text text, char what) {
-		byte[] bs = charGetBytes(what);
-		byte[] textByte = text.getBytes();
-		int textByteLength = text.getLength();
-		if (textByteLength == 0 || bs.length == 0) {
-			return -1;
-		}
-		for (int i = 0; i < textByteLength; i++) {
-			if (textByte[i] == bs[0]) {
-				return i;
-			}
-=======
 	/**
 	 * 将t的Text对象的字节数组都添加到text后面
 	 * 
@@ -219,7 +176,6 @@ public final class TextUtils {
 			System.arraycopy(t[i].getBytes(), 0, dest, destPos,
 					t[i].getLength());
 			destPos += t[i].getLength();
->>>>>>> 49af7719a4d2fab888da4e566b5845c8dcc5432b
 		}
 		text.set(dest);
 	}
@@ -320,12 +276,6 @@ public final class TextUtils {
 	}
 
 	/**
-<<<<<<< HEAD
-	 * 这个有点难 支持几个简单的标记 %d %s
-	 */
-	public static void format(Text text, String format, Object... params) {
-
-=======
 	 * 测试Text的前缀是不是目标字符串
 	 * 
 	 * @param text
@@ -338,7 +288,6 @@ public final class TextUtils {
 	public static boolean startsWith(Text text, String s)
 			throws CharacterCodingException {
 		return startsWith(text, encode(s));
->>>>>>> 49af7719a4d2fab888da4e566b5845c8dcc5432b
 	}
 
 	/**
@@ -440,12 +389,6 @@ public final class TextUtils {
 	 *            截取的结束偏移量
 	 * @return
 	 */
-<<<<<<< HEAD
-	public static String subString(Text text, int start, int len) {
-		String temp = "";
-		temp.format(format, args);
-		return null;
-=======
 	public static Text subText(Text text, int start, int end) {
 		if (end > text.getLength()) {
 			throw new TextSplitIndexOutOfBoundsException(end);
@@ -460,7 +403,6 @@ public final class TextUtils {
 		Text t = new Text();
 		t.set(b, start, (end - start));
 		return t;
->>>>>>> 49af7719a4d2fab888da4e566b5845c8dcc5432b
 	}
 
 	// 以下是寻找字段的相关的函数
@@ -591,9 +533,6 @@ public final class TextUtils {
 		return splitToTwo(text, encode(split), n);
 	}
 
-<<<<<<< HEAD
-	// todo string join with sp
-=======
 	/**
 	 * 根据第N个分隔符将Text打断为两个Text 例如 "aa,bb,cc,dd" 分隔符是","
 	 * 的情况下.按照第2个分隔符打断后，返回["aa,bb" "cc,dd"]
@@ -1044,5 +983,4 @@ public final class TextUtils {
 		}
 	}
 
->>>>>>> 49af7719a4d2fab888da4e566b5845c8dcc5432b
 }
