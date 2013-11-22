@@ -93,6 +93,9 @@ public class JobUtils {
 		// 存在可以不设置输入路径的情况（重载InputFormat）
 		for (String path : dirs.split(StringUtils.COMMA_STR)) {
 			try {
+				if(path.isEmpty()){
+					continue;
+				}
 				Path p = new Path(path);
 				// 只是缓存
 				ContentSummary cs = pathToCS.get(path);
