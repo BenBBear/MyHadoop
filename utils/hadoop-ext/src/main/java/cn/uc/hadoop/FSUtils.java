@@ -36,9 +36,9 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 
 /***
- * @deprecated see {@link cn.uc.hadoop.utils.FSUtils}
+ *  see {@link cn.uc.hadoop.utils.FSUtils}
  */
-@Deprecated
+
 final public class FSUtils {
 
 	public static final class WriteMapper extends

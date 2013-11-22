@@ -64,6 +64,23 @@ public class TextRecordTest {
 			assertTrue(tr.find("a")==0);
 			assertTrue(tr.find("acd")==1);
 			assertTrue(tr.find(new Text("acd"))==1);
+			
+			TextRecord ttx = new TextRecord();
+			int length = tr.fieldSize();
+			for(int i=0;i<length;i++){
+				ttx.append(new Text(tr.getField(i)));
+			}
+			
+			Record rec = new Record();
+			rec.setSplitChar('`');
+			rec.setRecord("a,b,c,d,e");
+			System.out.println( rec.getRecord() );
+			StringBuilder sb = new StringBuilder();
+			rec.appendTo(sb);
+			System.out.println( sb.toString() );
+			
+			
+			
 		}
 		catch(Exception e){
 			e.printStackTrace();

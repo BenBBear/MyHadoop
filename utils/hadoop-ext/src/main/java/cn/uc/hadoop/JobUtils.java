@@ -8,16 +8,30 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.ContentSummary;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.ClientServiceDelegate;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.JobID;
+import org.apache.hadoop.mapred.ResourceMgrDelegate;
+import org.apache.hadoop.mapred.RunningJob;
+import org.apache.hadoop.mapred.YARNRunner;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobStatus;
+import org.apache.hadoop.mapreduce.TypeConverter;
+import org.apache.hadoop.mapreduce.v2.api.HSClientProtocol;
+import org.apache.hadoop.mapreduce.v2.api.MRClientProtocol;
+import org.apache.hadoop.mapreduce.v2.jobhistory.JHAdminConfig;
+import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.util.StringUtils;
-
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.apache.hadoop.yarn.ipc.YarnRPC;
 
 /***
- * @deprecated see {@link cn.uc.hadoop.JobUtils}
+ * see {@link cn.uc.hadoop.JobUtils}
  */
-@Deprecated
 public class JobUtils {
 
 	static final String BYTES_PER_REDUCER = "uc.exec.reducers.bytes.per.reducer";
@@ -111,5 +125,27 @@ public class JobUtils {
 	 */
 	public static void setNumberOfReducers(Job job) throws IOException {
 		job.setNumReduceTasks(estimateNumberOfReducers(job));
+	}
+
+	/**
+	 * 根据给出的applicationid或者jobid查询对应的job的状态
+	 * 自动进行RM和AM之间切换的容错
+	 * 返回的FinalApplicationStatus有4种状态:
+	 *  UNDEFINED: app未完成
+	 *  SUCCEEDED: app成功
+	 *  FAILED: app失败
+	 *  KILLED: app被kill
+	 * @param name
+	 * @throws IOException
+	 */
+	public static FinalApplicationStatus getJobStatusFromRM(String name,Configuration conf) throws IOException {
+		if( name.startsWith("application")){
+			name = name.replace("application", "job");
+		}
+		JobID oldJobID = JobID.forName(name);
+		ApplicationId appId = TypeConverter.toYarn(oldJobID).getAppId();
+		ResourceMgrDelegate rmd = new ResourceMgrDelegate(new YarnConfiguration(conf));
+		ApplicationReport report = rmd.getApplicationReport(appId);
+		return report.getFinalApplicationStatus();
 	}
 }
