@@ -1,0 +1,12 @@
+cn.uc.hadoop
+cn.uc.hadoop.exception
+cn.uc.hadoop.file
+cn.uc.hadoop.mapreduce.lib.combiner
+cn.uc.hadoop.mapreduce.lib.input
+cn.uc.hadoop.mapreduce.lib.output
+cn.uc.hadoop.mapreduce.lib.partition
+cn.uc.hadoop.mapreduce.tools.dictreplace
+cn.uc.hadoop.mapreduce.tools.dictreplace.impl
+cn.uc.hadoop.mapreduce.tools.dictreplace.mapreduce
+cn.uc.hadoop.utils
+cn.uc.utils
