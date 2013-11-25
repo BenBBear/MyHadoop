@@ -6,6 +6,10 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.hadoop.io.Text;
 
@@ -982,5 +986,47 @@ public final class TextUtils {
 			}
 		}
 	}
-
+	/**
+	 * 将一个Text按照字段分隔符和keyvalue分隔符进行切分。
+	 * 例如: a=b`c=d 切分后返回 ((a,b),(c,d))的映射
+	 * @param text 要切分的Text
+	 * @param fieldSplit 字段分隔符
+	 * @param kvSplit keyvalue分隔符
+	 * @return 返回一个保护多个KV对的映射
+	 */
+	public static Map<Text, Text> splitToKV(Text text, byte[] fieldSplit,
+			byte[] kvSplit) {
+		// 是否启动预采集
+		// 根据测试 hashmap性能最好，默认的容量，也OK
+		Map<Text, Text>	map = new HashMap<Text, Text>();
+		byte[] b = text.getBytes();
+		int length = text.getLength();
+		int pos = -1;
+		int nextStart = 0;
+		int begin=0,end=0;
+		do {
+			pos = BytesUtils.findBytes(b, nextStart, length, fieldSplit);
+			if (pos >= 0) {
+				// nextStart pos
+				begin = nextStart;
+				end = pos;
+			} else {
+				// nextStart length
+				begin = nextStart;
+				end = length;
+			}
+			{
+				int kvMid = BytesUtils.findBytes(b, begin, end, kvSplit);
+				if (kvMid != -1) {
+					Text k = new Text();
+					k.set(b, begin, (kvMid - begin));
+					Text v = new Text();
+					v.set(b, kvMid + kvSplit.length, end - (kvMid + kvSplit.length));
+					map.put(k, v);
+				}
+			}
+			nextStart = pos + fieldSplit.length;
+		} while (pos >= 0);
+		return map;
+	}
 }

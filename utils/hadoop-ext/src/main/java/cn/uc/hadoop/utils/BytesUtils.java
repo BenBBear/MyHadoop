@@ -1,8 +1,8 @@
 package cn.uc.hadoop.utils;
 
 /**
- * 参考了UTF8ByteArrayUtils的代码
- * 实现了一些基本的基于字节数组的比较
+ * 参考了UTF8ByteArrayUtils的代码 实现了一些基本的基于字节数组的比较
+ * 
  * @author qiujw
  * 
  */
@@ -69,8 +69,7 @@ public class BytesUtils {
 	}
 
 	/**
-	 * 在原始数组中寻找第N个目标数组b
-	 * 按照最左匹配原则，寻找到一个目标数组后，将不会对匹配的数组进行重复匹配
+	 * 在原始数组中寻找第N个目标数组b 按照最左匹配原则，寻找到一个目标数组后，将不会对匹配的数组进行重复匹配
 	 * 
 	 * @param utf
 	 *            原始数组
@@ -82,7 +81,7 @@ public class BytesUtils {
 	 *            目标数组
 	 * @param n
 	 *            寻找第N个目标数组
-	 *            
+	 * 
 	 * @return 如果找到第N个目标数组，则返回对应的下标，否则返回-1
 	 */
 	public static int findNthBytes(byte[] utf, int start, int end, byte[] b,
@@ -97,6 +96,28 @@ public class BytesUtils {
 			nextStart = pos + b.length;
 		}
 		return pos;
+	}
+	/**
+	 * 计算某个原始数组保护多少个目标数组
+	 * @param utf	原始数组
+	 * @param start	开始下标
+	 * @param end	结束下标
+	 * @param b	目标数组
+	 * @return	保护的目标的个数
+	 */
+	public static int countBytes(byte[] utf, int start, int end, byte[] b) {
+		int pos = -1;
+		int re = 0;
+		int nextStart = start;
+		while (nextStart < end) {
+			pos = findBytes(utf, nextStart, end, b);
+			if (pos < 0) {
+				return re;
+			}
+			re++;
+			nextStart = pos + b.length;
+		}
+		return re;
 	}
 
 	/**
@@ -114,7 +135,7 @@ public class BytesUtils {
 	 */
 
 	public static boolean startsWith(byte[] utf, int start, int end, byte[] b) {
-		if ( (end - start) < b.length) {
+		if ((end - start) < b.length) {
 			return false;
 		}
 		for (int i = start, j = 0; j < b.length; i++, j++) {
@@ -139,10 +160,10 @@ public class BytesUtils {
 	 * @return 如果，目标数组是测试原始数组的后缀将返回true，否则返回false
 	 */
 	public static boolean endsWith(byte[] utf, int start, int end, byte[] b) {
-		if( (end - start) < b.length) {
+		if ((end - start) < b.length) {
 			return false;
 		}
-		for (int i = end-1 , j = b.length-1; j >=0; i--, j--) {
+		for (int i = end - 1, j = b.length - 1; j >= 0; i--, j--) {
 			if (utf[i] != b[j]) {
 				return false;
 			}
