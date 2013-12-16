@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding=utf8
 
-from lib import config
+from conf import config
 import sqlite3
 
 class database:

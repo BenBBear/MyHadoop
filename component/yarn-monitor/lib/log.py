@@ -3,7 +3,7 @@
 from logging.handlers import RotatingFileHandler
 import logging
 import os
-import config
+from conf import config
 
 #启动脚本初始化一个日志名称，程序其它地方调用 main这个logger打印日志
 def initLogger(fileName):

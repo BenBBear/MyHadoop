@@ -3,7 +3,7 @@
 
 import sqlalchemy
 from sqlalchemy import create_engine
-from lib import config
+from conf import config
 from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 from sqlalchemy import Column, Integer, String
@@ -11,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 from db.applicationRecord import applicationRecord
 from db.nmRecord import nmRecord
 from db.rmRecord import rmRecord
+from db.metricsRecord import metricsRecord
 import sqlite3
 
 def getSession():
@@ -28,10 +29,12 @@ def initDB():
     applicationRecord.metadata.drop_all(engine)
     nmRecord.metadata.drop_all(engine)
     rmRecord.metadata.drop_all(engine)
+    metricsRecord.metadata.drop_all(engine)
 
     applicationRecord.metadata.create_all(engine) 
     nmRecord.metadata.create_all(engine)
     rmRecord.metadata.create_all(engine)
+    metricsRecord.metadata.create_all(engine)
     
 def createIndex():
     conn = sqlite3.connect(config.sqlitepath) 
@@ -49,6 +52,8 @@ def showAll():
     cursor.execute('select * from nm limit 10');
     print cursor.fetchall()
     cursor.execute('select * from rm limit 10');
+    print cursor.fetchall()
+    cursor.execute('select * from metrics limit 10');
     print cursor.fetchall()
 # class User(Base):
 #     __tablename__ = 'users'
