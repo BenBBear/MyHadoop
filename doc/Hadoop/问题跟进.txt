@@ -1,0 +1,197 @@
+Hadoop 2.0 升级集群问题汇总
+=====
+
+-	Fuse偶发异常，文件不能删除
+	
+		现象：有时候，客户端删除文件失败。
+		过程：略
+		原因：挂载Fuse有私有和公有方式。删除文件都会移到root用户下的trash的文件夹中。
+			这个root用户是Fuse在C++源码中写死的。
+			私有方式下，删除的文件是用当前用户删除的。公有方式是用root用户删除的。
+			线上集群中有两种不同方式挂载的Fuse，两种方式都有可能删除文件。
+			问题的根源是trash文件夹的权限。
+			如果，root挂载的用户删除了文件，创建的trash文件夹是root目录的，私有方式就不能删除文件。
+			反之也一样。
+		解决方法：更改fuse的挂载方式为私有挂载。
+
+-	集群出现死亡结点，过会后自动回归
+	
+		现象：某天中午，运维报出部分结点出现死亡结点情况。
+		过程：登陆界面，发现该datanode很久没有打heartbeat了。
+			查看ganglia机器负载不是太高。登陆到该机器检查该datanode进程。
+			通过命令jstat -gcutil xxxx 1000查看datanode的进程GC回收状况严重。
+			基本上每秒都在进行FGC。查看最大堆设置是1024M。
+			断定是datanode的保存的文件块数量过多，导致可用内存减少。
+			需要调整最大堆参数。
+		解决方法：修改hadoop-env.sh中的DATANODE_OPT参数，重启集群。
+
+-	datanode报错大量的超时读写
+		
+		现象：datanode的日志中出现很多java.net.SocketTimeoutException
+		过程1：集群刚开始的负载都调整得较高，网络比较吃紧。于是，先把集群负载调低。
+			同时，调整datanode读取超时从60秒调整到180秒。
+			由于，认为服务器端重启较麻烦，就先调整client端的参数。
+			调整后datanode中的报错日志明显减少。从每小时过百条减少到每小时几十条。
+		过程2：调整后的，第二天发现部分任务在获取任务状态的时候出现error。
+		原因：经调查，发现失败的任务是JOB过后一段时间在读取状态的。
+			先提出让统计组修改使用RM的restful的API进行job的状态的查询。
+			通过日志和源码，我们定位在job收尾阶段的时候，写jobhistory的日志写失败了。
+			部分job在AM退出后，通过API查询job的状态的时候，会转向查询jobhistory的日志导致失败。
+			那写jobhistory为什么会失败呢？
+			出错的地方是在Dfsoutputstream中的，以pipeline方式写文件的时候，写某个datanode出现超时错误。
+			通过阅读源码发现，在某个datanode写超时的时候，客户端的更换策略比较奇怪。
+			如果，文件的分数数量只有2个，就不会尝试更换datanode。
+			修改写失败的策略（dfs.client.block.write.replace-datanode-on-failure.policy）到always。观察效果。
+		过程3：经过写策略的修改和restfulapi的启用，集群的错误现象减少了很多。datanode中	的报错信息也减少到每小时10几条。
+			但是，直到某天我们发现了一个运行很久的job再次发生jobhistory写失败的情况，说明情况还没有根治。
+			通过日志发现，job尝试更换了27次的datanode但都最终写失败了。
+			曾经怀疑过时集群负载，或者网络问题导致的。但27个datanode都写失败是不太可能的。
+			我们更换了思路，会不会是打开了socket流而没有写，导致超时呢？
+			在源码中发现了一个非常类似这样行为的类JobHistoryEventHandler。
+			这个类首先打开了一个Dfsoutputstream，然后在累积了一段时间的事件后进行flush，或者每30秒进行一次flush。
+			为了验证是这个类出现了问题，我们把这个类对应的代码抠出来做成测试程序运行。
+			经过几次测试，发现如果90秒没有写动作，就可以重现线上集群出现的问题，更换了所有的datanode都写失败。
+			那这个eventhandler不是30秒刷一次的么？
+			经过仔细查看代码，发现了一个变量没有赋值，导致了程序没有每30秒进行flush。
+			而同时，事件数量又没有达到flush的数量上限。所以就会出现90秒不flush就断开连接的情况。
+			问题进一步缩小为，为什么90秒不写就会断开连接？
+			Dfsoutputstream这个类会自动维持连接的，但是维持机制是在超时时间的一半，进行心跳维持。还记得我们把客户端的参数调整为180秒，而没有重启datanode吗？
+			就是因为这个，客户端在90秒（180秒的一半)的时候,想维持连接，但是datanode在60秒的时候已经认为连接超时，并断开连接了。然后，就是客户端维持连接失败。认为这个datanode不可写，尝试更换datanode。
+			最终更换所有datanode都失败，最终写失败。
+		解决方法：
+			1.重启datanode集群。
+			2.修改flush事件的上限。（实际上Dfsoutputstream能够维持连接之后，这个可以不修改）
+		最后：
+			经过以上修改后，当前datanode一天只有10条左右的报错信息。而且时间集中在早上集群负载高峰时期。
+			这种错误基本可认为是因为网络问题或者是部分没重启的客户端服务导致的。
+
+-	reduce阶段oom
+		
+		现象：某天一个运行良好的job在reduce阶段发生了OOM
+		原因：reduce阶段会多线程进行数据拷贝和merge。源码中的解析也描述了可能发现的内存使用量超时上限的情况。MergeManagerImpl（261行）
+			大概的含义是，如果一个复制线程要求的内存使用量加上当前使用量大于使用上限，就会被延迟执行。
+			但是有可能，出现一种情况就是所有复制线程都处于延迟状态，而当前的内存使用量又没有达到merge的上限的时候。所有线程都在等待，程序假死。
+			为了避免这种情况，允许一个线程的使用量超过内存上限（使用内存使用量<使用上限来进行判断，而不是内存使用量+要求量<使用上限）
+			详细的相关参数如下：
+				A=mapreduce.reduce.shuffle.input.buffer.percent（默认0.7）
+				B=mapreduce.reduce.memory.totalbytes（默认值是最大堆的大小）
+				C=mapreduce.reduce.shuffle.memory.limit.percent(默认值0.25)
+				D=mapreduce.task.io.sort.factor(默认值是10)
+				E=mapreduce.reduce.merge.memtomem.threshold（默认子是D）
+				F=mapreduce.reduce.shuffle.merge.percent（默认值0.66）
+				memoryLimit=A*B
+				maxSingleShuffleLimit=A*B*C
+				mergeThreshold=A*B*F
+		解决办法：调整mapreduce.reduce.shuffle.input.buffer.percent到0.5，给shuffle留有更多的余地
+
+-	AM内存OOM和hive的union all的空输入执行错误
+		
+	现象：某天一个hive查询发生了AM的物理内存使用达到了最大堆大小，被强制杀死。经检测是因为AM的最大堆和申请的内存量都是旧配置导致的。
+		于是重启了thriftserver。但是重启之后，发生了奇怪的现象，一个以前运行良好的job报失败了。
+	过程：这个hive查询使用了union all语句，整个查询需要12个步骤，在运行9个步骤之后，报错退出。查看对应的application，发现报错的job的原因是没有输入文件。
+		我们一开始纠结地认为hive是允许job因为没有输入文件而运行失败的。因为查询没有第一时间终止。
+		我们浪费了很多时间在检查hive和application的日志上，最后，在源码中发现了hive的批量执行机制。
+		批量执行机制是这样的，hive会一次执行完8个阶段的任务后才会检查job的运行结果，如果有失败任务就会返回。
+		那其实，没有输入的任务就是导致hive语句查询失败的原因。
+		那为什么以前能运行成功呢？
+		经过对比配置文件，我们发现了在uber模式下，空输入会导致job报错。而一般的MRjob是允许空输入的。
+	原因：uber模式下，空输入会导致Job报错。
+	解决方式：在hive的thriftserver的机器上关闭uber模式。
+
+-	某天发现几个Nodemanager挂掉，而且，lostnode中都没有报警。
+
+	原因：mob616 被重启，Resourcemanager 重新启动，对NodeManager发出reboot指令。但该几个机器reboot失败。
+	有两个是因为端口被占用额，一个是因为内存不够。
+	而监控脚本没有生效时因为，reboot失败的nodemanager没有成功注册，所以也就不再lostnodes中。
+	
+	改进：监控脚步加入对指定数量的nodemanager的监控
+	resourcemanager重启后，检查是否所有的Nodemanager都启动成功了。
+
+-   HBASE读错位问题：
+	现象：有时候，hbase会出现读错位问题。但是，重新读又正常了。
+	过程：从线上观察到hbase有时候读取很慢。但是python读取超时会抛出Exception，而且超时时间是100秒，排除超时可能。
+		python程序使用thrift的get接口获取记录。不是使用scan接口。而且，获取的key都是不连续的。
+	原因：thrift编译出来的代码的seqid没有递增导致。
+		我们现在采取的方案是：
+		1.修改Hbase.py，加入seqid的递增和校验。如果校验失败，将raise一个TApplicationException 内容是当前的seqid校验失败。
+		2.Hbaseutil.py需要能够catch到这个Exception，进行断开重连。
+	
+-   死亡结点问题：
+
+	现象：从2013-8-5开始，陆续有datanode变成死亡结点。死亡结点的datanode在日志中打印大量的启动接收数据线程的日志。但datanode处于假死状态没有响应。
+	持续到9月25号，有恶化的趋势。从一个死亡结点变成有多个死亡结点同时出现，造成业务的数据块丢失。
+	
+	过程：经排查，发现每个机器出现死亡结点的时间都是相隔6小时或其整数倍。于是，问题定位到datanode的两个6小时的动作，心跳中的block-report或者DirectoryScaner。
+	从时间上更吻合的是DirectoryScaner。在DirectoryScaner的代码中发现一个粗暴的上锁操作，结合Jstack打印的堆栈。发现上锁期间，会通过JAVA的File对象的getlength获取文件长度。
+	而getlength是直接调用native函数查询linux的文件系统的。在磁盘繁忙的时候，会造成长时间持有住锁。导致心跳和数据收发进程堵塞。
+
+	解决：将上锁期间的磁盘操作提取到上锁外部的异步扫描中。	
+	
+-   DISTCP+FTP 问题
+	现象：DISTcp，拷贝数据到FTP的文件系统的时候，报找不到文件的错误。
+    原因：distcp拷贝过程是，先把文件写到目标目录下以点开头的文件中（隐藏文件）。写完后，再将文件改名。
+          但是默认的HADOOP使用的FTPCLient是不打开列出隐藏文件的选项。于是，将隐藏文件改名为目标的文件就失败了。
+    解决：以下方法均可解决
+		1.修改FTPSystem的FTPClient，添加client.setListHiddenFiles(true);	  
+		 136
+		 >client.setListHiddenFiles(true);
+		2.修改DISTcp的行为，不写中间文件。直接写文件。
+		
+-   KPI12的NodeManager倒掉
+    现象：
+		日志中发现Exception；
+		2013-11-02 10:19:11,785 FATAL org.apache.hadoop.yarn.YarnUncaughtExceptionHandler: Thread Thread[LocalizerRunner for container_1383029162583_58733_01_000053,5,main] threw an Error.  Shutting down now...
+		org.apache.hadoop.fs.FSError: java.io.IOException: No space left on device
+				at org.apache.hadoop.fs.RawLocalFileSystem$LocalFSFileOutputStream.write(RawLocalFileSystem.java:220)
+				at java.io.BufferedOutputStream.flushBuffer(BufferedOutputStream.java:65)
+				at java.io.BufferedOutputStream.flush(BufferedOutputStream.java:123)
+				at java.io.FilterOutputStream.close(FilterOutputStream.java:140)
+				at org.apache.hadoop.fs.FSDataOutputStream$PositionCache.close(FSDataOutputStream.java:66)
+				at org.apache.hadoop.fs.FSDataOutputStream.close(FSDataOutputStream.java:99)
+				at org.apache.hadoop.fs.ChecksumFs$ChecksumFSOutputSummer.close(ChecksumFs.java:353)
+				at org.apache.hadoop.fs.FSDataOutputStream$PositionCache.close(FSDataOutputStream.java:66)
+				at org.apache.hadoop.fs.FSDataOutputStream.close(FSDataOutputStream.java:99)
+				at org.apache.hadoop.io.IOUtils.cleanup(IOUtils.java:237)
+				at org.apache.hadoop.io.IOUtils.closeStream(IOUtils.java:254)
+				at org.apache.hadoop.io.IOUtils.copyBytes(IOUtils.java:61)
+				at org.apache.hadoop.io.IOUtils.copyBytes(IOUtils.java:112)
+				at org.apache.hadoop.fs.FileContext$Util.copy(FileContext.java:2153)
+				at org.apache.hadoop.fs.FileContext$Util.copy(FileContext.java:2094)
+				at org.apache.hadoop.yarn.server.nodemanager.DefaultContainerExecutor.startLocalizer(DefaultContainerExecutor.java:98)
+				at org.apache.hadoop.yarn.server.nodemanager.containermanager.localizer.ResourceLocalizationService$LocalizerRunner.run(ResourceLocalizationService.java:864)
+		Caused by: java.io.IOException: No space left on device
+				at java.io.FileOutputStream.writeBytes(Native Method)
+				at java.io.FileOutputStream.write(FileOutputStream.java:282)
+				at org.apache.hadoop.fs.RawLocalFileSystem$LocalFSFileOutputStream.write(RawLocalFileSystem.java:218)
+		
+		另外有很多WARN，报告home9创建目录失败
+		
+		2013-11-02 10:19:11,605 WARN org.apache.hadoop.yarn.server.nodemanager.containermanager.launcher.ContainerLaunch: Failed to launch container.
+			java.io.IOException: mkdir of /home9/hadoop/yarn_nm/local-dir/usercache/kpi/appcache/application_1383029162583_58736/container_1383029162583_58736_01_000052 failed
+			at org.apache.hadoop.fs.FileSystem.primitiveMkdir(FileSystem.java:1042)
+			at org.apache.hadoop.fs.DelegateToFileSystem.mkdir(DelegateToFileSystem.java:145)
+			at org.apache.hadoop.fs.FilterFs.mkdir(FilterFs.java:190)
+			at org.apache.hadoop.fs.FileContext$4.next(FileContext.java:708)
+			at org.apache.hadoop.fs.FileContext$4.next(FileContext.java:705)
+			at org.apache.hadoop.fs.FileContext$FSLinkResolver.resolve(FileContext.java:2335)
+			at org.apache.hadoop.fs.FileContext.mkdir(FileContext.java:705)
+			at org.apache.hadoop.yarn.server.nodemanager.DefaultContainerExecutor.createDir(DefaultContainerExecutor.java:330)
+			at org.apache.hadoop.yarn.server.nodemanager.DefaultContainerExecutor.launchContainer(DefaultContainerExecutor.java:127)
+			at org.apache.hadoop.yarn.server.nodemanager.containermanager.launcher.ContainerLaunch.call(ContainerLaunch.java:242)
+			at org.apache.hadoop.yarn.server.nodemanager.containermanager.launcher.ContainerLaunch.call(ContainerLaunch.java:68)
+			at java.util.concurrent.FutureTask$Sync.innerRun(FutureTask.java:303)
+			at java.util.concurrent.FutureTask.run(FutureTask.java:138)
+			at java.util.concurrent.ThreadPoolExecutor$Worker.runTask(ThreadPoolExecutor.java:886)
+			at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:908)
+			at java.lang.Thread.run(Thread.java:662)
+		
+		Home9硬盘满了，导致不能创建文件。
+		
+	原因：NodeManager的第一个目录的硬盘满了，不能复制Token文件。NodeManager要求第一个目录必须可用可写，否则会抛出异常导致崩溃。
+	      而导致硬盘满的原因，初步认为是MR的中间过程文件太多。
+	解决：这个应该是NodeManager的设计缺陷。第一个磁盘读写失败。就会导致NodeManager崩溃。暂无好办法解决。
+	
+	
+	
+网络超时问题，基本和本机有关，hdfs，xceiver时，480000
+	是否和双网卡绑定有关？，本地

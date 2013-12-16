@@ -101,7 +101,10 @@
 5.  卸载
 
         fusermount -u $HOME/mnt/dfs
-    
+
+6.  可选，磁盘启动挂载
+
+        /home/hadoop/pkg/fuse-dfs/fuse_dfs_wrapper.3.sh#dfs://nameservice1 /home/hadoop/mnt/dfs fuse rw,usetrash,initchecks 0 0
 
 ## hadoop lzo
 

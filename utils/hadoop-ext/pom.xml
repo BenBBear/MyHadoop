@@ -9,11 +9,6 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 	<dependencies>
-		<dependency>
-			<groupId>gnu.getopt</groupId>
-			<artifactId>java-getopt</artifactId>
-			<version>1.0.13</version>
-		</dependency>
             
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
@@ -53,30 +48,10 @@
 			<version>2.0.0-cdh4.2.1</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.hive</groupId>
-			<artifactId>hive-cli</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.hive</groupId>
-			<artifactId>hive-jdbc</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.oozie</groupId>
-			<artifactId>oozie-client</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>hadoop-lzo</groupId>
 			<artifactId>hadoop-lzo</artifactId>
 			<scope>system</scope>
 			<systemPath>${basedir}/lib/hadoop-lzo-0.4.15.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
 		</dependency>
 
 	</dependencies>
