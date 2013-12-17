@@ -29,6 +29,7 @@ function showRmData(data){
 	var happenTimeSplit = getRmHappenTimeSplitParams();
 	//转换data的result的记录形式从[time,xx,xx...]转换为[time][xx,xx...]
 	var dataPool = {}
+	console.log(data);
 	for(var key in data['result']){
 		var temp = data['result'][key];
 		var time = temp[0]

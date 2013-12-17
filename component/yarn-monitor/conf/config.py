@@ -16,8 +16,8 @@ sqlitepath = "d:\sqllite.db"
 nmport = 59842
 
 # resource manager's host and port
-rmhost = "hadoop2"
-rmport = "59088"
+rmhost = "vdc21"
+rmport = "50088"
 
 # rmhost="hadoop2"
 # rmport="59088"

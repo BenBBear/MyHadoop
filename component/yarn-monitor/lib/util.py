@@ -3,7 +3,7 @@
 
 import logging
 import urllib2
-from lib import config
+from conf import config
 import json
 from lib import log
 import threading
@@ -29,6 +29,7 @@ def getHttp(url , timeout = 10):
     return None
 
 def getHttpJson(url , timeout = 10):
+    print url
     html = getHttp(url, timeout)
     try:
         if html:

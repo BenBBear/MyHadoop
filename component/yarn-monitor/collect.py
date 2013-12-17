@@ -2,11 +2,13 @@
 # coding=utf8
 
 from db import database
-from lib import config, util
+from lib import util
+from conf import config
 import time
 from db.applicationRecord import applicationRecord
 from db.nmRecord import nmRecord
 from db.rmRecord import rmRecord
+from db.metricsRecord import metricsRecord
 from lib import log
 import json
 import urllib2
@@ -32,15 +34,33 @@ class collector:
         self.rmList = {}
         self.nmList = {}
         self.appList = {} 
-        
-    def run(self):
+    
+    def collectMetrics(self):
+        #获取当前集群的状态
+        metrics = self.getMetrics()
+        meRecord =  metricsRecord(self.recordTime);
+        recordKey=["appsCompleted","appsPending","appsRunning",
+                   "appsFailed","appsKilled","totalMB","allocatedMB",
+                   "containersAllocated","containersReserved",
+                   "containersPending","totalNodes","activeNodes"]
+        print metrics
+        for key in recordKey:
+            print metrics['clusterMetrics'][key]
+            meRecord.set(key,metrics['clusterMetrics'][key])
+        session = database.getSession()
+        session.merge(meRecord)
+        session.commit()
+         
+    def collectApp(self):
+                
+        #获取所有的过去时段完成的app的列表
         apps = self.getAppList()
         if not apps or not apps["apps"]:
             logger.info("no appid match")
             return
         
         startCollectTime = time.time()
-        
+        #轮询app列表，获取每个app的详细信息
         for app in apps["apps"]["app"]:
             startTime = time.time()
             appid =  app["id"]
@@ -67,19 +87,20 @@ class collector:
         
         startFlushTime = time.time()
         
+        #提交数据
         session = database.getSession()
-        for (appid,appRecord) in self.appList.items():
-            session.merge(appRecord)
+        for (appid,appRecordValue) in self.appList.items():
+            session.merge(appRecordValue)
         session.commit()
         logger.info("push %d appRecord into table" % (len(self.appList)))
         
-        for (key,nmRecord) in self.nmList.items():
-            session.merge(nmRecord)
+        for (key,nmRecordValue) in self.nmList.items():
+            session.merge(nmRecordValue)
         session.commit()
         logger.info("push %d nmRecord into table" % (len(self.nmList)))
         
-        for (key,rmRecord) in self.rmList.items():
-            session.merge(rmRecord)
+        for (key,rmRecordValue) in self.rmList.items():
+            session.merge(rmRecordValue)
         session.commit()
         logger.info("push %d rmRecord into table" % (len(self.rmList)))
         endFlushTime = time.time()
@@ -143,8 +164,11 @@ class collector:
             return {"map":match.group(1),"reduce":match.group(2),"total": match.group(3) }
         else:
             return {"map":0,"reduce":0,"total":0}
-        
-        
+    
+    def getMetrics(self):    
+        url = ("http://%s:%s/ws/v1/cluster/metrics" % (config.rmhost,config.rmport))
+        return util.getHttpJson(url)
+    
     def getAppList(self):
         url = ("http://%s:%s/ws/v1/cluster/apps?finishedTimeBegin=%d&finishedTimeEnd=%d" 
             % (config.rmhost,config.rmport,(self.recordTime*1000),(self.recordTime+self.interval)*1000))
@@ -270,7 +294,8 @@ class collector:
         self.nm[node][recordTime][key]+=value
     
 if __name__ == "__main__":
-    #延迟2分钟执行
-    time.sleep(120)
     coll = collector()
-    coll.run()    
+    coll.collectMetrics()
+    #为了防止有些任务未成功收尾，延迟2分钟执行
+    time.sleep(120)
+    coll.collectApp()    

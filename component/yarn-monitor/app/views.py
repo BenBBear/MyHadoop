@@ -9,7 +9,7 @@ from app import app
 from db import database
 from db import applicationRecord
 from lib import util
-from lib import config
+from conf import config
 from lib import log
 # import data
 import data
