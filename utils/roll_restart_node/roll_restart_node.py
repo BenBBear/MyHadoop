@@ -11,6 +11,8 @@ host   = "cnode457" # Manager机器
 port   = 7180
 service= "yarn"  # 指定的服务，不需要加后面的数字编号
 role   = "nodemanager" # 大小写不限
+host_reg = r"kpi2[5-8]" # host的匹配正在，如果配置，只有匹配到host才执行
+                        # 注意前面的r代表raw字符串，修改需要明白其含义
 interval = 5 * 60 # seconds，每个重启节点的间隔时间
 
 # restart-all = True # 重启全部, 即便一个role之前是关闭的
@@ -31,6 +33,10 @@ import urlparse
 import json
 import time
 
+if host_reg: 
+  import re
+  host_p = re.compile(host_reg, re.IGNORECASE)
+  
 # url: UrlParse
 def build_opener(url):
   if not url.username:
@@ -86,6 +92,11 @@ roleNames = {}
 for item in roles['items']:
   if item['type'] != role: continue
   roleHost = item['hostRef']['hostId']
+  if host_reg:
+    m = host_p.match(roleHost)
+    if not m:
+      print "INFO: %s not match host reg rule, skip it" % roleHost
+      continue
   # 启动状态并且配置不过时，总是跳过
   if item['roleState'] == 'STARTED':
     if not item['configStale']:
