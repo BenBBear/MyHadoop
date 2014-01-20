@@ -66,7 +66,7 @@
         #pkg_check_modules(FUSE fuse)
 
 重新编译就可以了
-
+l
 ### 编译结果目录
 
     $HADOOP_PREFIX/src/hadoop-hdfs-project/hadoop-hdfs/target/native/main/native/fuse-dfs
@@ -93,6 +93,10 @@
         -oserver=hdfs://mycluster \
         -obig_writes -ousetrash -oprotected=/user:/tmp \
         $HOME/mnt/dfs
+
+    特别的，如果觉得挂载后显示的文件大小和实际的不太对<http://kicklinux.com/hadoop-fuse-dfs-filesize/>,可以使用如下参数
+
+        -odirect_io -oattribute_timeout=0 -oentry_timeout=0
 
 4.  挂载
 
