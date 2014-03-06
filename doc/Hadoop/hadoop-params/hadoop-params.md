@@ -831,7 +831,7 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 	>是否允许日志汇聚功能。*建议开启*
 
 * **yarn.log-aggregation.retain-seconds=-1**
-	>保存汇聚日志时间，秒，超过会删除，-1表示不删除。 注意，设置的过小，将导致NN垃圾碎片。*建议3-7天*
+	>保存汇聚日志时间，秒，超过会删除，-1表示不删除。 注意，设置的过小，将导致NN垃圾碎片。*建议3-7天 = 7 * 86400 = 604800*
 
 * **yarn.nodemanager.log.retain-seconds=10800**
 	>保留用户日志的时间，秒。在日志汇聚功能关闭时生效。
@@ -1059,10 +1059,10 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 	>job的reduce任务数。local方式运行时忽略。客户端参数。
 
 * **mapreduce.map.maxattempts=4**
-	>map重试次数
+	>map重试次数。mapred.map.max.attempts是旧参数
 
 * **mapreduce.reduce.maxattempts=4**
-	>reduce重试次数
+	>reduce重试次数。
 
 * **mapreduce.reduce.shuffle.parallelcopies=5**
 	>copy阶段的reduce的传输并发数量
@@ -1236,6 +1236,10 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 * mapreduce.reduce.log.level=INFO
 	>Reduce日志级别。可取值：OFF, FATAL, ERROR, WARN, INFO, DEBUG, TRACE和ALL.
 	>  >可以客户端指定
+
+* yarn.app.mapreduce.am.log.level=INFO
+
+    AM的日志级别
 
 * mapreduce.reduce.merge.inmem.threshold=1000
 	>内存中进行合并的文件数量。超过阀值，会先spill到磁盘上。<=0的值表示我们根本不想要有任何阀值，反而是希望完全在内存中完成merge。

@@ -66,7 +66,7 @@
         #pkg_check_modules(FUSE fuse)
 
 重新编译就可以了
-l
+
 ### 编译结果目录
 
     $HADOOP_PREFIX/src/hadoop-hdfs-project/hadoop-hdfs/target/native/main/native/fuse-dfs
@@ -101,6 +101,14 @@ l
 4.  挂载
 
         sh myfuse.sh
+
+    *如果提示你： allow_other_user 需要写入到 /etc/fuse.conf，照做*
+
+    前提是需要：
+
+        /etc/init.d/fuse start
+        modprobe fuse
+        另外，注意 fusermount 的权限问题
 
 5.  卸载
 
@@ -155,6 +163,13 @@ ant compile-native jar
         <value>com.hadoop.compression.lzo.LzoCodec</value>
     </property>
 
+
+### 测试
+
+1.  创建一个本地文本文件
+2.  lzop压缩，没有lzop可以用（yum install lzop -y）安装
+3.  上传到hdfs，hdfs dfs -put data.lzo /user/hadoop/test/lzo-test/data.lzo
+4.  查看文件，hdfs dfs -text /user/hadoop/test/lzo-test/data.lzo
 
 ## open-ssl 安装
 

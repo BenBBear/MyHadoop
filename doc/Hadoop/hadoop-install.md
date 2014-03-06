@@ -817,7 +817,9 @@ Hadoop经典安装。
     hadoop namenode -format
     
     # 从hadoop1拷贝元数据到hadoop2，保持元数据一致
-    scp -P 22 -r ~/meta/hadoop/name hadoop2:$HOME/meta/hadoop 
+    scp -P 22 -r ~/meta/hadoop/name hadoop2:$HOME/meta/hadoop
+    或者，在启动了hadoop1上的NameNode的情况下：
+    hdfs namenode -bootstrap
 
     # 检查确保zookeeper成功启动
     hdfs zkfc -formatZK
@@ -835,12 +837,40 @@ Hadoop经典安装。
     hdfs dfs -mkdir /tmp
     hdfs dfs -chmod -R 1777 /tmp
     hdfs dfs -mkdir /user
-    hdfs dfs -chmod -R 1777 /user  
+    hdfs dfs -chmod -R 1777 /user
+    hdfs dfs -mkdir /var/jobhistory/intermediate-done-dir
+    hdfs dfs -mkdir /var/jobhistory/done
+    hdfs dfs -chmod -R 1777 /var
 
     sbin/start-yarn.sh
     # 此时，如果成功，可以通过浏览器访问http://hadoop1:50088来看Yarn系统
 
----
+## 测试
+
+    准备一些文本数据，写入文件 test.txt
+
+    hdfs dfs -mkdir /user/hadoop/test/test-mr
+    hdfs dfs -put text.txt /user/hadoop/test/test-mr/
+
+    hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-2.0.0-cdh4.2.1.jar wordcount /user/kpi/test/test-mr/ /user/kpi/test/test-mr-out    
+
+# 为其它用户创建软连接和环境
+
+上面安装的环境仅对hadoop用户有效，为了让其它用户也使用到，可以：
+
+1. 为其它用户也安装hadoop，过程是上述过程的简略版，
+2. 或者，用创建软链共用上述安装的Hadoop
+
+        chmod a+x /home/hadoop
+        
+        ln -s -t /usr/local/bin /home/hadoop/local/hadoop/bin/*
+        ln -s -t /usr/local/libexec /home/hadoop/local/hadoop/libexec/*
+        ln -s -t /usr/local/etc /home/hadoop/local/hadoop/etc/hadoop
+        
+        vi .bash_profeil
+            export JAVA_HOME=/home/hadoop/local/java
+            export HADOOP_HOME=/home/hadoop/local/hadoop
+            export HADOOP_PREFIX=$HADOOP_HOME
 
 ### 补充说明
 
