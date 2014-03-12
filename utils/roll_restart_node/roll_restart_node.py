@@ -1,27 +1,9 @@
 #!/usr/bin/env python
 # coding=utf8
 
-# 滚动重启指定角色服务，关于service和role的概念，参考CDH API的说明
-# 重启过程中，任何一个任务失败，都会导致整个重启工作停止。
-# 不会重启启动状态并且配置不过期的role
+# usage: 修改如下参数
 
-user   = "admin"
-passwd = "admin" # 你自己的管理员账户和密码
-host   = "cnode457" # Manager机器
-port   = 7180
-service= "yarn"  # 指定的服务，不需要加后面的数字编号
-role   = "nodemanager" # 大小写不限
-host_reg = r"kpi2[5-8]" # host的匹配正在，如果配置，只有匹配到host才执行
-                        # 注意前面的r代表raw字符串，修改需要明白其含义
-interval = 5 * 60 # seconds，每个重启节点的间隔时间
-
-# restart-all = True # 重启全部, 即便一个role之前是关闭的
-restart_all = False
-
-##############################
-# 以下是代码部分，不需要修改
-##############################
-
+from config import *
 ##############################
 role = role.upper() 
 ##############################
@@ -36,7 +18,7 @@ import time
 if host_reg: 
   import re
   host_p = re.compile(host_reg, re.IGNORECASE)
-  
+
 # url: UrlParse
 def build_opener(url):
   if not url.username:
@@ -49,7 +31,7 @@ def build_opener(url):
   return opener
 
 def get(url):
-  print "get", url
+  #print "get", url
   url = urlparse.urlparse(url)
   opener = build_opener(url)
   url = urlparse.urlunparse((url.scheme, "%s:%d" % (url.hostname, url.port), url.path, url.params, url.query, url.fragment))
@@ -57,7 +39,7 @@ def get(url):
   return f.read() 
 
 def post(url, data, headers):
-  print "post", url, data, headers
+  #print "post", url, data, headers
   url = urlparse.urlparse(url)
   opener = build_opener(url)
   url = urlparse.urlunparse((url.scheme, "%s:%d" % (url.hostname, url.port), url.path, url.params, url.query, url.fragment))
@@ -81,7 +63,8 @@ services = get(url)
 #print services
 services = json.loads(services)
 #serviceName = services['items'][0]['name']
-serviceName = "%s1" % service 
+#serviceName = "%s1" % service 
+serviceName = service 
 #####
 
 url = "%s/clusters/%s/services/%s/roles" % (API, clusterName, serviceName)
@@ -110,7 +93,7 @@ for item in roles['items']:
   roleNames[roleHost]=item['name'] 
 
 def restart(name):
-  print "restart", name
+  #print "restart", name
   url = "%s/clusters/%s/services/%s/roleCommands/restart" % (API, clusterName, serviceName)
   data = "{\"items\":[\"%s\"]}" % name
   headers = {"Content-Type": "application/json"}
@@ -119,7 +102,7 @@ def restart(name):
   return rep['errors']
 
 def info(name):
-  print "info", name
+  #print "info", name
   url = "%s/clusters/%s/services/%s/roles/%s" % (API, clusterName, serviceName, name)
   rep = get(url)
   #print rep
@@ -128,9 +111,13 @@ def info(name):
 
 first = True
 for khost, kname in roleNames.items():
+  if just_show_host:
+    print khost, kname
+    continue
   if first:
     first = False
   else:
+    print "Sleep ..."
     time.sleep(interval)
 
   print "restart", khost
