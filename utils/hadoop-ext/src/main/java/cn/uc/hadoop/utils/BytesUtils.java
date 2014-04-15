@@ -67,6 +67,35 @@ public class BytesUtils {
 		}
 		return -1;
 	}
+	
+	/**
+	 * 在原始数组中,从后往前寻找目标数组b
+	 * 
+	 * @param utf
+	 *            原始字节数组
+	 * @param start
+	 *            开始下标
+	 * @param end
+	 *            结束下标
+	 * @param b
+	 *            目标数组
+	 * @return 如果找到目标数组，则返回对应的下标，否则返回-1
+	 */
+	public static int rfindBytes(byte[] utf, int start, int end, byte[] b) {
+		for (int i = end - b.length; i >= 0; i--) {
+			boolean matched = true;
+			for (int j = 0; j < b.length; j++) {
+				if (utf[i + j] != b[j]) {
+					matched = false;
+					break;
+				}
+			}
+			if (matched) {
+				return i;
+			}
+		}
+		return -1;
+	}
 
 	/**
 	 * 在原始数组中寻找第N个目标数组b 按照最左匹配原则，寻找到一个目标数组后，将不会对匹配的数组进行重复匹配
@@ -94,6 +123,36 @@ public class BytesUtils {
 				return pos;
 			}
 			nextStart = pos + b.length;
+		}
+		return pos;
+	}
+	
+	/**
+	 * 在原始数组中,从后往前寻找第N个目标数组b 按照最右匹配原则，寻找到一个目标数组后，将不会对匹配的数组进行重复匹配
+	 * 
+	 * @param utf
+	 *            原始数组
+	 * @param start
+	 *            开始下标
+	 * @param end
+	 *            结束下标
+	 * @param b
+	 *            目标数组
+	 * @param n
+	 *            寻找倒数第N个目标数组
+	 * 
+	 * @return 如果找到第N个目标数组，则返回对应的下标，否则返回-1
+	 */
+	public static int rfindNthBytes(byte[] utf, int start, int end, byte[] b,
+			int n) {
+		int pos = -1;
+		int nextEnd = end;
+		for (int i = 0; i < n; i++) {
+			pos = rfindBytes(utf, start, nextEnd, b);
+			if (pos < 0) {
+				return pos;
+			}
+			nextEnd = pos ;
 		}
 		return pos;
 	}

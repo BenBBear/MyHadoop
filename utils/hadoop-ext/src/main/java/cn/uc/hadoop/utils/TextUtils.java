@@ -41,8 +41,8 @@ public final class TextUtils {
 	private static ThreadLocal<CharsetEncoder> ENCODER_FACTORY = new ThreadLocal<CharsetEncoder>() {
 		protected CharsetEncoder initialValue() {
 			return Charset.forName("UTF-8").newEncoder()
-					.onMalformedInput(CodingErrorAction.REPORT)
-					.onUnmappableCharacter(CodingErrorAction.REPORT);
+					.onMalformedInput(CodingErrorAction.REPLACE)
+					.onUnmappableCharacter(CodingErrorAction.REPLACE);
 		}
 	};
 
@@ -199,6 +199,22 @@ public final class TextUtils {
 			throws CharacterCodingException {
 		return find(text, str, 1);
 	}
+	
+	/**
+	 * 在Text中从后往前寻找目标字符串是否存在，返回字节下标
+	 * 
+	 * @param text
+	 *            原始Text
+	 * @param str
+	 *            目标字符串
+	 * @return 如果找到返回,字节下标，否则返回-1
+	 * @throws CharacterCodingException
+	 */
+	public static int rfind(Text text, String str)
+			throws CharacterCodingException {
+		return rfind(text, str, 1);
+	}
+	
 
 	/**
 	 * 在Text中寻找目标字符是否存在，返回字节下标
@@ -213,6 +229,20 @@ public final class TextUtils {
 	public static int find(Text text, char c) throws CharacterCodingException {
 		return find(text, c, 1);
 	}
+	
+	/**
+	 * 在Text中从后往前寻找目标字符是否存在，返回字节下标
+	 * 
+	 * @param text
+	 *            原始Text
+	 * @param c
+	 *            目标字符
+	 * @return 如果找到返回,字节下标，否则返回-1
+	 * @throws CharacterCodingException
+	 */
+	public static int rfind(Text text, char c) throws CharacterCodingException {
+		return rfind(text, c, 1);
+	}
 
 	/**
 	 * 在Text中寻找目标字节数组是否存在，返回字节下标
@@ -226,6 +256,19 @@ public final class TextUtils {
 	 */
 	public static int find(Text text, byte[] b) {
 		return find(text, b, 1);
+	}
+	/**
+	 * 在Text中从后向前寻找目标字节数组是否存在，返回字节下标
+	 * 
+	 * @param text
+	 *            原始Text
+	 * @param b
+	 *            目标字节数组
+	 * @return 如果找到返回,字节下标，否则返回-1
+	 * @throws CharacterCodingException
+	 */
+	public static int rfind(Text text, byte[] b) {
+		return rfind(text, b, 1);
 	}
 
 	/**
@@ -244,7 +287,24 @@ public final class TextUtils {
 			throws CharacterCodingException {
 		return find(text, encode(str), n);
 	}
-
+	
+	/**
+	 * 在Text中,从后向前寻找第N个目标字符串是否存在，返回字节下标
+	 * 
+	 * @param text
+	 *            原始Text
+	 * @param str
+	 *            目标字符串
+	 * @param n
+	 *            第N个目标字符串
+	 * @return 如果找到返回,字节下标，否则返回-1
+	 * @throws CharacterCodingException
+	 */
+	public static int rfind(Text text, String str, int n)
+			throws CharacterCodingException {
+		return rfind(text, encode(str), n);
+	}
+	
 	/**
 	 * 在Text中寻找第N个目标字符是否存在，返回字节下标
 	 * 
@@ -261,7 +321,24 @@ public final class TextUtils {
 			throws CharacterCodingException {
 		return find(text, encode(c), n);
 	}
-
+	
+	/**
+	 * 在Text中从后向前寻找第N个目标字符是否存在，返回字节下标
+	 * 
+	 * @param text
+	 *            原始Text
+	 * @param c
+	 *            目标字符
+	 * @param n
+	 *            第N个目标字符
+	 * @return 如果找到返回,字节下标，否则返回-1
+	 * @throws CharacterCodingException
+	 */
+	public static int rfind(Text text, char c, int n)
+			throws CharacterCodingException {
+		return rfind(text, encode(c), n);
+	}
+	
 	/**
 	 * 在Text中寻找第N个目标字节数组是否存在，返回字节下标
 	 * 
@@ -278,7 +355,24 @@ public final class TextUtils {
 		return BytesUtils.findNthBytes(text.getBytes(), 0, text.getLength(), b,
 				n);
 	}
-
+	
+	/**
+	 * 在Text中从后往前寻找第N个目标字节数组是否存在，返回字节下标
+	 * 
+	 * @param text
+	 *            原始Text
+	 * @param b
+	 *            目标字节数组
+	 * @param n
+	 *            第N个目标字节数组
+	 * @return 如果找到返回,字节下标，否则返回-1
+	 * @throws CharacterCodingException
+	 */
+	public static int rfind(Text text, byte[] b, int n) {
+		return BytesUtils.rfindNthBytes(text.getBytes(), 0, text.getLength(), b,
+				n);
+	}
+	
 	/**
 	 * 测试Text的前缀是不是目标字符串
 	 * 
@@ -432,7 +526,25 @@ public final class TextUtils {
 		byte[] b = encode(split);
 		return findField(text, b, n);
 	}
-
+	
+	/**
+	 * 根据分隔符将Text分割后，从后往前寻找第N个字段，字段下标从0开始
+	 * 
+	 * @param text
+	 *            原始Text
+	 * @param split
+	 *            分隔符
+	 * @param n
+	 *            第n个字段
+	 * @return 返回第n个字段
+	 * @throws CharacterCodingException
+	 */
+	public static Text rfindField(Text text, String split, int n)
+			throws CharacterCodingException {
+		byte[] b = encode(split);
+		return rfindField(text, b, n);
+	}
+	
 	/**
 	 * 根据分隔符将Text分割后，寻找第N个字段，字段下标从0开始
 	 * 
@@ -449,6 +561,24 @@ public final class TextUtils {
 			throws CharacterCodingException {
 		byte[] b = encode(split);
 		return findField(text, b, n);
+	}
+	
+	/**
+	 * 根据分隔符将Text分割后，从后往前寻找第N个字段，字段下标从0开始
+	 * 
+	 * @param text
+	 *            原始Text
+	 * @param split
+	 *            分隔符
+	 * @param n
+	 *            第n个字段
+	 * @return 返回第n个字段
+	 * @throws CharacterCodingException
+	 */
+	public static Text rfindField(Text text, char split, int n)
+			throws CharacterCodingException {
+		byte[] b = encode(split);
+		return rfindField(text, b, n);
 	}
 
 	/**
@@ -496,6 +626,51 @@ public final class TextUtils {
 			return re;
 		}
 	}
+	/**
+	 * 根据分隔符将Text分割后，从后往前寻找第N个字段，字段下标从0开始
+	 * 
+	 * @param text
+	 *            原始Text
+	 * @param split
+	 *            分隔符
+	 * @param n
+	 *            第n个字段
+	 * @return 返回第n个字段
+	 * @throws CharacterCodingException
+	 */
+	public static Text rfindField(Text text, byte[] split, int n) {
+		byte[] b = text.getBytes();
+		int end = text.getLength();
+		int pos = -1;
+		int nextEnd = end;
+		int s = -1, e = -1;
+		int i = 0;
+		for (i = 0; i <= n; i++) {
+			pos = BytesUtils.rfindBytes(b, 0, nextEnd, split);
+			if (pos < 0) {
+				break;
+			} else {
+				if (i == n) {
+					s = pos + split.length;
+					e = nextEnd;
+					break;
+				}
+			}
+			nextEnd = pos ;
+		}
+		// 寻找到最后一个
+		if (pos < 0 && i == n) {
+			s = 0;
+			e = nextEnd;
+		}
+		if (s < 0) {
+			throw new TextSplitIndexOutOfBoundsException(n);
+		} else {
+			Text re = new Text();
+			re.set(b, s, e - s);
+			return re;
+		}
+	}
 
 	// 以下是Text打断的相关函数,一种是针对一个单一的分隔符，打断为两个Text.一种是类似string的split的全体打断.
 
@@ -504,13 +679,14 @@ public final class TextUtils {
 	/**
 	 * 根据第N个分隔符将Text打断为两个Text 例如 "aa,bb,cc,dd" 分隔符是","
 	 * 的情况下.按照第2个分隔符打断后，返回["aa,bb" "cc,dd"]
+	 * 如果N为负数,将从后面开始找起。
 	 * 
 	 * @param text
 	 *            原始的Text
 	 * @param split
 	 *            分隔符
 	 * @param n
-	 *            第n个分隔符（从1开始)
+	 *            第n个分隔符（从1开始),如果为负数,将从后面开始找起
 	 * @return 分割后的两个Text
 	 * @throws CharacterCodingException
 	 */
@@ -555,7 +731,13 @@ public final class TextUtils {
 			return null;
 		byte[] b = text.getBytes();
 		int length = text.getLength();
-		int pos = BytesUtils.findNthBytes(b, 0, length, split, n);
+		int pos = -1;
+		if( n > 0 ){
+			pos = BytesUtils.findNthBytes(b, 0, length, split, n);
+		}
+		else{
+			pos = BytesUtils.rfindNthBytes(b, 0, length, split, -n);
+		}
 		if (pos == -1) {
 			throw new TextSplitIndexOutOfBoundsException(n);
 		} else {

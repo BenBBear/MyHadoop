@@ -7,6 +7,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import cn.uc.hadoop.mapreduce.lib.partition.TextFirstPartitioner;
@@ -49,45 +51,53 @@ public class TwoStepPickMapper extends Mapper<Text, Text, Text, Text> {
 	// 低效地使用字符串实现 TODO 使用byte继续改写
 	protected void map(Text key, Text value, Context context)
 			throws IOException, InterruptedException {
-		String filePath = key.toString();
-		DictDescriptor descriptor = dictDesciptorHelper.getDictDescriptor(filePath);
-
-		if (descriptor != null) {
-			// 字典
-			DictTranslate dictTranslate = dictDesciptorHelper.getDictTranslate(filePath);
-			if (dictTranslate != null) {
-				KVPair<String,String> pair = dictTranslate.translate(value.toString());
-				if (pair != null) {
-					writerKey.set(descriptor.getFieldNumebr() + split
-							+ pair.k + secondSortSplit + "1");
-					writervalue.set(pair.v);
+		try{
+			String filePath = key.toString();
+			DictDescriptor descriptor = dictDesciptorHelper.getDictDescriptor(filePath);
+	
+			if (descriptor != null) {
+				// 字典
+				DictTranslate dictTranslate = dictDesciptorHelper.getDictTranslate(filePath);
+				if (dictTranslate != null) {
+					KVPair<String,String> pair = dictTranslate.translate(value.toString());
+					if (pair != null) {
+						writerKey.set(descriptor.getFieldNumebr() + split
+								+ pair.k + secondSortSplit + "1");
+						writervalue.set(pair.v);
+						context.write(writerKey, writervalue);
+					}
+				}
+			} else {
+				// 日志
+				StringBuilder sb = new StringBuilder();
+				int index = 1;
+				boolean needSplit = false;
+				List<String> writeKeyList = new ArrayList<String>();
+				for (String field : Splitter.on(split).split(value.toString())) {
+					if (dictDesciptorHelper.shouldReplace(index)) {
+						if (needSplit) {
+							sb.append(split);
+						} else {
+							needSplit = true;
+						}
+						sb.append(field);
+						writeKeyList.add(index + split + field + secondSortSplit
+								+ "2");
+					}
+					index++;
+				}
+				writervalue.set(sb.toString());
+				for (String k : writeKeyList) {
+					writerKey.set(k);
 					context.write(writerKey, writervalue);
 				}
 			}
-		} else {
-			// 日志
-			StringBuilder sb = new StringBuilder();
-			int index = 1;
-			boolean needSplit = false;
-			List<String> writeKeyList = new ArrayList<String>();
-			for (String field : Splitter.on(split).split(value.toString())) {
-				if (dictDesciptorHelper.shouldReplace(index)) {
-					if (needSplit) {
-						sb.append(split);
-					} else {
-						needSplit = true;
-					}
-					sb.append(field);
-					writeKeyList.add(index + split + field + secondSortSplit
-							+ "2");
-				}
-				index++;
-			}
-			writervalue.set(sb.toString());
-			for (String k : writeKeyList) {
-				writerKey.set(k);
-				context.write(writerKey, writervalue);
-			}
+			
+		}
+		catch(Exception e){
+			Counter counter = context.getCounter("kpi bao", "map paoqi jilu");
+			counter.increment(1);
+			LOG.error("",e);
 		}
 	}
 

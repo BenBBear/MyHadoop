@@ -228,7 +228,54 @@ public class TestTextUtils {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	@Test
+	public void testrFind() {
+		try {
+			String s1 = "abcdabcd";
+			byte[] b2 = "cd".getBytes();
+			assertTrue(TextUtils.rfind(new Text(s1), b2) == 6);
+			
+			assertTrue(TextUtils.rfind(new Text(s1), 'a') == 4);
+			
+			assertTrue(TextUtils.rfind(new Text(s1), 'z') == -1);
 
+			assertTrue(TextUtils.rfind(new Text(s1), "abcda") == 0);
+
+			assertTrue(TextUtils.rfind(this.getLessByteText(s1, "z"), 'z') == -1);
+
+			// 寻找第N个
+			assertTrue(TextUtils.rfind(this.getLessByteText(s1, s1), "abc", 0) == -1);
+			assertTrue(TextUtils.rfind(this.getLessByteText(s1, s1), "abc", 1) == 4);
+
+			assertTrue(TextUtils.rfind(this.getLessByteText("aaaaa","aaaaa"), 'a', 2) == 3);
+			assertTrue(TextUtils.rfind(new Text("aaaaa"), 'a', 2) == 3);
+
+			assertTrue(TextUtils.rfind(new Text("abcd,,,,,,cbd"), ",,", 1) == 8);
+			assertTrue(TextUtils.rfind(new Text("abcd,,,,,,cbd"), ",,", 2) == 6);
+			assertTrue(TextUtils.rfind(new Text("abcd,,,,,,cbd"), ",,", 3) == 4);
+
+			// 特殊字符串
+			s1 = "a,,bcd,e,f,g";
+			Text t1 = new Text(s1);
+			assertTrue(TextUtils.rfind(t1, ',', 2) == 8);
+			assertTrue(TextUtils.rfind(t1, ',', 4) == 2);
+			assertTrue(TextUtils.rfind(t1, ',', 6) == -1);
+
+			// 特殊字符串
+			String s2 = ",,,,,";
+			Text t2 = new Text(s2);
+			assertTrue(TextUtils.rfind(t2, ',', 2) == 3);
+			assertTrue(TextUtils.rfind(t2, ',', 4) == 1);
+			assertTrue(TextUtils.rfind(t1, ',', 7) == -1);
+
+		} catch (Exception e) {
+			assertTrue(false);
+			e.printStackTrace();
+		}
+	}
+	
 	@Test
 	public void testStartsWith() {
 		try {
@@ -314,7 +361,50 @@ public class TestTextUtils {
 			assertTrue(false);
 		}
 	}
+	
+	@Test
+	public void testrFindField() {
+		try {
+			//String ss1 = "abc,def,ghi,jkl,opq";
+			Text text = this.getLessByteText(ss1);
+			assertTrue(TextUtils.rfindField(text, ",", 0)
+					.equals(new Text("opq")));
+			assertTrue(TextUtils.rfindField(text, ",", 1)
+					.equals(new Text("jkl")));
+			assertTrue(TextUtils.rfindField(text, ",", 4)
+					.equals(new Text("abc")));
+			//String ss2 = ",abc,def,ghi,jkl,opq,";
+			text = this.getLessByteText(ss2);
+			assertTrue(TextUtils.rfindField(text, ",", 0).equals(new Text("")));
+			assertTrue(TextUtils.rfindField(text, ",", 1)
+					.equals(new Text("opq")));
+			assertTrue(TextUtils.rfindField(text, ",", 6).equals(new Text("")));
 
+			text = this.getLessByteText(ss3);
+			assertTrue(TextUtils.rfindField(text, ",", 0).equals(new Text("")));
+			assertTrue(TextUtils.rfindField(text, ",", 1).equals(new Text("")));
+			assertTrue(TextUtils.rfindField(text, ",", 5).equals(new Text("")));
+			boolean exception = false;
+			try{
+				TextUtils.rfindField(text, ",", 6).equals(new Text(""));
+			}
+			catch(Exception e){
+				exception = true;
+			}
+			assertTrue(exception);
+
+			text = this.getLessByteText(ss4);
+			assertTrue(TextUtils.rfindField(text, ",", 0).equals(
+					new Text("abcde")));
+
+			assertTrue(TextUtils.rfindField(new Text("abcd,,abc,,,,"), ",,", 1)
+					.equals(new Text("")));
+			assertTrue(TextUtils.rfindField(new Text("abcd,,abc,,,,"), ",,", 2)
+					.equals(new Text("abc")));
+		} catch (Exception e) {
+			assertTrue(false);
+		}
+	}
 	@Test(expected = TextSplitIndexOutOfBoundsException.class)
 	public void testFindFieldException1() throws CharacterCodingException {
 		Text text = this.getLessByteText(ss1);
@@ -366,11 +456,17 @@ public class TestTextUtils {
 
 			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, ",", 1),
 					"abc", "def,ghi,jkl,opq"));
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, ",", -1),
+					"abc,def,ghi,jkl", "opq"));
 			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, ",", 3),
 					"abc,def,ghi", "jkl,opq"));
-
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, ",", -3),
+					"abc,def", "ghi,jkl,opq"));
 			assertTrue(compareSpliteResult(
 					TextUtils.splitToTwo(new Text("abcd``abcd"), "``", 1),
+					"abcd", "abcd"));
+			assertTrue(compareSpliteResult(
+					TextUtils.splitToTwo(new Text("abcd``abcd"), "``", -1),
 					"abcd", "abcd"));
 			try {
 				exceptionError = false;
@@ -379,10 +475,25 @@ public class TestTextUtils {
 				exceptionError = true;
 			}
 			assertTrue(exceptionError);
-
+			
+			try {
+				exceptionError = false;
+				assertTrue(TextUtils.splitToTwo(text, ",", -5) == null);
+			} catch (TextSplitIndexOutOfBoundsException e) {
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
+			
 			try {
 				exceptionError = false;
 				assertTrue(TextUtils.splitToTwo(text, ",", 10) == null);
+			} catch (TextSplitIndexOutOfBoundsException e) {
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
+			try {
+				exceptionError = false;
+				assertTrue(TextUtils.splitToTwo(text, ",", -10) == null);
 			} catch (TextSplitIndexOutOfBoundsException e) {
 				exceptionError = true;
 			}
@@ -400,8 +511,12 @@ public class TestTextUtils {
 
 			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, ",", 1),
 					"", "abc,def,ghi,jkl,opq,"));
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, ",", -1),
+					",abc,def,ghi,jkl,opq", ""));
 			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, ",", 6),
 					",abc,def,ghi,jkl,opq", ""));
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, ",", -6),
+					"", "abc,def,ghi,jkl,opq,"));
 
 			try {
 				exceptionError = false;
@@ -422,16 +537,31 @@ public class TestTextUtils {
 
 			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, ",", 1),
 					"", ",,,,"));
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, ",", -1),
+					",,,,", ""));
 			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, ",", 2),
 					",", ",,,"));
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, ",", -2),
+					",,,", ","));
 			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, ",", 3),
+					",,", ",,"));
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, ",", -3),
 					",,", ",,"));
 			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, ",", 5),
 					",,,,", ""));
-
+			
+			assertTrue(compareSpliteResult(TextUtils.splitToTwo(text, ",", -5),
+					"", ",,,,"));
 			try {
 				exceptionError = false;
 				assertTrue(TextUtils.splitToTwo(text, ",", 6) == null);
+			} catch (TextSplitIndexOutOfBoundsException e) {
+				exceptionError = true;
+			}
+			assertTrue(exceptionError);
+			try {
+				exceptionError = false;
+				assertTrue(TextUtils.splitToTwo(text, ",", -6) == null);
 			} catch (TextSplitIndexOutOfBoundsException e) {
 				exceptionError = true;
 			}
@@ -818,6 +948,22 @@ public class TestTextUtils {
 		// testAppendBeanchMark();
 		// textSplitAndAppendBeanchMark();
 		textSplitToKV();
+	}
+	@Test
+	public void testCharest(){
+		String str="(linux; u; android 4.0.4; zh-cn; vcall_v90d_Ƭ?怖1.18 build/imm76d) applewebkit/528.5+ (khtml, like gecko) version/3.1.2 mobile safari/525.20.1 ucbrowser/8.8.3.272 mobile";
+		Text t = new Text();
+		try {
+			TextUtils.append(t, str);
+		} catch (CharacterCodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public void TextUtils(){
+		
 	}
 
 	public static void main(String[] arga) {
