@@ -29,7 +29,7 @@ public class JobUtils {
 	static final String MAX_REDUCERS = "uc.exec.reducers.max";
 	static final long DEF_BYTES_PER_REDUCER = 1000L * 1000 * 1000;
 	static final int DEF_MAX_REDUCERS = 999;
-	static private final Map<String, ContentSummary> pathToCS = new ConcurrentHashMap<String, ContentSummary>();
+	//static private final Map<String, ContentSummary> pathToCS = new ConcurrentHashMap<String, ContentSummary>();
 
 	/**
 	 * 估算Job需要的Reducers数量，基于Job输入数据量、配置参数和集群中Reduce槽数。
@@ -89,22 +89,26 @@ public class JobUtils {
 				}
 				Path p = new Path(path);
 				// 只是缓存
-				ContentSummary cs = pathToCS.get(path);
-				if (cs == null) {
-					FileSystem fs = p.getFileSystem(conf);
-					cs = fs.getContentSummary(p);
-					pathToCS.put(path, cs);
-				}
-
+//				ContentSummary cs = pathToCS.get(path);
+//				if (cs == null) {
+//					FileSystem fs = p.getFileSystem(conf);
+//					cs = fs.getContentSummary(p);
+//					pathToCS.put(path, cs);
+//				}
+				
+				FileSystem fs = p.getFileSystem(conf);
+				ContentSummary cs = fs.getContentSummary(p);
+				
 				summary[0] += cs.getLength();
 				summary[1] += cs.getFileCount();
 				summary[2] += cs.getDirectoryCount();
 
 			} catch (IOException e) {
 				// Cannot get size of $path . Safely ignored.
-				if (path != null) {
-					pathToCS.put(path, new ContentSummary(0, 0, 0));
-				}
+//				if (path != null) {
+//					pathToCS.put(path, new ContentSummary(0, 0, 0));
+//				}
+				
 			}
 		}
 		return new ContentSummary(summary[0], summary[1], summary[2]);
