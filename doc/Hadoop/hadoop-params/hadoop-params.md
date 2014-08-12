@@ -59,7 +59,7 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 
 * **fs.trash.interval=0**
 	>以分钟为单位的垃圾回收时间，垃圾站中数据超过此时间，会被删除。如果是0，垃圾回收机制关闭。可以配置在服务器端和客户端。如果在服务器端配置trash无效，会检查客户端配置。如果服务器端配置有效，客户端配置会忽略。  
-	>  >**建议开启，建议4200（3天）**
+	>  >**建议开启，建议4320（3天）**
 	>  >垃圾回收站，如有同名文件被删除，会给文件顺序编号，例如：a.txt,a.txt(1)
 
 * **fs.trash.checkpoint.interval=0**
@@ -630,6 +630,9 @@ JVM方面的优化项[Hadoop Performance Tuning Guide](http://developer.amd.com/
 	
 * dfs.namenode.num.checkpoints.retained=2
 	*建议不使用SNN功能，忽略此配置*
+
+* dfs.namenode.num.extra.edits.retained=1000000
+    >数量限制，额外的edits事务数。
 
 * dfs.namenode.max.extra.edits.segments.retained=10000
 	>extra edit日志文件segments的最大数量。除了用于NN重启时的最小edits文件之外。*一个segments包含多个日志文件*

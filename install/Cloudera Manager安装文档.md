@@ -164,3 +164,45 @@ CDH的配置Cloudera Manager会设置默认值，大部分都可使用默认的�
 - 服务配置文件目录
 
     服务运行的配置文件是服务启动时Server从数据库中取出配置内容动态产生配置文件分发给Agnet使用。存放于`/var/run/cloudera-scm-agent/process/`目录下。
+
+- 可以指定自己的parcels
+
+	http://archive.cloudera.com/cdh4/parcels/latest/
+	http://archive.cloudera.com/impala/parcels/latest/
+	http://beta.cloudera.com/search/parcels/latest/
+	http://archive.cloudera.com/gplextras/parcels/latest
+	http://10.1.74.44:60001/cdh4/parcels/latest
+	http://10.1.74.44:60001/cdh4/parcels/4.2.1
+	http://10.1.74.44:60001/cm4/redhat/5/x86_64/cm/4.6.3/
+	http://10.1.74.44:60001/cm4/redhat/5/x86_64/cm/4.6.3/
+	http://10.1.74.44:60001/cm4/redhat/6/x86_64/cm/4.6.3
+	http://10.1.74.44:60001/redhat/cdh/RPM-GPG-KEY-cloudera
+	
+	
+	用nginx做静态代理， 配置如下
+	
+	server {
+		listen       60001;
+		server_name  _;
+		#resolver 8.8.8.8;
+		#charset koi8-r;
+
+		#access_log  logs/host.access.log  main;
+		# http://hadoop1:60001/archive.cloudera.com/cdh4/parcdls/latest
+		root /usr/local/nginx/proxy_temp_dir;
+		
+		location / {
+			#proxy_cache cache1;
+			proxy_store on;
+			proxy_temp_path  /usr/local/nginx/proxy_temp_dir;
+			proxy_set_header Host "archive.cloudera.com";
+			proxy_set_header X-Real-IP $remote_addr;
+			proxy_set_header X-Forwarded-For $remote_addr;
+			if ( $uri ~ /$ ) {
+				proxy_pass http://archive.cloudera.com;
+			}
+			if ( !-e $request_filename ) {
+				proxy_pass http://archive.cloudera.com;
+			} 
+		}
+	}

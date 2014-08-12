@@ -849,10 +849,10 @@ Hadoop经典安装。
 
     准备一些文本数据，写入文件 test.txt
 
-    hdfs dfs -mkdir /user/hadoop/test/test-mr
-    hdfs dfs -put text.txt /user/hadoop/test/test-mr/
+    hdfs dfs -mkdir /user/$USER/test/test-mr
+    hdfs dfs -put text.txt /user/$USER/test/test-mr/
 
-    hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-2.0.0-cdh4.2.1.jar wordcount /user/kpi/test/test-mr/ /user/kpi/test/test-mr-out    
+    hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-2.0.0-cdh4.2.1.jar wordcount /user/$USER/test/test-mr/ /user/$USER/test/test-mr-out    
 
 # 为其它用户创建软连接和环境
 
@@ -872,6 +872,11 @@ Hadoop经典安装。
             export HADOOP_HOME=/home/hadoop/local/hadoop
             export HADOOP_PREFIX=$HADOOP_HOME
 
+			
+## 通过WEB方式访问Hdfs
+
+	curl -X DELETE "http://hadoop1:50070/webhdfs/v1/mnt/hdfs/ssp/user/2?op=DELETE&user.name=hadoop&recursive=true"
+	
 ### 补充说明
 
 现在CDH4版本正在快速开发中，版本之间的变动稍大，上面示例并不完全适合CDH4.0~4.3的全部版本，但大同小异。
